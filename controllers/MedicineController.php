@@ -8,7 +8,16 @@ class MedicineController extends Controller {
         $this->checkLogin();
         
         $medicineModel = $this->model('MedicineModel');
-        $data['medicines'] = $medicineModel->getAllWithCategory();
+        $categoryModel = $this->model('CategoryModel');
+
+        try {
+            $data['categories'] = $categoryModel->all(); 
+            $data['medicines'] = $medicineModel->getAllWithCategory();
+        } catch (Exception $e) {
+            $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            $data['medicines'] = [];
+        }
+        
         $this->view('medicine/index', $data);
     }
 
@@ -82,9 +91,20 @@ class MedicineController extends Controller {
     public function search() {
         $this->checkLogin();
         
-        $keyword = $_GET['keyword'] ?? '';
+        $keyword = trim($_GET['keyword'] ?? '');
+        $categoryId = $_GET['maDanhMuc'] ?? ''; 
+        
         $medicineModel = $this->model('MedicineModel');
-        $data['medicines'] = $medicineModel->search($keyword);
+        $categoryModel = $this->model('CategoryModel');
+        
+        try {
+            $data['categories'] = $categoryModel->all();
+            $data['medicines'] = $medicineModel->search($keyword, $categoryId);
+        } catch (Exception $e) {
+            $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            $data['medicines'] = [];
+        }
+        
         $this->view('medicine/index', $data);
     }
 
@@ -124,9 +144,18 @@ class MedicineController extends Controller {
 
     public function detail($id) {
         $this->checkLogin();
-        $medicineModel = $this->model('MedicineModel');
-        $data['medicine'] = $medicineModel->getDetail($id);
-        if (!$data['medicine']) redirect('medicine/index');
-        $this->view('medicine/detail', $data);
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            $data['medicine'] = $medicineModel->getDetail($id);
+            
+            if (!$data['medicine']) {
+                $data['error'] = 'Không tìm thấy thông tin thuốc này trong hệ thống.';
+            }
+        } catch (Exception $e) {
+            $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            $data['medicine'] = null;
+        }
+        
+        $this->view('medicine/detail', $data ?? []);
     }
 }

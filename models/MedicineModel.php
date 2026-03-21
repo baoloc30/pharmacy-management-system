@@ -86,14 +86,40 @@ class MedicineModel extends Model {
         return $stmt->execute();
     }
 
-    public function search($keyword) {
+    public function search($keyword, $categoryId = '') {
         $sql = "SELECT t.*, d.tenDanhMuc 
                 FROM thuoc t 
                 JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
-                WHERE (t.tenThuoc LIKE ? OR t.thanhPhan LIKE ?) AND t.trangThai='DangBan'";
-        $keyword = "%$keyword%";
+                WHERE t.trangThai='DangBan'";
+
+        if ($keyword !== '') {
+            $sql .= " AND (
+                    CAST(t.maThuoc AS CHAR) LIKE ? OR
+                    t.tenThuoc LIKE ? OR 
+                    t.thanhPhan LIKE ? OR 
+                    t.congDung LIKE ? OR 
+                    t.xuatXu LIKE ? OR 
+                    d.tenDanhMuc LIKE ?
+                  )";
+            $kw = "%$keyword%";
+        }
+
+        if ($categoryId !== '') {
+            $sql .= " AND t.maDanhMuc = ?";
+        }
+
+        $sql .= " ORDER BY t.ngayTao DESC";
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ss", $keyword, $keyword);
+
+        if ($keyword !== '' && $categoryId !== '') {
+            $stmt->bind_param("ssssssi", $kw, $kw, $kw, $kw, $kw, $kw, $categoryId);
+        } elseif ($keyword !== '') {
+            $stmt->bind_param("ssssss", $kw, $kw, $kw, $kw, $kw, $kw);
+        } elseif ($categoryId !== '') {
+            $stmt->bind_param("i", $categoryId);
+        }
+        
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }

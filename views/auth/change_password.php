@@ -13,18 +13,18 @@
                     <form method="POST" action="<?php echo BASE_URL; ?>auth/changePassword" class="change-password-form">
                         <div class="mb-3">
                             <label class="form-label">Mật khẩu hiện tại <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="old_password" name="old_password" required>
+                            <input type="password" class="form-control" id="old_password" name="old_password">
                             <span class="text-danger small" id="oldPasswordError"></span>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Mật khẩu mới <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="new_password" name="new_password" required>
-                            <span class="text-danger small" id="newPasswordError"></span>
-                            <small class="text-muted">Ít nhất 6 ký tự</small>
+                            <input type="password" class="form-control" id="new_password" name="new_password">
+                            <span class="text-danger small d-block" id="newPasswordError"></span>
+                            <small class="text-muted d-block">Ít nhất 6 ký tự</small>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nhập lại mật khẩu mới <span class="text-danger">*</span></label>
-                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password">
                             <span class="text-danger small" id="confirmPasswordError"></span>
                         </div>
                         <div class="d-flex gap-2 justify-content-end">
@@ -43,21 +43,42 @@
 </div>
 
 <script>
-document.querySelector('.change-password-form').addEventListener('submit', function(e) {
-    ['oldPasswordError','newPasswordError','confirmPasswordError'].forEach(id => document.getElementById(id).textContent = '');
-    const old = document.getElementById('old_password').value.trim();
-    const nw = document.getElementById('new_password').value.trim();
-    const cf = document.getElementById('confirm_password').value.trim();
-    let hasError = false;
+    document.addEventListener('DOMContentLoaded', function() {
+        const serverAlert = document.querySelector('.alert-danger');
+        if (serverAlert) {
+            setTimeout(function() {
+                serverAlert.style.transition = 'opacity 0.5s ease';
+                serverAlert.style.opacity = '0'; 
+                setTimeout(function() {
+                    serverAlert.style.display = 'none'; 
+                }, 500);
+            }, 2000);
+        }
 
-    if (!old) { document.getElementById('oldPasswordError').textContent = 'Vui lòng nhập mật khẩu hiện tại'; hasError = true; }
-    if (!nw) { document.getElementById('newPasswordError').textContent = 'Vui lòng nhập mật khẩu mới'; hasError = true; }
-    else if (nw.length < 6) { document.getElementById('newPasswordError').textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự'; hasError = true; }
-    if (!cf) { document.getElementById('confirmPasswordError').textContent = 'Vui lòng nhập lại mật khẩu mới'; hasError = true; }
-    else if (nw !== cf) { document.getElementById('confirmPasswordError').textContent = 'Mật khẩu xác nhận không trùng khớp'; hasError = true; }
+    document.querySelector('.change-password-form').addEventListener('submit', function(e) {
+        ['oldPasswordError','newPasswordError','confirmPasswordError'].forEach(id => document.getElementById(id).textContent = '');
+        const old = document.getElementById('old_password').value.trim();
+        const nw = document.getElementById('new_password').value.trim();
+        const cf = document.getElementById('confirm_password').value.trim();
+        let hasError = false;
 
-    if (hasError) { e.preventDefault(); return; }
-    document.getElementById('submitBtn').disabled = true;
-    document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+        if (!old) { document.getElementById('oldPasswordError').textContent = 'Vui lòng nhập mật khẩu hiện tại'; hasError = true; }
+        if (!nw) { document.getElementById('newPasswordError').textContent = 'Vui lòng nhập mật khẩu mới'; hasError = true; }
+        else if (nw.length < 6) { document.getElementById('newPasswordError').textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự'; hasError = true; }
+        if (!cf) { document.getElementById('confirmPasswordError').textContent = 'Vui lòng nhập lại mật khẩu mới'; hasError = true; }
+        else if (nw !== cf) { document.getElementById('confirmPasswordError').textContent = 'Mật khẩu xác nhận không trùng khớp'; hasError = true; }
+
+        if (hasError) { 
+            e.preventDefault(); 
+            setTimeout(() => {
+                ['oldPasswordError','newPasswordError','confirmPasswordError'].forEach(id => {
+                    document.getElementById(id).textContent = '';
+                });
+            }, 2000);
+            return; 
+        }
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    });
 });
 </script>

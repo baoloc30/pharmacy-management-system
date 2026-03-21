@@ -42,7 +42,13 @@
                 </div>
                 <div class="card-body">
                     <div class="input-group">
-                        <input type="text" id="search-medicine" class="form-control" placeholder="Nhập tên thuốc...">
+                        <select id="search-category" class="form-select" style="max-width: 130px;">
+                            <option value="">Tất cả</option>
+                            <?php if(!empty($categories)): foreach($categories as $cat): ?>
+                                <option value="<?php echo $cat['maDanhMuc']; ?>"><?php echo htmlspecialchars($cat['tenDanhMuc']); ?></option>
+                            <?php endforeach; endif; ?>
+                        </select>
+                        <input type="text" id="search-medicine" class="form-control" placeholder="Nhập tên, mã, thành phần, công dụng...">
                         <button class="btn btn-primary" type="button" onclick="searchMedicine()">
                             <i class="fas fa-search"></i>
                         </button>
@@ -148,25 +154,60 @@ let cart = [];
 let selectedCustomer = null;
 
 function searchMedicine() {
-    let keyword = $('#search-medicine').val();
-    if(keyword.length < 1) return;
+    let keyword = $('#search-medicine').val().trim();
+    let categoryId = $('#search-category').val();
     
-    $.get('<?php echo BASE_URL; ?>sale/searchMedicine?keyword=' + encodeURIComponent(keyword), function(data) {
-        if (!data.medicines || data.medicines.length === 0) {
-            $('#search-result').html('<div class="text-muted p-2">Không tìm thấy thuốc phù hợp</div>');
+    if(keyword.length === 0 && categoryId === '') {
+        $('#search-result').html('');
+        return;
+    }
+    
+    let url = '<?php echo BASE_URL; ?>sale/searchMedicine?keyword=' + encodeURIComponent(keyword) + '&maDanhMuc=' + encodeURIComponent(categoryId);
+    
+    $('#search-result').html('<div class="text-center p-3 text-muted"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>');
+    
+    $.get(url, function(data) {
+        if (data.success === false) {
+            $('#search-result').html('<div class="alert alert-danger p-2 m-1"><i class="fas fa-exclamation-triangle"></i> ' + data.message + '</div>');
             return;
         }
+
+        if (!data.medicines || data.medicines.length === 0) {
+            $('#search-result').html('<div class="text-muted p-2 alert alert-warning m-1">Không tìm thấy thuốc phù hợp</div>');
+            return;
+        }
+        
         let html = '';
         data.medicines.forEach(item => {
-            html += `<div class="search-item p-2 border-bottom" style="cursor:pointer"
-                onclick="addToCart(${item.maThuoc}, '${item.tenThuoc.replace(/'/g,"\\'")}', '${item.donViTinh}', ${item.giaBan}, ${item.soLuongTon})">
-                <strong>${item.tenThuoc}</strong> - ${formatCurrency(item.giaBan)}<br>
-                <small class="text-muted">Tồn: ${item.soLuongTon} | HSD: ${item.hanSuDung}</small>
+            let isOutOfStock = item.soLuongTon <= 0;
+            let style = isOutOfStock ? 'opacity: 0.5; cursor: not-allowed;' : 'cursor:pointer;';
+            let clickAction = isOutOfStock ? '' : `onclick="addToCart(${item.maThuoc}, '${item.tenThuoc.replace(/'/g,"\\'")}', '${item.donViTinh}', ${item.giaBan}, ${item.soLuongTon})"`;
+            let stockColor = isOutOfStock ? 'text-danger fw-bold' : 'text-success';
+
+            html += `<div class="search-item p-2 border-bottom" style="${style}" ${clickAction}>
+                <strong>${item.tenThuoc}</strong> - <span class="text-primary">${formatCurrency(item.giaBan)}</span><br>
+                <small class="text-muted">
+                    <span class="${stockColor}">Tồn kho: ${item.soLuongTon}</span> | HSD: ${item.hanSuDung}
+                </small>
             </div>`;
         });
         $('#search-result').html(html);
-    }, 'json');
+        
+    }, 'json').fail(function() {
+        $('#search-result').html('<div class="alert alert-danger p-2 m-1"><i class="fas fa-wifi"></i> Không thể kết nối với máy chủ</div>');
+    });
 }
+
+document.getElementById('search-medicine').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        searchMedicine();
+    }
+});
+
+document.getElementById('search-category').addEventListener('change', function() {
+    searchMedicine();
+});
 
 function addToCart(id, name, unit, price, stock) {
     let existing = cart.find(item => item.maThuoc == id);

@@ -9,37 +9,59 @@ class AuthController extends Controller {
     }
 
     public function login() {
+        Session::init();
+
+        $data = [];
+        if (Session::get('success')) {
+            $data['success'] = Session::get('success');
+            Session::set('success', null); 
+        }
+
+        if (Session::get('logged_in')) {
+            redirect(Session::get('role') == 'QuanLy' ? 'home/admin' : 'home/employee');
+        }
+
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = $_POST['username'] ?? '';
-            $password = $_POST['password'] ?? '';
+            $username = trim($_POST['username'] ?? '');
+            $password = trim($_POST['password'] ?? '');
+
+            $hasError = false;
             
             // Validate empty fields
             if(empty($username)) {
-                $data['error'] = 'Vui lòng không để trống tên đăng nhập';
-            } elseif(empty($password)) {
-                $data['error'] = 'Vui lòng không để trống mật khẩu';
-            } else {
-                $userModel = $this->model('UserModel');
-                $user = $userModel->login($username, $password);
-                
-                if($user) {
-                    // Check account status
-                    if($user['trangThai'] !== 'HoatDong') {
-                        $data['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản lý';
+                $data['username_error'] = 'Vui lòng không bỏ trống thông tin này';
+                $hasError = true;
+            } 
+            if(empty($password)) {
+                $data['password_error'] = 'Vui lòng không bỏ trống thông tin này';
+                $hasError = true;
+            } 
+            if(!$hasError) {
+                try {
+                    $userModel = $this->model('UserModel');
+                    $user = $userModel->login($username, $password);
+                    
+                    if($user) {
+                        // Check account status
+                        if($user['trangThai'] !== 'HoatDong') {
+                            $data['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản lý';
+                        } else {
+                            Session::set('logged_in', true);
+                            Session::set('user_id', $user['idTaiKhoan']);
+                            Session::set('username', $user['tenDangNhap']);
+                            Session::set('role', $user['vaiTro']);
+                            Session::set('nhan_vien_id', $user['maNhanVien']);
+                            Session::set('nhan_vien_name', $user['hoTen']);
+                            
+                            Session::set('login_success', 'Đăng nhập thành công');
+                            redirect($user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee');
+                            exit;
+                        }
                     } else {
-                        Session::init();
-                        Session::set('logged_in', true);
-                        Session::set('user_id', $user['idTaiKhoan']);
-                        Session::set('username', $user['tenDangNhap']);
-                        Session::set('role', $user['vaiTro']);
-                        Session::set('nhan_vien_id', $user['maNhanVien']);
-                        Session::set('nhan_vien_name', $user['hoTen']);
-                        
-                        // Redirect based on role from database
-                        redirect($user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee');
+                        $data['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
                     }
-                } else {
-                    $data['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
         }
@@ -70,15 +92,21 @@ class AuthController extends Controller {
             $confirmPass = $_POST['confirm_password'];
             
             if($newPass != $confirmPass) {
-                $data['error'] = 'Mật khẩu mới không khớp';
+                $data['error'] = 'Mật khẩu xác nhận không trùng khớp';
             } else {
                 $userModel = $this->model('UserModel');
-                if($userModel->changePassword(Session::get('user_id'), $oldPass, $newPass)) {
-                    // Đăng xuất và yêu cầu đăng nhập lại
-                    Session::destroy();
-                    redirect('auth/login');
+                try {
+                    if($userModel->changePassword(Session::get('user_id'), $oldPass, $newPass)) {
+                        Session::destroy();
+                        Session::init();
+                        Session::set('success', 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.');
+                        redirect('auth/login');
+                        exit;
                 } else {
                     $data['error'] = 'Mật khẩu hiện tại không chính xác';
+                }
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
         }
@@ -103,11 +131,15 @@ class AuthController extends Controller {
             if(empty($profileData['hoTen'])) {
                 $error = 'Vui lòng nhập họ tên';
             } else {
-                if($userModel->updateProfile(Session::get('user_id'), $profileData)) {
-                    Session::set('nhan_vien_name', $profileData['hoTen']);
-                    $success = 'Cập nhật thông tin thành công';
-                } else {
-                    $error = 'Cập nhật thông tin thất bại';
+                try {
+                    if($userModel->updateProfile(Session::get('user_id'), $profileData)) {
+                        Session::set('nhan_vien_name', $profileData['hoTen']);
+                        $success = 'Cập nhật thông tin thành công';
+                    } else {
+                        $error = 'Cập nhật thông tin thất bại';
+                    }
+                } catch (Exception $e) {
+                    $error = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
         }
