@@ -1,123 +1,128 @@
-<div class="container-fluid mt-3">
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5><i class="fas fa-calendar-alt"></i> Lịch làm việc nhân viên</h5>
-                </div>
-                <div class="card-body">
-                    <form method="GET" action="" class="row g-2 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Từ ngày</label>
-                            <input type="date" class="form-control" name="from_date" value="<?php echo $from_date; ?>">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Đến ngày</label>
-                            <input type="date" class="form-control" name="to_date" value="<?php echo $to_date; ?>">
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Lọc</button>
-                        </div>
-                    </form>
-
-                    <?php if (empty($schedule)): ?>
-                        <div class="alert alert-info">Không có lịch làm việc trong khoảng thời gian này.</div>
-                    <?php else: ?>
-                    <table class="table table-hover table-sm">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Nhân viên</th>
-                                <th>Ngày làm</th>
-                                <th>Ca làm</th>
-                                <th>Giờ bắt đầu</th>
-                                <th>Giờ kết thúc</th>
-                                <th>Ghi chú</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($schedule as $s): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($s['hoTen']); ?></td>
-                                <td><?php echo date('d/m/Y', strtotime($s['ngayLam'])); ?></td>
-                                <td>
-                                    <?php if ($s['caLam'] == 'TangCa'): ?>
-                                        <span class="badge bg-warning text-dark">Tăng ca</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-primary">Sáng chiều</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td><?php echo $s['gioBatDau']; ?></td>
-                                <td><?php echo $s['gioKetThuc']; ?></td>
-                                <td><?php echo htmlspecialchars($s['ghiChu'] ?? ''); ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header bg-warning">
-                    <h6><i class="fas fa-plus"></i> Phân công tăng ca (18h - 22h)</h6>
-                </div>
-                <div class="card-body">
-                    <?php if (isset($success)): ?>
-                        <div class="alert alert-success"><?php echo $success; ?></div>
-                    <?php endif; ?>
-                    <?php if (isset($error)): ?>
-                        <div class="alert alert-danger"><?php echo $error; ?></div>
-                    <?php endif; ?>
-
-                    <form method="POST" action="" id="shiftForm">
-                        <div class="mb-3">
-                            <label class="form-label">Nhân viên <span class="text-danger">*</span></label>
-                            <select class="form-control" name="maNhanVien" id="maNhanVien" required>
-                                <option value="">-- Chọn nhân viên --</option>
-                                <?php foreach ($employees as $emp): ?>
-                                <option value="<?php echo $emp['maNhanVien']; ?>">
-                                    <?php echo htmlspecialchars($emp['hoTen']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Ngày tăng ca <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="ngayLam" id="ngayLam" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Giờ bắt đầu <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="gioBatDau" id="gioBatDau" value="18:00" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Giờ kết thúc <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" name="gioKetThuc" id="gioKetThuc" value="22:00" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Ghi chú</label>
-                            <input type="text" class="form-control" name="ghiChu">
-                        </div>
-                        <button type="submit" class="btn btn-warning w-100">
-                            <i class="fas fa-save"></i> Xác nhận phân công
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+﻿<div class="content-wrapper">
+<!-- Header -->
+<div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
+  <div style="padding:16px 22px;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;gap:12px;">
+    <div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;"><i class="fas fa-calendar-alt" style="color:#fff;font-size:18px;"></i></div>
+    <div>
+      <div style="font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.6px;">Lịch Làm Việc</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;">Phân công ca làm việc nhân viên</div>
     </div>
+  </div>
 </div>
 
+<div style="display:flex;gap:16px;flex-wrap:wrap;">
+
+  <!-- Bảng lịch -->
+  <div style="flex:1.4;min-width:300px;">
+    <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;">
+      <div style="padding:12px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
+        <span style="font-size:13px;font-weight:700;color:#fff;">Danh sách ca làm việc</span>
+      </div>
+      <div style="padding:14px 16px;border-bottom:1px solid #e2e8f0;">
+        <form method="GET" action="" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Từ ngày</label>
+            <input type="date" name="from_date" value="<?php echo $from_date; ?>" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div style="flex:1;min-width:140px;">
+            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Đến ngày</label>
+            <input type="date" name="to_date" value="<?php echo $to_date; ?>" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <button type="submit" style="padding:8px 16px;border-radius:8px;border:none;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-filter"></i> Lọc</button>
+        </form>
+      </div>
+      <div style="overflow-x:auto;">
+        <?php if(empty($schedule)): ?>
+          <div style="padding:30px;text-align:center;color:#94a3b8;font-size:13px;">Không có lịch làm việc trong khoảng thời gian này</div>
+        <?php else: ?>
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
+              <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Nhân viên</th>
+              <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Ngày làm</th>
+              <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Ca làm</th>
+              <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Giờ bắt đầu</th>
+              <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Giờ kết thúc</th>
+              <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach($schedule as $i => $s): ?>
+            <?php $rowBg = $i%2===0?'#fff':'#f0f7ff'; ?>
+            <tr style="background:<?php echo $rowBg; ?>;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $rowBg; ?>'">
+              <td style="padding:9px 14px;font-size:13px;font-weight:600;color:#374151;"><?php echo htmlspecialchars($s['hoTen']); ?></td>
+              <td style="padding:9px 14px;font-size:13px;color:#374151;white-space:nowrap;"><?php echo date('d/m/Y', strtotime($s['ngayLam'])); ?></td>
+              <td style="padding:9px 14px;">
+                <?php if($s['caLam']==='TangCa'): ?>
+                  <span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#fffbeb;color:#b45309;">Tăng ca</span>
+                <?php else: ?>
+                  <span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#eff6ff;color:#1d4ed8;">Sáng chiều</span>
+                <?php endif; ?>
+              </td>
+              <td style="padding:9px 14px;font-size:13px;color:#374151;"><?php echo $s['gioBatDau']; ?></td>
+              <td style="padding:9px 14px;font-size:13px;color:#374151;"><?php echo $s['gioKetThuc']; ?></td>
+              <td style="padding:9px 14px;font-size:12px;color:#64748b;"><?php echo htmlspecialchars($s['ghiChu']??''); ?></td>
+            </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form phân công -->
+  <div style="flex:1;min-width:260px;">
+    <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;">
+      <div style="padding:12px 16px;background:linear-gradient(135deg,#15803d,#16a34a);display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-plus" style="color:#fff;font-size:13px;"></i>
+        <span style="font-size:13px;font-weight:700;color:#fff;">Phân công tăng ca (18h - 22h)</span>
+      </div>
+      <div style="padding:18px;">
+        <?php if(isset($success)): ?><div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;margin-bottom:12px;color:#15803d;font-size:13px;"><i class="fas fa-check-circle"></i> <?php echo $success; ?></div><?php endif; ?>
+        <?php if(isset($error)): ?><div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;margin-bottom:12px;color:#dc2626;font-size:13px;"><i class="fas fa-exclamation-circle"></i> <?php echo $error; ?></div><?php endif; ?>
+        <form method="POST" action="" id="shiftForm">
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Nhân viên <span style="color:#dc2626;">*</span></label>
+            <select name="maNhanVien" id="maNhanVien" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+              <option value="">-- Chọn nhân viên --</option>
+              <?php foreach($employees as $emp): ?>
+              <option value="<?php echo $emp['maNhanVien']; ?>"><?php echo htmlspecialchars($emp['hoTen']); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Ngày tăng ca <span style="color:#dc2626;">*</span></label>
+            <input type="date" name="ngayLam" id="ngayLam" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Giờ bắt đầu</label>
+              <input type="time" name="gioBatDau" value="18:00" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+            </div>
+            <div>
+              <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Giờ kết thúc</label>
+              <input type="time" name="gioKetThuc" value="22:00" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+            </div>
+          </div>
+          <div style="margin-bottom:14px;">
+            <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Ghi chú</label>
+            <input type="text" name="ghiChu" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
+          </div>
+          <button type="submit" style="width:100%;padding:10px;border-radius:8px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 10px rgba(21,128,61,.3);">
+            <i class="fas fa-save"></i> Xác nhận phân công
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
 <script>
-document.getElementById('shiftForm').addEventListener('submit', function(e) {
-    const nv = document.getElementById('maNhanVien').value;
-    const ngay = document.getElementById('ngayLam').value;
-    const gio1 = document.getElementById('gioBatDau').value;
-    const gio2 = document.getElementById('gioKetThuc').value;
-    if (!nv || !ngay || !gio1 || !gio2) {
-        alert('Vui lòng chọn đầy đủ thông tin!');
-        e.preventDefault();
+document.getElementById('shiftForm').addEventListener('submit',function(e){
+    if(!document.getElementById('maNhanVien').value||!document.getElementById('ngayLam').value){
+        alert('Vui lòng chọn đầy đủ thông tin');e.preventDefault();
     }
 });
 </script>

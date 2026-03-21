@@ -69,17 +69,7 @@ class AuthController extends Controller {
     }
 
     public function logout() {
-        Session::init();
-        // Xử lý confirm từ POST
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_logout'])) {
-            Session::destroy();
-            redirect('auth/login');
-        }
-        // Hiển thị confirm qua JS (xử lý GET với confirm=1)
-        if (isset($_GET['confirm']) && $_GET['confirm'] == '1') {
-            Session::destroy();
-            redirect('auth/login');
-        }
+        Session::destroy();
         redirect('auth/login');
     }
 

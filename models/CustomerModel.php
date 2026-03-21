@@ -7,14 +7,19 @@ class CustomerModel extends Model {
 
     public function getAllCustomers($search = '') {
         if (!empty($search)) {
-            $sql = "SELECT * FROM {$this->table} WHERE hoTen LIKE ? OR soDienThoai LIKE ? OR email LIKE ? ORDER BY ngayTao DESC";
+            $sql = "SELECT *, COALESCE(tongChiTieu, 0) as tongChiTieu 
+                    FROM {$this->table} 
+                    WHERE hoTen LIKE ? OR soDienThoai LIKE ? OR email LIKE ? 
+                    ORDER BY maKhachHang DESC";
             $s = "%$search%";
             $stmt = $this->db->prepare($sql);
             $stmt->bind_param("sss", $s, $s, $s);
             $stmt->execute();
-            return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+            $result = $stmt->get_result();
+            return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
         }
-        return $this->db->query("SELECT * FROM {$this->table} ORDER BY ngayTao DESC")->fetch_all(MYSQLI_ASSOC);
+        $result = $this->db->query("SELECT *, COALESCE(tongChiTieu, 0) as tongChiTieu FROM {$this->table} ORDER BY maKhachHang DESC");
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
     public function getCustomerById($id) {

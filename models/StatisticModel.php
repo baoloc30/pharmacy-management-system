@@ -12,8 +12,9 @@ class StatisticModel extends Model {
                 AND trangThai = 'DaThanhToan'
                 GROUP BY DATE(ngayLap)
                 ORDER BY ngayLap";
+        $toDateEnd = $toDate . ' 23:59:59';
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ss", $fromDate, $toDate . ' 23:59:59');
+        $stmt->bind_param("ss", $fromDate, $toDateEnd);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }

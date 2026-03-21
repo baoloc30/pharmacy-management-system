@@ -158,4 +158,30 @@ class MedicineController extends Controller {
         
         $this->view('medicine/detail', $data ?? []);
     }
+
+    public function updateUnit() {
+        $this->checkLogin();
+        $this->checkRole('QuanLy');
+
+        $medicineModel = $this->model('MedicineModel');
+        $data['medicines'] = $medicineModel->getAllWithCategoryAndUnit();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $donViLeArr      = $_POST['donViLe']       ?? [];
+            $soLuongArr      = $_POST['soLuongQuyDoi'] ?? [];
+            $giaBanLeArr     = $_POST['giaBanLe']      ?? [];
+
+            foreach ($donViLeArr as $id => $donViLe) {
+                $soLuong  = isset($soLuongArr[$id])  ? (int)$soLuongArr[$id]    : 1;
+                $giaBanLe = isset($giaBanLeArr[$id]) ? (float)$giaBanLeArr[$id] : 0;
+                if ($soLuong < 1) $soLuong = 1;
+                $medicineModel->updateUnit((int)$id, trim($donViLe), $soLuong, $giaBanLe);
+            }
+
+            $data['success'] = 'Cập nhật đơn vị lẻ thành công';
+            $data['medicines'] = $medicineModel->getAllWithCategoryAndUnit();
+        }
+
+        $this->view('medicine/update_unit', $data);
+    }
 }
