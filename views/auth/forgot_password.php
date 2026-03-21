@@ -5,99 +5,80 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quên mật khẩu - PHARMACARE</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f4c75 0%,#0ea5e9 100%);}
+.box{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,.18);width:100%;max-width:420px;overflow:hidden;}
+.box-header{padding:28px 30px 20px;background:linear-gradient(135deg,#1e40af,#2563eb);text-align:center;}
+.box-header .logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:10px;}
+.box-header .logo i{font-size:28px;color:#fff;}
+.box-header .logo span{font-size:22px;font-weight:800;color:#fff;letter-spacing:1px;}
+.box-header p{font-size:13px;color:rgba(255,255,255,.8);margin:0;}
+.box-body{padding:24px 30px 28px;}
+.alert{padding:11px 16px;border-radius:9px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.alert-error{background:#fef2f2;border:1.5px solid #fecaca;color:#dc2626;}
+.alert-success{background:#f0fdf4;border:1.5px solid #bbf7d0;color:#15803d;}
+.field{margin-bottom:16px;}
+.field label{font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:6px;}
+.input-wrap{position:relative;}
+.input-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;}
+.input-wrap input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:13px;font-family:inherit;outline:none;transition:all .2s;}
+.input-wrap input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.btn-submit{width:100%;padding:12px;border:none;border-radius:10px;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;transition:opacity .2s;}
+.btn-submit:hover{opacity:.9;}
+.back-link{text-align:center;margin-top:18px;}
+.back-link a{font-size:13px;color:#2563eb;text-decoration:none;font-weight:600;}
+.back-link a:hover{text-decoration:underline;}
+.hint{background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:10px 14px;font-size:12px;color:#1d4ed8;margin-bottom:16px;display:flex;align-items:flex-start;gap:8px;}
+</style>
 </head>
 <body>
-<div class="login-container">
-    <div class="login-box">
-        <div class="login-logo">
-            <div class="logo">
-                <i class="fas fa-clinic-medical"></i>
-                <span>PHARMACARE</span>
-            </div>
-        </div>
-
-        <h5 style="text-align:center; margin-bottom:6px; color:#2d3748;">Quên mật khẩu</h5>
-        <p style="text-align:center; color:#718096; font-size:13px; margin-bottom:20px;">
-            Nhập tên đăng nhập và số điện thoại để đặt lại mật khẩu về <b>123456</b>
-        </p>
-
-        <?php if(isset($error)): ?>
-            <div class="alert-danger"><i class="fas fa-exclamation-triangle"></i> <?= $error ?></div>
-        <?php endif; ?>
-        <?php if(isset($success)): ?>
-            <div class="alert-success"><i class="fas fa-check-circle"></i> <?= $success ?></div>
-        <?php endif; ?>
-
-        <form method="POST" action="<?= BASE_URL ?>auth/forgotPassword">
-            <div class="mb-3">
-                <label class="form-label">Tên đăng nhập</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-user input-icon"></i>
-                    <input type="text" class="form-control" name="username" required placeholder="Nhập tên đăng nhập">
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Số điện thoại</label>
-                <div class="input-wrapper">
-                    <i class="fas fa-phone input-icon"></i>
-                    <input type="text" class="form-control" name="soDienThoai" required placeholder="Số điện thoại đã đăng ký">
-                </div>
-            </div>
-            <button type="submit" class="btn-primary-full">
-                <i class="fas fa-redo"></i> Đặt lại mật khẩu
-            </button>
-        </form>
-
-        <div style="text-align:center; margin-top:16px;">
-            <a href="<?= BASE_URL ?>auth/login" style="color:#0d6efd; font-size:13px;">
-                <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
-            </a>
-        </div>
+<div class="box">
+  <div class="box-header">
+    <div class="logo">
+      <i class="fas fa-clinic-medical"></i>
+      <span>PHARMACARE</span>
     </div>
-</div>
+    <p>Đặt lại mật khẩu tài khoản của bạn</p>
+  </div>
+  <div class="box-body">
+    <?php if(isset($error)): ?>
+    <div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?></div>
+    <?php endif; ?>
+    <?php if(isset($success)): ?>
+    <div class="alert alert-success"><i class="fas fa-check-circle"></i> <?php echo $success; ?></div>
+    <?php endif; ?>
 
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family: 'Inter', Arial, sans-serif; }
-.login-container {
-    display:flex; justify-content:center; align-items:center;
-    min-height:100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-.login-box {
-    background:#fff; padding:40px 30px; border-radius:20px;
-    box-shadow:0 20px 40px rgba(0,0,0,0.1); width:100%; max-width:420px;
-}
-.login-logo { text-align:center; margin-bottom:20px; }
-.logo { display:inline-flex; align-items:center; font-size:28px; font-weight:700; color:#0d6efd; }
-.logo i { font-size:32px; margin-right:8px; }
-.form-label { font-weight:500; color:#4a5568; font-size:14px; display:block; margin-bottom:6px; }
-.input-wrapper { position:relative; }
-.form-control {
-    width:100%; padding:12px 16px 12px 42px;
-    border:2px solid #e2e8f0; border-radius:10px; font-size:14px;
-    background:#f7fafc; transition:border-color .3s;
-}
-.form-control:focus { outline:none; border-color:#0d6efd; background:#fff; }
-.input-icon { position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#a0aec0; }
-.mb-3 { margin-bottom:16px; }
-.btn-primary-full {
-    width:100%; padding:14px; background:#0d6efd; color:#fff;
-    border:none; border-radius:10px; font-size:15px; font-weight:600;
-    cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
-    margin-top:8px; transition:background .3s;
-}
-.btn-primary-full:hover { background:#0b5ed7; }
-.alert-danger {
-    background:#fff5f5; border:1px solid #fed7d7; color:#c53030;
-    padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;
-    display:flex; align-items:center; gap:8px;
-}
-.alert-success {
-    background:#f0fff4; border:1px solid #9ae6b4; color:#276749;
-    padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;
-    display:flex; align-items:center; gap:8px;
-}
-</style>
+    <div class="hint">
+      <i class="fas fa-info-circle" style="margin-top:1px;flex-shrink:0;"></i>
+      <span>Nhập tên đăng nhập và số điện thoại đã đăng ký. Mật khẩu sẽ được đặt lại về <strong>123456</strong>.</span>
+    </div>
+
+    <form method="POST" action="<?php echo BASE_URL; ?>auth/forgotPassword">
+      <div class="field">
+        <label>Tên đăng nhập</label>
+        <div class="input-wrap">
+          <i class="fas fa-user"></i>
+          <input type="text" name="username" required placeholder="Nhập tên đăng nhập">
+        </div>
+      </div>
+      <div class="field">
+        <label>Số điện thoại</label>
+        <div class="input-wrap">
+          <i class="fas fa-phone"></i>
+          <input type="text" name="soDienThoai" required placeholder="Số điện thoại đã đăng ký">
+        </div>
+      </div>
+      <button type="submit" class="btn-submit">
+        <i class="fas fa-redo"></i> Đặt lại mật khẩu
+      </button>
+    </form>
+
+    <div class="back-link">
+      <a href="<?php echo BASE_URL; ?>auth/login"><i class="fas fa-arrow-left"></i> Quay lại đăng nhập</a>
+    </div>
+  </div>
+</div>
 </body>
 </html>

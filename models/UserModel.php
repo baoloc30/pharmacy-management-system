@@ -6,17 +6,30 @@ class UserModel extends Model {
     protected $primaryKey = 'idTaiKhoan';
 
     public function login($username, $password) {
+        // Hỗ trợ đăng nhập bằng tên đăng nhập HOẶC email
         $sql = "SELECT t.*, n.hoTen FROM taikhoan t 
                 JOIN nhanvien n ON t.maNhanVien = n.maNhanVien 
-                WHERE t.tenDangNhap = ?";
+                WHERE t.tenDangNhap = ? OR n.email = ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("s", $username);
+        $stmt->bind_param("ss", $username, $username);
         $stmt->execute();
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
         
-        if ($user && password_verify($password, $user['matKhau'])) {
-            return $user;
+        if ($user) {
+            // Thử password_verify trước (mật khẩu đã hash)
+            if (password_verify($password, $user['matKhau'])) {
+                return $user;
+            }
+            // Fallback: so sánh plain text (mật khẩu chưa hash trong DB)
+            if ($user['matKhau'] === $password) {
+                // Tự động nâng cấp lên hash
+                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                $upd = $this->db->prepare("UPDATE taikhoan SET matKhau=? WHERE idTaiKhoan=?");
+                $upd->bind_param("si", $newHash, $user['idTaiKhoan']);
+                $upd->execute();
+                return $user;
+            }
         }
         return false;
     }
@@ -50,12 +63,16 @@ class UserModel extends Model {
         $result = $stmt->get_result();
         $user = $result->fetch_assoc();
         
-        if ($user && password_verify($oldPass, $user['matKhau'])) {
-            $newHash = password_hash($newPass, PASSWORD_DEFAULT);
-            $sql = "UPDATE taikhoan SET matKhau = ? WHERE idTaiKhoan = ?";
-            $stmt = $this->db->prepare($sql);
-            $stmt->bind_param("si", $newHash, $userId);
-            return $stmt->execute();
+        if ($user) {
+            $valid = password_verify($oldPass, $user['matKhau'])
+                  || $user['matKhau'] === $oldPass; // plain text fallback
+            if ($valid) {
+                $newHash = password_hash($newPass, PASSWORD_DEFAULT);
+                $sql = "UPDATE taikhoan SET matKhau = ? WHERE idTaiKhoan = ?";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bind_param("si", $newHash, $userId);
+                return $stmt->execute();
+            }
         }
         return false;
     }
@@ -84,6 +101,16 @@ class UserModel extends Model {
         $stmt->bind_param("s", $username);
         $stmt->execute();
         return $stmt->get_result()->num_rows > 0;
+    }
+
+    public function findByUsername($username) {
+        $sql = "SELECT t.idTaiKhoan, t.tenDangNhap, t.matKhau, t.trangThai, n.email 
+                FROM taikhoan t JOIN nhanvien n ON t.maNhanVien = n.maNhanVien
+                WHERE t.tenDangNhap = ? OR n.email = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("ss", $username, $username);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
     }
 
     public function createEmployee($employeeData, $accountData) {

@@ -1,60 +1,92 @@
-<div class="container mt-3">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5><i class="fas fa-edit"></i> Chỉnh sửa danh mục thuốc</h5>
-            <a href="<?php echo BASE_URL; ?>category/index" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Quay lại
-            </a>
-        </div>
-        <div class="card-body">
-            <?php if (isset($success)): ?>
-                <div class="alert alert-success"><?php echo $success; ?></div>
-            <?php endif; ?>
-            <?php if (isset($error)): ?>
-                <div class="alert alert-danger"><?php echo $error; ?></div>
-            <?php endif; ?>
+<style>
+.cat-label{font-size:12px;font-weight:700;color:#475569;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
+.cat-input{width:100%;padding:10px 13px;border:1.5px solid #cbd5e1;border-radius:9px;font-size:13px;color:#1e293b;background:#fff;outline:none;box-sizing:border-box;font-family:inherit;transition:all .2s;}
+.cat-input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.field-err{font-size:11px;color:#ef4444;font-weight:600;margin-top:4px;display:block;min-height:16px;}
+</style>
 
-            <form method="POST" action="" id="editCategoryForm">
-                <div class="mb-3">
-                    <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="tenDanhMuc" id="tenDanhMuc"
-                        value="<?php echo htmlspecialchars($category['tenDanhMuc']); ?>" required>
-                    <span class="text-danger small" id="tenError"></span>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Mô tả</label>
-                    <textarea class="form-control" name="moTa" rows="3"><?php echo htmlspecialchars($category['moTa'] ?? ''); ?></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Trạng thái</label>
-                    <select class="form-control" name="trangThai">
-                        <option value="SuDung" <?php echo $category['trangThai'] == 'SuDung' ? 'selected' : ''; ?>>Đang dùng</option>
-                        <option value="NgungSuDung" <?php echo $category['trangThai'] == 'NgungSuDung' ? 'selected' : ''; ?>>Ngừng dùng</option>
-                    </select>
-                </div>
-                <div class="d-flex gap-2 justify-content-end">
-                    <a href="<?php echo BASE_URL; ?>category/index" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Hủy bỏ
-                    </a>
-                    <button type="button" class="btn btn-primary" onclick="confirmUpdate()">
-                        <i class="fas fa-save"></i> Cập nhật
-                    </button>
-                </div>
-            </form>
+<div class="content-wrapper">
+<div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;max-width:600px;margin:0 auto;">
+
+    <div style="padding:18px 24px;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-edit" style="color:#fff;font-size:17px;"></i>
+            </div>
+            <div>
+                <div style="font-size:17px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Chỉnh sửa danh mục</div>
+                <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;"><?php echo htmlspecialchars($category['tenDanhMuc']); ?></div>
+            </div>
         </div>
+        <a href="<?php echo BASE_URL; ?>category/index"
+           style="width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:9px;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+            <i class="fas fa-times"></i>
+        </a>
     </div>
+
+    <?php if (isset($success)): ?>
+    <div style="margin:14px 24px 0;padding:11px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;color:#15803d;font-size:13px;font-weight:600;">
+        <i class="fas fa-check-circle"></i> <?php echo $success; ?>
+    </div>
+    <?php endif; ?>
+    <?php if (isset($error)): ?>
+    <div style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600;">
+        <i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?>
+    </div>
+    <?php endif; ?>
+
+    <form method="POST" action="" id="editCategoryForm" style="padding:22px 24px;">
+        <div style="margin-bottom:14px;">
+            <label class="cat-label">Tên danh mục <span style="color:#ef4444;">*</span></label>
+            <input type="text" name="tenDanhMuc" id="tenDanhMuc" class="cat-input"
+                value="<?php echo htmlspecialchars($category['tenDanhMuc']); ?>" required>
+            <span class="field-err" id="tenError"></span>
+        </div>
+        <div style="margin-bottom:14px;">
+            <label class="cat-label">Mô tả</label>
+            <textarea name="moTa" class="cat-input" rows="3" style="resize:vertical;"><?php echo htmlspecialchars($category['moTa'] ?? ''); ?></textarea>
+        </div>
+        <div style="margin-bottom:20px;">
+            <label class="cat-label">Trạng thái</label>
+            <select name="trangThai" class="cat-input" style="cursor:pointer;">
+                <option value="SuDung" <?php echo $category['trangThai'] == 'SuDung' ? 'selected' : ''; ?>>Đang dùng</option>
+                <option value="NgungSuDung" <?php echo $category['trangThai'] == 'NgungSuDung' ? 'selected' : ''; ?>>Ngừng dùng</option>
+            </select>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid #e2e8f0;">
+            <a href="<?php echo BASE_URL; ?>category/index"
+               style="padding:10px 22px;border-radius:9px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px;">
+                <i class="fas fa-times"></i> Hủy bỏ
+            </a>
+            <button type="button" onclick="confirmUpdate()"
+               style="padding:10px 26px;border-radius:9px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(21,128,61,.3);">
+                <i class="fas fa-save"></i> Cập nhật
+            </button>
+        </div>
+    </form>
+</div>
 </div>
 
-<!-- Modal xác nhận -->
-<div class="modal fade" id="confirmModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header"><h5 class="modal-title">Xác nhận cập nhật</h5></div>
-            <div class="modal-body">Bạn có chắc chắn muốn cập nhật thông tin danh mục này không?</div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Từ chối</button>
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('editCategoryForm').submit()">Đồng ý</button>
-            </div>
+<!-- Overlay xác nhận -->
+<div id="confirmOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.2);width:100%;max-width:400px;overflow:hidden;">
+        <div style="padding:16px 20px;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-question-circle" style="color:#fff;"></i>
+            <span style="font-size:15px;font-weight:700;color:#fff;">Xác nhận cập nhật</span>
+        </div>
+        <div style="padding:20px 24px;">
+            <p style="color:#374151;font-size:14px;margin:0;">Bạn có chắc chắn muốn cập nhật thông tin danh mục này không?</p>
+        </div>
+        <div style="padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:10px;">
+            <button onclick="document.getElementById('confirmOverlay').style.display='none'"
+                    style="padding:9px 20px;border-radius:9px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;">
+                Từ chối
+            </button>
+            <button onclick="document.getElementById('editCategoryForm').submit()"
+                    style="padding:9px 20px;border-radius:9px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">
+                Đồng ý
+            </button>
         </div>
     </div>
 </div>
@@ -65,8 +97,12 @@ function confirmUpdate() {
     document.getElementById('tenError').textContent = '';
     if (!ten) {
         document.getElementById('tenError').textContent = 'Chưa chọn đầy đủ thông tin. Vui lòng chọn lại!';
+        document.getElementById('tenDanhMuc').style.borderColor = '#ef4444';
         return;
     }
-    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+    document.getElementById('confirmOverlay').style.display = 'flex';
 }
+document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
 </script>

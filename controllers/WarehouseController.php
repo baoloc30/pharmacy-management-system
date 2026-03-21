@@ -47,8 +47,10 @@ class WarehouseController extends Controller {
     public function stock() {
         $this->checkLogin();
         
-        $medicineModel = $this->model('MedicineModel');
+        $medicineModel  = $this->model('MedicineModel');
+        $supplierModel  = $this->model('SupplierModel');
         $data['medicines'] = $medicineModel->getStock();
+        $data['suppliers'] = $supplierModel->all();
         $this->view('warehouse/stock', $data);
     }
 
@@ -68,8 +70,10 @@ class WarehouseController extends Controller {
         $this->checkLogin();
         $this->checkRole('QuanLy');
 
-        $medicineModel = $this->model('MedicineModel');
+        $medicineModel  = $this->model('MedicineModel');
+        $supplierModel  = $this->model('SupplierModel');
         $data['medicines'] = $medicineModel->getStock();
+        $data['suppliers'] = $supplierModel->all();
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $updates = $_POST['soLuong'] ?? [];

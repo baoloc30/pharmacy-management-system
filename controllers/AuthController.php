@@ -27,7 +27,6 @@ class AuthController extends Controller {
                     if($user['trangThai'] !== 'HoatDong') {
                         $data['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản lý';
                     } else {
-                        Session::init();
                         Session::set('logged_in', true);
                         Session::set('user_id', $user['idTaiKhoan']);
                         Session::set('username', $user['tenDangNhap']);
@@ -35,8 +34,9 @@ class AuthController extends Controller {
                         Session::set('nhan_vien_id', $user['maNhanVien']);
                         Session::set('nhan_vien_name', $user['hoTen']);
                         
-                        // Redirect based on role from database
-                        redirect($user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee');
+                        $target = $user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee';
+                        header('Location: ' . BASE_URL . $target);
+                        exit();
                     }
                 } else {
                     $data['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
@@ -47,17 +47,7 @@ class AuthController extends Controller {
     }
 
     public function logout() {
-        Session::init();
-        // Xử lý confirm từ POST
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_logout'])) {
-            Session::destroy();
-            redirect('auth/login');
-        }
-        // Hiển thị confirm qua JS (xử lý GET với confirm=1)
-        if (isset($_GET['confirm']) && $_GET['confirm'] == '1') {
-            Session::destroy();
-            redirect('auth/login');
-        }
+        Session::destroy();
         redirect('auth/login');
     }
 
