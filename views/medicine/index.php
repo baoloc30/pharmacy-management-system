@@ -10,7 +10,16 @@
                 <?php endif; ?>
                 <form class="d-inline-flex" method="GET" action="<?php echo BASE_URL; ?>medicine/search">
                     <div class="input-group input-group-sm">
-                        <input type="text" name="keyword" class="form-control" placeholder="Tìm kiếm thuốc..." value="<?php echo htmlspecialchars($_GET['keyword'] ?? ''); ?>">
+                        <select name="maDanhMuc" class="form-select form-select-sm" style="max-width: 160px; border-top-left-radius: 4px; border-bottom-left-radius: 4px;" onchange="this.form.submit()">
+                            <option value="">Tất cả danh mục</option>
+                            <?php if(!empty($categories)): foreach($categories as $cat): ?>
+                                <option value="<?php echo $cat['maDanhMuc']; ?>" <?php echo (isset($_GET['maDanhMuc']) && $_GET['maDanhMuc'] == $cat['maDanhMuc']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($cat['tenDanhMuc']); ?>
+                                </option>
+                            <?php endforeach; endif; ?>
+                        </select>
+                        
+                        <input type="text" name="keyword" class="form-control" placeholder="Nhập tên, mã, thành phần, công dụng..." value="<?php echo htmlspecialchars($_GET['keyword'] ?? ''); ?>">
                         <button class="btn btn-outline-secondary" type="submit"><i class="fas fa-search"></i></button>
                     </div>
                 </form>
@@ -23,10 +32,13 @@
             <?php if (isset($_SESSION['warning'])): ?>
                 <div class="alert alert-warning"><?php echo $_SESSION['warning']; unset($_SESSION['warning']); ?></div>
             <?php endif; ?>
+            <?php if (isset($data['error']) || isset($error)): ?>
+                <div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <?php echo $data['error'] ?? $error; ?></div>
+            <?php endif; ?>
 
-            <?php if (empty($medicines)): ?>
+            <?php if (empty($medicines) && !isset($data['error'])): ?>
                 <div class="alert alert-info">Không tìm thấy thuốc phù hợp.</div>
-            <?php else: ?>
+            <?php elseif (!empty($medicines)): ?>
             <table class="table table-hover">
                 <thead class="table-light">
                     <tr>

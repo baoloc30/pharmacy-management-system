@@ -7,26 +7,23 @@
             </a>
         </div>
         <div class="card-body">
-            <?php if (isset($success)): ?>
-                <div class="alert alert-success"><i class="fas fa-check-circle"></i> <?php echo $success; ?></div>
-            <?php endif; ?>
-            <?php if (isset($error)): ?>
-                <div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?></div>
+            <?php if (isset($data['error']) || isset($error)): ?>
+                <div class="alert alert-danger server-alert"><i class="fas fa-exclamation-triangle"></i> <?php echo $data['error'] ?? $error; ?></div>
             <?php endif; ?>
 
-            <form method="POST" action="" id="editCustomerForm">
+            <form method="POST" action="" id="editCustomerForm" novalidate>
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Họ tên <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="hoTen" id="hoTen"
-                            value="<?php echo htmlspecialchars($customer['hoTen']); ?>" required>
-                        <span class="text-danger small" id="hoTenError"></span>
+                            value="<?php echo htmlspecialchars($customer['hoTen'] ?? ''); ?>">
+                        <span class="text-danger small d-block" id="hoTenError"><?php echo $data['hoTen_error'] ?? ''; ?></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" name="soDienThoai" id="soDienThoai"
-                            value="<?php echo htmlspecialchars($customer['soDienThoai']); ?>" required>
-                        <span class="text-danger small" id="sdtError"></span>
+                            value="<?php echo htmlspecialchars($customer['soDienThoai'] ?? ''); ?>">
+                        <span class="text-danger small d-block" id="sdtError"><?php echo $data['sdt_error'] ?? ''; ?></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Email</label>
@@ -35,8 +32,9 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Ngày sinh</label>
-                        <input type="date" class="form-control" name="ngaySinh"
-                            value="<?php echo $customer['ngaySinh'] ?? ''; ?>">
+                        <input type="date" class="form-control" name="ngaySinh" id="ngaySinh"
+                            value="<?php echo $customer['ngaySinh'] ?? $_POST['ngaySinh'] ?? ''; ?>">
+                        <span class="text-danger small d-block" id="ngaySinhError"><?php echo $data['ngaySinh_error'] ?? ''; ?></span>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Giới tính</label>
@@ -60,7 +58,7 @@
                     <a href="<?php echo BASE_URL; ?>customer/index" class="btn btn-secondary">
                         <i class="fas fa-times"></i> Hủy bỏ
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
                         <i class="fas fa-save"></i> Cập nhật
                     </button>
                 </div>
@@ -70,15 +68,76 @@
 </div>
 
 <script>
-document.getElementById('editCustomerForm').addEventListener('submit', function(e) {
-    let valid = true;
-    const hoTen = document.getElementById('hoTen').value.trim();
-    const sdt = document.getElementById('soDienThoai').value.trim();
-    document.getElementById('hoTenError').textContent = '';
-    document.getElementById('sdtError').textContent = '';
-    if (!hoTen) { document.getElementById('hoTenError').textContent = 'Vui lòng không bỏ trống thông tin này'; valid = false; }
-    if (!sdt) { document.getElementById('sdtError').textContent = 'Vui lòng không bỏ trống thông tin này'; valid = false; }
-    else if (!/^[0-9]{10}$/.test(sdt)) { document.getElementById('sdtError').textContent = 'Vui lòng nhập đúng định dạng số điện thoại'; valid = false; }
-    if (!valid) e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    const toastSuccess = document.getElementById('toastSuccess');
+    if (toastSuccess) {
+        setTimeout(() => toastSuccess.classList.add('show'), 100);
+        setTimeout(() => {
+            toastSuccess.classList.remove('show');
+            setTimeout(() => toastSuccess.remove(), 400); 
+        }, 3000);
+    }
+
+    const serverAlert = document.querySelector('.server-alert');
+    if (serverAlert) {
+        setTimeout(() => {
+            serverAlert.style.transition = 'opacity 0.5s ease';
+            serverAlert.style.opacity = '0';
+            setTimeout(() => serverAlert.style.display = 'none', 500);
+        }, 3000);
+    }
+
+    ['hoTenError', 'sdtError', 'ngaySinhError'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.textContent.trim() !== '') {
+            setTimeout(() => el.textContent = '', 3000);
+        }
+    });
+
+    document.getElementById('editCustomerForm').addEventListener('submit', function(e) {
+        let valid = true;
+        const hoTen = document.getElementById('hoTen').value.trim();
+        const sdt = document.getElementById('soDienThoai').value.trim();
+        const ngaySinh = document.getElementById('ngaySinh').value;
+
+        document.getElementById('hoTenError').textContent = '';
+        document.getElementById('sdtError').textContent = '';
+        document.getElementById('ngaySinhError').textContent = '';
+
+        if (!hoTen) {
+            document.getElementById('hoTenError').textContent = 'Vui lòng không bỏ trống thông tin này';
+            valid = false;
+        }
+        if (!sdt) {
+            document.getElementById('sdtError').textContent = 'Vui lòng không bỏ trống thông tin này';
+            valid = false;
+        } else if (!/^[0-9]{10}$/.test(sdt)) {
+            document.getElementById('sdtError').textContent = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)';
+            valid = false;
+        }
+        if (ngaySinh) {
+            const selectedDate = new Date(ngaySinh);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            if (selectedDate > today) {
+                document.getElementById('ngaySinhError').textContent = 'Ngày sinh không được lớn hơn ngày hiện tại';
+                valid = false;
+            }
+        }
+        
+        if (!valid) {
+            e.preventDefault();
+            setTimeout(() => {
+                ['hoTenError', 'sdtError', 'ngaySinhError'].forEach(id => {
+                    document.getElementById(id).textContent = '';
+                });
+            }, 3000);
+        } else {
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+        }
+    });
 });
 </script>

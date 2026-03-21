@@ -6,6 +6,37 @@
                 <i class="fas fa-plus"></i> Thêm khách hàng
             </a>
         </div>
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="toast-notification" id="toastSuccess">
+                <i class="fas fa-check-circle"></i>
+                <span><?php echo $_SESSION['success']; unset($_SESSION['success']); ?></span>
+            </div>
+            
+            <style>
+                .toast-notification {
+                    position: fixed; top: 20px; right: 20px; background: #ffffff;
+                    border-left: 5px solid #48bb78; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+                    padding: 16px 24px; border-radius: 8px; display: flex; align-items: center; gap: 12px;
+                    z-index: 9999; transform: translateX(150%); transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                }
+                .toast-notification.show { transform: translateX(0); }
+                .toast-notification i { color: #48bb78; font-size: 24px; }
+                .toast-notification span { color: #2d3748; font-weight: 500; font-size: 15px; }
+            </style>
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const toast = document.getElementById('toastSuccess');
+                    if (toast) {
+                        setTimeout(() => toast.classList.add('show'), 100);
+                        setTimeout(() => {
+                            toast.classList.remove('show');
+                            setTimeout(() => toast.remove(), 400);
+                        }, 3000);
+                    }
+                });
+            </script>
+        <?php endif; ?>
         <div class="card-body">
             <form method="GET" action="" class="row g-2 mb-3">
                 <div class="col-md-6">
