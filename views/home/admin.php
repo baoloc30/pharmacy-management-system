@@ -1,5 +1,114 @@
 <div class="content-wrapper">
 
+<?php if (Session::get('login_success')): ?>
+    <style>
+        .glass-toast-home {
+            position: fixed;
+            top: 64px; 
+            right: 24px;
+            width: max-content;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.06);
+            padding: 18px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            z-index: 9999999;
+            font-family: 'Inter', sans-serif;
+            transform: translateX(120%);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        .glass-toast-home.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon-wrapper-home {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.35);
+        }
+
+        .toast-icon-wrapper-home i {
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        .toast-text-content-home {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: -1px;
+        }
+
+        .toast-text-title-home {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1f2937;
+            letter-spacing: 0.2px;
+        }
+
+        .toast-text-msg-home {
+            font-size: 13.5px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .toast-progress-home {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+            width: 100%;
+            transform-origin: left;
+            animation: progressShrinkHome 4s linear forwards;
+        }
+
+        @keyframes progressShrinkHome {
+            0% { transform: scaleX(1); }
+            100% { transform: scaleX(0); }
+        }
+    </style>
+
+    <div id="loginToast" class="glass-toast-home">
+        <div class="toast-icon-wrapper-home">
+            <i class="fas fa-user-check"></i>
+        </div>
+        <div class="toast-text-content-home">
+            <div class="toast-text-title-home">Chào mừng trở lại!</div>
+            <div class="toast-text-msg-home"><?php echo Session::get('login_success'); ?></div>
+        </div>
+        <div class="toast-progress-home"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.getElementById('loginToast');
+            if (toast) {
+                setTimeout(() => toast.classList.add('show'), 150);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 600);
+                }, 4000);
+            }
+        });
+    </script>
+    <?php Session::set('login_success', null); ?>
+<?php endif; ?>
+
 <!-- Header -->
 <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
   <div style="padding:16px 22px;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;gap:12px;">

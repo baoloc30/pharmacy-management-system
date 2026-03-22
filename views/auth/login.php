@@ -8,6 +8,121 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+<?php 
+    $msg = '';
+    if (isset($_SESSION['success'])) { $msg = $_SESSION['success']; unset($_SESSION['success']); }
+    elseif (isset($data['success'])) { $msg = $data['success']; }
+    elseif (isset($success)) { $msg = $success; }
+
+    if ($msg !== ''): 
+?>
+    <style>
+        .glass-toast {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: max-content;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12), 0 5px 15px rgba(0, 0, 0, 0.06);
+            padding: 18px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            z-index: 9999999;
+            font-family: 'Inter', sans-serif;
+            transform: translateX(120%);
+            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+        }
+
+        .glass-toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-icon-wrapper {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34d399, #10b981);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+
+        .toast-icon-wrapper i {
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        .toast-text-content {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: -1px;
+        }
+
+        .toast-text-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #1f2937;
+            letter-spacing: 0.2px;
+        }
+
+        .toast-text-msg {
+            font-size: 13.5px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #34d399, #10b981);
+            width: 100%;
+            transform-origin: left;
+            animation: progressShrink 4s linear forwards;
+        }
+
+        @keyframes progressShrink {
+            0% { transform: scaleX(1); }
+            100% { transform: scaleX(0); }
+        }
+    </style>
+
+    <div id="superToast" class="glass-toast">
+        <div class="toast-icon-wrapper">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="toast-text-content">
+            <div class="toast-text-title">Thành công!</div>
+            <div class="toast-text-msg"><?php echo $msg; ?></div>
+        </div>
+        <div class="toast-progress"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.getElementById('superToast');
+            if (toast) {
+                setTimeout(() => toast.classList.add('show'), 150);
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 600);
+                }, 4000);
+            }
+        });
+    </script>
+<?php endif; ?>
 <div class="login-container">
     <div class="login-bg-img" id="loginBgImg"></div>
     <div class="login-box">
@@ -20,31 +135,31 @@
             <div class="logo-divider"></div>
         </div>
         
-        <?php if(isset($error)): ?>
-            <div class="alert alert-danger">
+        <?php if(isset($data['error']) || isset($error)): ?>
+            <div class="alert alert-danger server-alert">
                 <i class="fas fa-exclamation-triangle"></i>
-                <?php echo $error; ?>
+                <?php echo isset($data['error']) ? $data['error'] : $error; ?>
             </div>
         <?php endif; ?>
         
-        <form method="POST" action="<?php echo BASE_URL; ?>auth/login" id="loginForm">
+        <form method="POST" action="<?php echo BASE_URL; ?>auth/login" id="loginForm" novalidate>
             <div class="mb-3">
                 <label for="username" class="form-label">Tên đăng nhập</label>
                 <div class="input-wrapper">
                     <i class="fas fa-user input-icon"></i>
-                    <input type="text" class="form-control" id="username" name="username" required>
+                    <input type="text" class="form-control" id="username" name="username" value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
                 </div>
-                <span class="error-message" id="usernameError"></span>
+                <span class="error-message" id="usernameError"><?php echo $data['username_error'] ?? ''; ?></span>
             </div>
             
             <div class="mb-3">
                 <label for="password" class="form-label">Mật khẩu</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock input-icon"></i>
-                    <input type="password" class="form-control" id="password" name="password" required>
+                    <input type="password" class="form-control" id="password" name="password">
                     <i class="fas fa-eye toggle-password" id="togglePassword"></i>
                 </div>
-                <span class="error-message" id="passwordError"></span>
+                <span class="error-message" id="passwordError"><?php echo $data['password_error'] ?? ''; ?></span>
             </div>
             
             <button type="submit" class="btn btn-primary w-100 login-btn" id="loginBtn">
@@ -179,19 +294,6 @@ html, body {
     margin: 14px auto 0;
 }
 
-.alert-danger {
-    background: rgba(255,245,245,.9);
-    border: 1px solid #fed7d7;
-    color: #c53030;
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-}
-
 .form-label {
     font-weight: 600;
     color: rgba(255,255,255,.95);
@@ -249,15 +351,6 @@ html, body {
 
 .toggle-password:hover { color: #38bdf8; }
 
-.error-message {
-    color: #fca5a5;
-    font-size: 12px;
-    font-weight: 500;
-    margin-top: 4px;
-    min-height: 16px;
-    display: block;
-}
-
 .login-btn {
     background: linear-gradient(135deg, #0ea5e9, #2563eb);
     color: #fff;
@@ -305,6 +398,40 @@ html, body {
     margin-bottom: 8px;
 }
 
+.alert-danger, .server-alert {
+    background: rgba(254, 226, 226, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+    border-left: 4px solid #ef4444;
+    color: #991b1b;
+    padding: 14px 18px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15);
+}
+
+.alert-danger i {
+    font-size: 18px;
+    color: #ef4444;
+}
+
+.error-message {
+    color: #fecaca;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-top: 6px;
+    min-height: 18px;
+    display: block;
+    padding-left: 4px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
 .background-decoration {
     position: absolute;
     top: 0; left: 0;
@@ -336,93 +463,91 @@ html, body {
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Reset button state on page load (handles back navigation / server error)
-    var loginBtn = document.getElementById('loginBtn');
-    loginBtn.disabled = false;
-    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Đăng nhập';
+    document.addEventListener('DOMContentLoaded', function() {
+        var loginBtn = document.getElementById('loginBtn');
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Đăng nhập';
 
-    // Fade in background image khi load xong
-    var bgDiv = document.getElementById('loginBgImg');
-    var img = new Image();
-    img.onload = function() { bgDiv.style.opacity = '1'; };
-    img.src = '<?php echo BASE_URL; ?>assets/images/nhathuoc.jpg';
+        var bgDiv = document.getElementById('loginBgImg');
+        var img = new Image();
+        img.onload = function() { bgDiv.style.opacity = '1'; };
+        img.src = '<?php echo BASE_URL; ?>assets/images/nhathuoc.jpg';
 
-    const loginForm = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const usernameError = document.getElementById('usernameError');
-    const passwordError = document.getElementById('passwordError');
-    const togglePassword = document.getElementById('togglePassword');
+        const loginForm = document.getElementById('loginForm');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const usernameError = document.getElementById('usernameError');
+        const passwordError = document.getElementById('passwordError');
+        const togglePassword = document.getElementById('togglePassword');
 
-    // Toggle password visibility
-    togglePassword.addEventListener('click', function() {
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        this.classList.toggle('fa-eye');
-        this.classList.toggle('fa-eye-slash');
-    });
+        const serverAlert = document.querySelector('.server-alert');
+        if (serverAlert) {
+            setTimeout(function() {
+                serverAlert.style.transition = 'opacity 0.5s ease';
+                serverAlert.style.opacity = '0';
+                setTimeout(() => serverAlert.style.display = 'none', 500);
+            }, 3000);
+        }
 
-    // Clear error messages on input
-    usernameInput.addEventListener('input', function() {
-        clearError(usernameInput, usernameError);
-    });
+        if (usernameError.textContent.trim() !== '' || passwordError.textContent.trim() !== '') {
+            setTimeout(() => {
+                clearError(usernameInput, usernameError);
+                clearError(passwordInput, passwordError);
+            }, 3000);
+        }
 
-    passwordInput.addEventListener('input', function() {
-        clearError(passwordInput, passwordError);
-    });
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
 
-    // Form validation before submit
-    loginForm.addEventListener('submit', function(e) {
-        // Clear previous errors
-        clearError(usernameInput, usernameError);
-        clearError(passwordInput, passwordError);
-        
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        
-        let hasError = false;
-        
-        // Validate empty fields
-        if (!username) {
-            showError(usernameInput, usernameError, 'Vui lòng không để trống tên đăng nhập');
-            hasError = true;
+        usernameInput.addEventListener('input', function() { clearError(usernameInput, usernameError); });
+        passwordInput.addEventListener('input', function() { clearError(passwordInput, passwordError); });
+
+        loginForm.addEventListener('submit', function(e) {
+            clearError(usernameInput, usernameError);
+            clearError(passwordInput, passwordError);
+            
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            let hasError = false;
+            
+            if (!username) {
+                showError(usernameInput, usernameError, 'Vui lòng không bỏ trống thông tin này');
+                hasError = true;
+            }
+            if (!password) {
+                showError(passwordInput, passwordError, 'Vui lòng không bỏ trống thông tin này');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                e.preventDefault();
+                setTimeout(() => {
+                    clearError(usernameInput, usernameError);
+                    clearError(passwordInput, passwordError);
+                }, 3000);
+                return false;
+            }
+            
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đăng nhập...';
+        });
+
+        function showError(input, errorElement, message) {
+            input.style.borderColor = '#f56565';
+            input.style.background = '#fff5f5';
+            errorElement.textContent = message;
         }
         
-        if (!password) {
-            showError(passwordInput, passwordError, 'Vui lòng không để trống mật khẩu');
-            hasError = true;
+        function clearError(input, errorElement) {
+            input.style.borderColor = '';
+            input.style.background = '';
+            errorElement.textContent = '';
         }
-        
-        if (hasError) {
-            e.preventDefault();
-            return false;
-        }
-        
-        // Show loading state
-        loginBtn.disabled = true;
-        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang đăng nhập...';
-        
-        // Re-enable after 5s in case of server error
-        setTimeout(function() {
-            loginBtn.disabled = false;
-            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Đăng nhập';
-        }, 5000);
     });
-
-    // Helper functions
-    function showError(input, errorElement, message) {
-        input.style.borderColor = '#f56565';
-        input.style.background = '#fff5f5';
-        errorElement.textContent = message;
-    }
-    
-    function clearError(input, errorElement) {
-        input.style.borderColor = '';
-        input.style.background = '';
-        errorElement.textContent = '';
-    }
-});
 </script>
 </body>
 </html>

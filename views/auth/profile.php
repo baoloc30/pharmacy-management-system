@@ -8,8 +8,8 @@ $homeUrl = BASE_URL . 'home/' . (Session::get('role') === 'QuanLy' ? 'admin' : '
 
   <!-- Profile hero card -->
   <div style="background:#fff;border-radius:16px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
-    <div style="height:90px;background:linear-gradient(135deg,#1e40af,#2563eb,#0ea5e9);position:relative;">
-      <div style="position:absolute;inset:0;background:url('data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 20\"><circle cx=\"10\" cy=\"10\" r=\"8\" fill=\"rgba(255,255,255,.06)\"/><circle cx=\"50\" cy=\"5\" r=\"12\" fill=\"rgba(255,255,255,.04)\"/><circle cx=\"85\" cy=\"15\" r=\"6\" fill=\"rgba(255,255,255,.07)\"/></svg>');background-size:cover;"></div>
+    <div style="height:90px;background:linear-gradient(135deg,#1e40af,#2563eb,#0ea5e9);position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background-image:radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 2px, transparent 2px), radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 3px, transparent 3px), radial-gradient(circle at 80% 40%, rgba(255,255,255,0.06) 4px, transparent 4px);background-size:40px 40px, 60px 60px, 80px 80px;background-repeat:repeat;"></div>
     </div>
     <div style="padding:0 24px 20px;position:relative;">
       <!-- Avatar -->

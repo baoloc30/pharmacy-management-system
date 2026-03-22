@@ -13,9 +13,9 @@
     </div>
   </div>
 
-  <?php if(isset($error)): ?>
-  <div style="margin:14px 22px 0;padding:12px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;color:#dc2626;font-size:13px;display:flex;align-items:center;gap:8px;">
-    <i class="fas fa-exclamation-circle"></i> <?php echo $error; ?>
+  <?php if(isset($data['error']) || isset($error)): ?>
+  <div class="server-alert" style="margin:14px 22px 0;padding:12px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;color:#dc2626;font-size:13px;display:flex;align-items:center;gap:8px;">
+    <i class="fas fa-exclamation-circle"></i> <?php echo $data['error'] ?? $error; ?>
   </div>
   <?php endif; ?>
   <?php if(isset($success)): ?>
@@ -102,6 +102,7 @@ document.querySelectorAll('.toggle-pw').forEach(function(icon) {
         else { inp.type = 'password'; this.classList.replace('fa-eye-slash','fa-eye'); }
     });
 });
+
 function checkStrength(val) {
     var score = 0;
     if (val.length >= 6) score++;
@@ -113,20 +114,40 @@ function checkStrength(val) {
         document.getElementById('bar'+i).style.background = i <= score ? colors[score-1] : '#e2e8f0';
     });
 }
-document.getElementById('changePwForm').addEventListener('submit', function(e) {
-    ['oldPwErr','newPwErr','cfPwErr'].forEach(function(id){ document.getElementById(id).textContent = ''; });
-    var old = document.getElementById('old_password').value.trim();
-    var nw  = document.getElementById('new_password').value.trim();
-    var cf  = document.getElementById('confirm_password').value.trim();
-    var ok  = true;
-    if (!old) { document.getElementById('oldPwErr').textContent = 'Vui lòng nhập mật khẩu hiện tại'; ok = false; }
-    if (!nw)  { document.getElementById('newPwErr').textContent = 'Vui lòng nhập mật khẩu mới'; ok = false; }
-    else if (nw.length < 6) { document.getElementById('newPwErr').textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự'; ok = false; }
-    if (!cf)  { document.getElementById('cfPwErr').textContent = 'Vui lòng nhập lại mật khẩu mới'; ok = false; }
-    else if (nw !== cf) { document.getElementById('cfPwErr').textContent = 'Mật khẩu xác nhận không trùng khớp'; ok = false; }
-    if (!ok) { e.preventDefault(); return; }
-    var btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+
+document.addEventListener('DOMContentLoaded', function() {
+    const serverAlert = document.querySelector('.server-alert');
+    if (serverAlert) {
+        setTimeout(() => {
+            serverAlert.style.transition = 'opacity 0.5s ease';
+            serverAlert.style.opacity = '0';
+            setTimeout(() => serverAlert.style.display = 'none', 500);
+        }, 3000);
+    }
+
+    document.getElementById('changePwForm').addEventListener('submit', function(e) {
+        ['oldPwErr','newPwErr','cfPwErr'].forEach(function(id){ document.getElementById(id).textContent = ''; });
+        var old = document.getElementById('old_password').value.trim();
+        var nw  = document.getElementById('new_password').value.trim();
+        var cf  = document.getElementById('confirm_password').value.trim();
+        var ok  = true;
+        
+        if (!old) { document.getElementById('oldPwErr').textContent = 'Vui lòng nhập mật khẩu hiện tại'; ok = false; }
+        if (!nw)  { document.getElementById('newPwErr').textContent = 'Vui lòng nhập mật khẩu mới'; ok = false; }
+        else if (nw.length < 6) { document.getElementById('newPwErr').textContent = 'Mật khẩu mới phải có ít nhất 6 ký tự'; ok = false; }
+        if (!cf)  { document.getElementById('cfPwErr').textContent = 'Vui lòng nhập lại mật khẩu mới'; ok = false; }
+        else if (nw !== cf) { document.getElementById('cfPwErr').textContent = 'Mật khẩu xác nhận không trùng khớp'; ok = false; }
+        
+        if (!ok) { 
+            e.preventDefault(); 
+            setTimeout(() => {
+                ['oldPwErr','newPwErr','cfPwErr'].forEach(function(id){ document.getElementById(id).textContent = ''; });
+            }, 3000);
+            return; 
+        }
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    });
 });
 </script>
