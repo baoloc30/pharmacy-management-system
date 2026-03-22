@@ -10,13 +10,7 @@ class AuthController extends Controller {
 
     public function login() {
         Session::init();
-
-        $data = [];
-        if (Session::get('success')) {
-            $data['success'] = Session::get('success');
-            Session::set('success', null); 
-        }
-
+        
         if (Session::get('logged_in')) {
             redirect(Session::get('role') == 'QuanLy' ? 'home/admin' : 'home/employee');
         }
@@ -24,10 +18,9 @@ class AuthController extends Controller {
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $username = trim($_POST['username'] ?? '');
             $password = trim($_POST['password'] ?? '');
-
+            
             $hasError = false;
             
-            // Validate empty fields
             if(empty($username)) {
                 $data['username_error'] = 'Vui lòng không bỏ trống thông tin này';
                 $hasError = true;
@@ -36,13 +29,13 @@ class AuthController extends Controller {
                 $data['password_error'] = 'Vui lòng không bỏ trống thông tin này';
                 $hasError = true;
             } 
+            
             if(!$hasError) {
                 try {
                     $userModel = $this->model('UserModel');
                     $user = $userModel->login($username, $password);
                     
                     if($user) {
-                        // Check account status
                         if($user['trangThai'] !== 'HoatDong') {
                             $data['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản lý';
                         } else {
@@ -54,8 +47,9 @@ class AuthController extends Controller {
                             Session::set('nhan_vien_name', $user['hoTen']);
                             
                             Session::set('login_success', 'Đăng nhập thành công');
-                            redirect($user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee');
-                            exit;
+                            $target = $user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee';
+                            redirect($target);
+                            exit();
                         }
                     } else {
                         $data['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
@@ -69,17 +63,7 @@ class AuthController extends Controller {
     }
 
     public function logout() {
-        Session::init();
-        // Xử lý confirm từ POST
-        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirm_logout'])) {
-            Session::destroy();
-            redirect('auth/login');
-        }
-        // Hiển thị confirm qua JS (xử lý GET với confirm=1)
-        if (isset($_GET['confirm']) && $_GET['confirm'] == '1') {
-            Session::destroy();
-            redirect('auth/login');
-        }
+        Session::destroy();
         redirect('auth/login');
     }
 
@@ -94,17 +78,19 @@ class AuthController extends Controller {
             if($newPass != $confirmPass) {
                 $data['error'] = 'Mật khẩu xác nhận không trùng khớp';
             } else {
-                $userModel = $this->model('UserModel');
                 try {
+                    $userModel = $this->model('UserModel');
                     if($userModel->changePassword(Session::get('user_id'), $oldPass, $newPass)) {
-                        Session::destroy();
-                        Session::init();
-                        Session::set('success', 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.');
+                        Session::set('logged_in', false);
+                        Session::set('user_id', null);
+                        Session::set('role', null);
+                        Session::set('username', null);
+                        $_SESSION['success'] = 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.';
                         redirect('auth/login');
                         exit;
-                } else {
-                    $data['error'] = 'Mật khẩu hiện tại không chính xác';
-                }
+                    } else {
+                        $data['error'] = 'Mật khẩu hiện tại không chính xác';
+                    }
                 } catch (Exception $e) {
                     $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }

@@ -1,134 +1,140 @@
-<div class="container mt-3">
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5><i class="fas fa-user-plus"></i> Thêm khách hàng mới</h5>
-            <a href="<?php echo BASE_URL; ?>customer/index" class="btn btn-secondary btn-sm">
-                <i class="fas fa-arrow-left"></i> Quay lại
-            </a>
-        </div>
-        <div class="card-body">
-            <?php if (isset($data['error']) || isset($error)): ?>
-                <div class="alert alert-danger server-alert"><i class="fas fa-exclamation-triangle"></i> <?php echo $data['error'] ?? $error; ?></div>
-            <?php endif; ?>
+<style>
+.cust-label{font-size:12px;font-weight:700;color:#475569;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
+.cust-input{width:100%;padding:10px 13px;border:1.5px solid #cbd5e1;border-radius:9px;font-size:13px;color:#1e293b;background:#fff;outline:none;box-sizing:border-box;font-family:inherit;transition:all .2s;}
+.cust-input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.cust-input.error{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.1);}
+.cust-input.ok{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.08);}
+.field-err{font-size:11px;color:#ef4444;font-weight:600;margin-top:4px;display:block;min-height:16px;}
+</style>
 
-            <form method="POST" action="" id="addCustomerForm" novalidate>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Họ tên <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="hoTen" id="hoTen"
-                            value="<?php echo htmlspecialchars($_POST['hoTen'] ?? ''); ?>">
-                        <span class="text-danger small d-block" id="hoTenError"><?php echo $data['hoTen_error'] ?? ''; ?></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" name="soDienThoai" id="soDienThoai"
-                            value="<?php echo htmlspecialchars($_POST['soDienThoai'] ?? ''); ?>">
-                        <span class="text-danger small d-block" id="sdtError"><?php echo $data['sdt_error'] ?? ''; ?></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email"
-                            value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Ngày sinh</label>
-                        <input type="date" class="form-control" name="ngaySinh" id="ngaySinh"
-                            value="<?php echo $customer['ngaySinh'] ?? $_POST['ngaySinh'] ?? ''; ?>">
-                        <span class="text-danger small d-block" id="ngaySinhError"><?php echo $data['ngaySinh_error'] ?? ''; ?></span>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Giới tính</label>
-                        <select class="form-control" name="gioiTinh">
-                            <option value="Nam">Nam</option>
-                            <option value="Nu">Nữ</option>
-                            <option value="Khac">Khác</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Địa chỉ</label>
-                        <input type="text" class="form-control" name="diaChi"
-                            value="<?php echo htmlspecialchars($_POST['diaChi'] ?? ''); ?>">
-                    </div>
-                    <div class="col-12 mb-3">
-                        <label class="form-label">Ghi chú</label>
-                        <textarea class="form-control" name="ghiChu" rows="2"><?php echo htmlspecialchars($_POST['ghiChu'] ?? ''); ?></textarea>
-                    </div>
-                </div>
-                <div class="d-flex gap-2 justify-content-end">
-                    <a href="<?php echo BASE_URL; ?>customer/index" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Hủy bỏ
-                    </a>
-                    <button type="submit" class="btn btn-primary" id="saveBtn">
-                        <i class="fas fa-save"></i> Lưu
-                    </button>
-                </div>
-            </form>
+<div class="content-wrapper">
+<div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;max-width:720px;margin:0 auto;">
+
+    <!-- Header -->
+    <div style="padding:18px 24px;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-user-plus" style="color:#fff;font-size:17px;"></i>
+            </div>
+            <div>
+                <div style="font-size:17px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Thêm khách hàng mới</div>
+                <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;">Điền đầy đủ thông tin bên dưới</div>
+            </div>
         </div>
+        <a href="<?php echo BASE_URL; ?>customer/index"
+           style="width:32px;height:32px;background:rgba(255,255,255,.2);border-radius:9px;color:#fff;font-size:15px;display:flex;align-items:center;justify-content:center;text-decoration:none;">
+            <i class="fas fa-times"></i>
+        </a>
     </div>
+
+    <?php if (isset($error)): ?>
+    <div style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600;">
+        <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
+    </div>
+    <?php endif; ?>
+
+    <form method="POST" action="" id="addCustForm" style="padding:22px 24px;">
+
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:#eff6ff;border-left:3px solid #2563eb;margin-bottom:16px;">
+            <i class="fas fa-star" style="color:#2563eb;font-size:11px;"></i>
+            <span style="font-size:12px;font-weight:700;color:#1d4ed8;text-transform:uppercase;letter-spacing:.3px;">Thông tin bắt buộc</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;">
+            <div>
+                <label class="cust-label">Họ tên <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="hoTen" id="hoTen" class="cust-input"
+                    placeholder="Nhập họ và tên đầy đủ"
+                    value="<?php echo htmlspecialchars($_POST['hoTen'] ?? ''); ?>"
+                    oninput="validateHoTen()">
+                <span class="field-err" id="hoTenError"></span>
+            </div>
+            <div>
+                <label class="cust-label">Số điện thoại <span style="color:#ef4444;">*</span></label>
+                <input type="text" name="soDienThoai" id="soDienThoai" class="cust-input"
+                    placeholder="VD: 0901234567" maxlength="10"
+                    value="<?php echo htmlspecialchars($_POST['soDienThoai'] ?? ''); ?>"
+                    oninput="validateSdt()">
+                <span class="field-err" id="sdtError"></span>
+            </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:8px;background:#f0fdf4;border-left:3px solid #16a34a;margin-bottom:16px;">
+            <i class="fas fa-info-circle" style="color:#16a34a;font-size:11px;"></i>
+            <span style="font-size:12px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.3px;">Thông tin thêm (không bắt buộc)</span>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+            <div>
+                <label class="cust-label">Email</label>
+                <input type="email" name="email" class="cust-input"
+                    placeholder="example@email.com"
+                    value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+            </div>
+            <div>
+                <label class="cust-label">Ngày sinh</label>
+                <input type="date" name="ngaySinh" class="cust-input"
+                    value="<?php echo $_POST['ngaySinh'] ?? ''; ?>">
+            </div>
+            <div>
+                <label class="cust-label">Giới tính</label>
+                <select name="gioiTinh" class="cust-input" style="cursor:pointer;">
+                    <option value="Nam" <?php echo ($_POST['gioiTinh'] ?? '') == 'Nam' ? 'selected' : ''; ?>>Nam</option>
+                    <option value="Nu"  <?php echo ($_POST['gioiTinh'] ?? '') == 'Nu'  ? 'selected' : ''; ?>>Nữ</option>
+                    <option value="Khac" <?php echo ($_POST['gioiTinh'] ?? '') == 'Khac' ? 'selected' : ''; ?>>Khác</option>
+                </select>
+            </div>
+            <div>
+                <label class="cust-label">Địa chỉ</label>
+                <input type="text" name="diaChi" class="cust-input"
+                    placeholder="Số nhà, đường, phường/xã..."
+                    value="<?php echo htmlspecialchars($_POST['diaChi'] ?? ''); ?>">
+            </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+            <label class="cust-label">Ghi chú</label>
+            <textarea name="ghiChu" class="cust-input" rows="2"
+                placeholder="Ghi chú thêm về khách hàng..."
+                style="resize:vertical;"><?php echo htmlspecialchars($_POST['ghiChu'] ?? ''); ?></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;padding-top:16px;border-top:1px solid #e2e8f0;">
+            <a href="<?php echo BASE_URL; ?>customer/index"
+               style="padding:10px 22px;border-radius:9px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px;">
+                <i class="fas fa-times"></i> Hủy bỏ
+            </a>
+            <button type="submit" id="submitBtn"
+               style="padding:10px 26px;border-radius:9px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(21,128,61,.3);">
+                <i class="fas fa-save"></i> Lưu khách hàng
+            </button>
+        </div>
+    </form>
+</div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const serverAlert = document.querySelector('.server-alert');
-    if (serverAlert) {
-        setTimeout(() => {
-            serverAlert.style.transition = 'opacity 0.5s ease';
-            serverAlert.style.opacity = '0';
-            setTimeout(() => serverAlert.style.display = 'none', 500);
-        }, 3000);
-    }
-
-    ['hoTenError', 'sdtError', 'ngaySinhError'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el && el.textContent.trim() !== '') {
-            setTimeout(() => el.textContent = '', 3000);
-        }
-    });
-
-    document.getElementById('addCustomerForm').addEventListener('submit', function(e) {
-        let valid = true;
-        const hoTen = document.getElementById('hoTen').value.trim();
-        const sdt = document.getElementById('soDienThoai').value.trim();
-        const ngaySinh = document.getElementById('ngaySinh').value;
-
-        document.getElementById('hoTenError').textContent = '';
-        document.getElementById('sdtError').textContent = '';
-        document.getElementById('ngaySinhError').textContent = '';
-
-        if (!hoTen) {
-            document.getElementById('hoTenError').textContent = 'Vui lòng không bỏ trống thông tin này';
-            valid = false;
-        }
-        if (!sdt) {
-            document.getElementById('sdtError').textContent = 'Vui lòng không bỏ trống thông tin này';
-            valid = false;
-        } else if (!/^[0-9]{10}$/.test(sdt)) {
-            document.getElementById('sdtError').textContent = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)';
-            valid = false;
-        }
-        if (ngaySinh) {
-            const selectedDate = new Date(ngaySinh);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); 
-            
-            if (selectedDate > today) {
-                document.getElementById('ngaySinhError').textContent = 'Ngày sinh không được lớn hơn ngày hiện tại';
-                valid = false;
-            }
-        }
-        
-        if (!valid) {
-            e.preventDefault();
-            setTimeout(() => {
-                ['hoTenError', 'sdtError', 'ngaySinhError'].forEach(id => {
-                    document.getElementById(id).textContent = '';
-                });
-            }, 3000);
-        } else {
-            const saveBtn = document.getElementById('saveBtn');
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-        }
-    });
+function validateHoTen() {
+    const val = document.getElementById('hoTen').value.trim();
+    const inp = document.getElementById('hoTen');
+    const err = document.getElementById('hoTenError');
+    if (!val) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng không bỏ trống thông tin này'; return false; }
+    inp.className = 'cust-input ok'; err.textContent = ''; return true;
+}
+function validateSdt() {
+    const val = document.getElementById('soDienThoai').value.trim();
+    const inp = document.getElementById('soDienThoai');
+    const err = document.getElementById('sdtError');
+    if (!val) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng không bỏ trống thông tin này'; return false; }
+    if (!/^[0-9]{10}$/.test(val)) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)'; return false; }
+    inp.className = 'cust-input ok'; err.textContent = ''; return true;
+}
+document.getElementById('addCustForm').addEventListener('submit', function(e) {
+    const v1 = validateHoTen(), v2 = validateSdt();
+    if (!v1 || !v2) e.preventDefault();
 });
+<?php if (isset($error) && strpos($error, 'điện thoại') !== false): ?>
+document.getElementById('soDienThoai').className = 'cust-input error';
+document.getElementById('sdtError').textContent = '<?php echo addslashes($error); ?>';
+<?php endif; ?>
 </script>

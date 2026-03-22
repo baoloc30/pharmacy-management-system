@@ -8,10 +8,10 @@ class MedicineModel extends Model {
     public function getAllWithCategory() {
         $sql = "SELECT t.*, d.tenDanhMuc 
                 FROM thuoc t 
-                JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
-                WHERE t.trangThai = 'DangBan'
-                ORDER BY t.ngayTao DESC";
-        return $this->db->query($sql)->fetch_all(MYSQLI_ASSOC);
+                LEFT JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
+                ORDER BY t.maThuoc DESC";
+        $result = $this->db->query($sql);
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
     public function getAvailable() {
@@ -86,42 +86,17 @@ class MedicineModel extends Model {
         return $stmt->execute();
     }
 
-    public function search($keyword, $categoryId = '') {
+    public function search($keyword) {
         $sql = "SELECT t.*, d.tenDanhMuc 
                 FROM thuoc t 
-                JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
-                WHERE t.trangThai='DangBan'";
-
-        if ($keyword !== '') {
-            $sql .= " AND (
-                    CAST(t.maThuoc AS CHAR) LIKE ? OR
-                    t.tenThuoc LIKE ? OR 
-                    t.thanhPhan LIKE ? OR 
-                    t.congDung LIKE ? OR 
-                    t.xuatXu LIKE ? OR 
-                    d.tenDanhMuc LIKE ?
-                  )";
-            $kw = "%$keyword%";
-        }
-
-        if ($categoryId !== '') {
-            $sql .= " AND t.maDanhMuc = ?";
-        }
-
-        $sql .= " ORDER BY t.ngayTao DESC";
-
+                LEFT JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
+                WHERE (t.tenThuoc LIKE ? OR t.thanhPhan LIKE ?)";
+        $keyword = "%$keyword%";
         $stmt = $this->db->prepare($sql);
-
-        if ($keyword !== '' && $categoryId !== '') {
-            $stmt->bind_param("ssssssi", $kw, $kw, $kw, $kw, $kw, $kw, $categoryId);
-        } elseif ($keyword !== '') {
-            $stmt->bind_param("ssssss", $kw, $kw, $kw, $kw, $kw, $kw);
-        } elseif ($categoryId !== '') {
-            $stmt->bind_param("i", $categoryId);
-        }
-        
+        $stmt->bind_param("ss", $keyword, $keyword);
         $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $result = $stmt->get_result();
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
 
     public function getDetail($id) {
@@ -163,6 +138,22 @@ class MedicineModel extends Model {
         $sql = "UPDATE thuoc SET giaBan=? WHERE maThuoc=?";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("di", $newPrice, $id);
+        return $stmt->execute();
+    }
+
+    public function getAllWithCategoryAndUnit() {
+        $sql = "SELECT t.*, d.tenDanhMuc 
+                FROM thuoc t 
+                LEFT JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
+                ORDER BY t.tenThuoc ASC";
+        $result = $this->db->query($sql);
+        return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    }
+
+    public function updateUnit($id, $donViLe, $soLuongQuyDoi, $giaBanLe) {
+        $sql = "UPDATE thuoc SET donViLe=?, soLuongQuyDoi=?, giaBanLe=? WHERE maThuoc=?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("sidi", $donViLe, $soLuongQuyDoi, $giaBanLe, $id);
         return $stmt->execute();
     }
 

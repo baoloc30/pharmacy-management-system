@@ -8,16 +8,7 @@ class MedicineController extends Controller {
         $this->checkLogin();
         
         $medicineModel = $this->model('MedicineModel');
-        $categoryModel = $this->model('CategoryModel');
-
-        try {
-            $data['categories'] = $categoryModel->all(); 
-            $data['medicines'] = $medicineModel->getAllWithCategory();
-        } catch (Exception $e) {
-            $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
-            $data['medicines'] = [];
-        }
-        
+        $data['medicines'] = $medicineModel->getAllWithCategory();
         $this->view('medicine/index', $data);
     }
 
@@ -91,20 +82,9 @@ class MedicineController extends Controller {
     public function search() {
         $this->checkLogin();
         
-        $keyword = trim($_GET['keyword'] ?? '');
-        $categoryId = $_GET['maDanhMuc'] ?? ''; 
-        
+        $keyword = $_GET['keyword'] ?? '';
         $medicineModel = $this->model('MedicineModel');
-        $categoryModel = $this->model('CategoryModel');
-        
-        try {
-            $data['categories'] = $categoryModel->all();
-            $data['medicines'] = $medicineModel->search($keyword, $categoryId);
-        } catch (Exception $e) {
-            $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
-            $data['medicines'] = [];
-        }
-        
+        $data['medicines'] = $medicineModel->search($keyword);
         $this->view('medicine/index', $data);
     }
 
@@ -144,18 +124,35 @@ class MedicineController extends Controller {
 
     public function detail($id) {
         $this->checkLogin();
-        try {
-            $medicineModel = $this->model('MedicineModel');
-            $data['medicine'] = $medicineModel->getDetail($id);
-            
-            if (!$data['medicine']) {
-                $data['error'] = 'Không tìm thấy thông tin thuốc này trong hệ thống.';
+        $medicineModel = $this->model('MedicineModel');
+        $data['medicine'] = $medicineModel->getDetail($id);
+        if (!$data['medicine']) redirect('medicine/index');
+        $this->view('medicine/detail', $data);
+    }
+
+    public function updateUnit() {
+        $this->checkLogin();
+        $this->checkRole('QuanLy');
+
+        $medicineModel = $this->model('MedicineModel');
+        $data['medicines'] = $medicineModel->getAllWithCategoryAndUnit();
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $donViLeArr      = $_POST['donViLe']       ?? [];
+            $soLuongArr      = $_POST['soLuongQuyDoi'] ?? [];
+            $giaBanLeArr     = $_POST['giaBanLe']      ?? [];
+
+            foreach ($donViLeArr as $id => $donViLe) {
+                $soLuong  = isset($soLuongArr[$id])  ? (int)$soLuongArr[$id]    : 1;
+                $giaBanLe = isset($giaBanLeArr[$id]) ? (float)$giaBanLeArr[$id] : 0;
+                if ($soLuong < 1) $soLuong = 1;
+                $medicineModel->updateUnit((int)$id, trim($donViLe), $soLuong, $giaBanLe);
             }
-        } catch (Exception $e) {
-            $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
-            $data['medicine'] = null;
+
+            $data['success'] = 'Cập nhật đơn vị lẻ thành công';
+            $data['medicines'] = $medicineModel->getAllWithCategoryAndUnit();
         }
-        
-        $this->view('medicine/detail', $data ?? []);
+
+        $this->view('medicine/update_unit', $data);
     }
 }

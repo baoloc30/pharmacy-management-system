@@ -9,10 +9,7 @@ class SaleController extends Controller {
         $this->checkLogin();
         
         $medicineModel = $this->model('MedicineModel');
-        $categoryModel = $this->model('CategoryModel');
-
         $data['medicines'] = $medicineModel->getAvailable();
-        $data['categories'] = $categoryModel->all();
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $invoiceModel = $this->model('InvoiceModel');
@@ -77,19 +74,11 @@ class SaleController extends Controller {
 
     public function searchMedicine() {
         $this->checkLogin();
-        $keyword = trim($_GET['keyword'] ?? '');
-        $categoryId = trim($_GET['maDanhMuc'] ?? ''); 
-        
-        try {
-            $medicineModel = $this->model('MedicineModel');
-            $medicines = $medicineModel->search($keyword, $categoryId);
-            
-            header('Content-Type: application/json');
-            echo json_encode(['success' => true, 'medicines' => $medicines]);
-        } catch (Exception $e) {
-            header('Content-Type: application/json');
-            echo json_encode(['success' => false, 'message' => 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau']);
-        }
+        $keyword = $_GET['keyword'] ?? '';
+        $medicineModel = $this->model('MedicineModel');
+        $medicines = $medicineModel->search($keyword);
+        header('Content-Type: application/json');
+        echo json_encode(['medicines' => $medicines]);
         exit;
     }
 }
