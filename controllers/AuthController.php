@@ -99,43 +99,6 @@ class AuthController extends Controller {
         $this->view('auth/change_password', $data ?? []);
     }
 
-    public function updateProfile() {
-        $this->checkLogin();
-        
-        if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $userModel = $this->model('UserModel');
-            
-            $profileData = [
-                'hoTen'       => $_POST['hoTen'] ?? '',
-                'email'       => $_POST['email'] ?? '',
-                'soDienThoai' => $_POST['soDienThoai'] ?? '',
-                'diaChi'      => $_POST['diaChi'] ?? '',
-                'ngaySinh'    => !empty($_POST['ngaySinh']) ? $_POST['ngaySinh'] : null,
-                'gioiTinh'    => $_POST['gioiTinh'] ?? 'Nam'
-            ];
-            
-            if(empty($profileData['hoTen'])) {
-                $error = 'Vui lòng nhập họ tên';
-            } else {
-                try {
-                    if($userModel->updateProfile(Session::get('user_id'), $profileData)) {
-                        Session::set('nhan_vien_name', $profileData['hoTen']);
-                        $success = 'Cập nhật thông tin thành công';
-                    } else {
-                        $error = 'Cập nhật thông tin thất bại';
-                    }
-                } catch (Exception $e) {
-                    $error = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
-                }
-            }
-        }
-        
-        $userModel = $this->model('UserModel');
-        $data['user'] = $userModel->getProfile(Session::get('user_id'));
-        if (isset($success)) $data['success'] = $success;
-        if (isset($error)) $data['error'] = $error;
-        $this->view('auth/profile', $data);
-    }
 
     public function forgotPassword() {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -154,9 +117,75 @@ class AuthController extends Controller {
 
     public function profile() {
         $this->checkLogin();
-        
         $userModel = $this->model('UserModel');
-        $data['user'] = $userModel->getProfile(Session::get('user_id'));
+
+        try {
+            $data['user'] = $userModel->getProfile(Session::get('user_id'));
+        } catch (Exception $e) {
+            $data['error'] = 'Không thể kết nối cơ sở dữ liệu.';
+            $this->view('auth/profile', $data ?? []);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $hoTen       = trim($_POST['hoTen'] ?? '');
+            $soDienThoai = trim($_POST['soDienThoai'] ?? '');
+            $email       = trim($_POST['email'] ?? '');
+            $ngaySinh    = !empty($_POST['ngaySinh']) ? $_POST['ngaySinh'] : null;
+            $diaChi      = trim($_POST['diaChi'] ?? '');
+            $gioiTinh    = $_POST['gioiTinh'] ?? 'Nam';
+
+            $hasError = false;
+
+            // Validate
+            if (empty($hoTen)) {
+                $data['hoTen_error'] = 'Vui lòng không bỏ trống thông tin này';
+                $hasError = true;
+            }
+            if (!empty($soDienThoai) && !preg_match('/^[0-9]{10}$/', $soDienThoai)) {
+                $data['sdt_error'] = 'Số điện thoại không hợp lệ (10 chữ số)';
+                $hasError = true;
+            }
+            if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $data['email_error'] = 'Email không đúng định dạng';
+                $hasError = true;
+            }
+            if ($ngaySinh && strtotime($ngaySinh) > time()) {
+                $data['ngaySinh_error'] = 'Ngày sinh không được lớn hơn ngày hiện tại';
+                $hasError = true;
+            }
+
+            if (!$hasError) {
+                $profileData = [
+                    'hoTen'       => $hoTen,
+                    'soDienThoai' => $soDienThoai,
+                    'email'       => $email,
+                    'ngaySinh'    => $ngaySinh,
+                    'diaChi'      => $diaChi,
+                    'gioiTinh'    => $gioiTinh
+                ];
+                
+                try {
+                    if ($userModel->updateProfile(Session::get('user_id'), $profileData)) {
+                        Session::set('nhan_vien_name', $profileData['hoTen']);
+                        $data['success'] = 'Cập nhật thông tin cá nhân thành công';
+                        $data['user'] = $userModel->getProfile(Session::get('user_id'));
+                    } else {
+                        $data['error'] = 'Cập nhật thông tin thất bại';
+                    }
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+                }
+            } else {
+                $data['user']['hoTen']       = $hoTen;
+                $data['user']['soDienThoai'] = $soDienThoai;
+                $data['user']['email']       = $email;
+                $data['user']['ngaySinh']    = $ngaySinh;
+                $data['user']['diaChi']      = $diaChi;
+                $data['user']['gioiTinh']    = $gioiTinh;
+            }
+        }
+
         $this->view('auth/profile', $data);
     }
 }

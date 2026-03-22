@@ -21,31 +21,92 @@
                     <i class="fas fa-plus"></i> Thêm thuốc
                 </a>
                 <?php endif; ?>
-                <form method="GET" action="<?php echo BASE_URL; ?>medicine/search" style="display:flex;gap:0;">
-                    <input type="text" name="keyword" placeholder="Tìm kiếm thuốc..."
-                           value="<?php echo htmlspecialchars($_GET['keyword'] ?? ''); ?>"
-                           style="padding:9px 14px;border:1.5px solid rgba(255,255,255,.4);border-right:none;border-radius:9px 0 0 9px;font-size:13px;background:rgba(255,255,255,.9);color:#1e293b;outline:none;width:220px;">
+
+                <form method="GET" action="<?php echo BASE_URL; ?>medicine/search" id="searchMedForm" 
+                  style="display:flex;align-items:center;background:#fff;border-radius:12px;padding:5px;box-shadow:0 6px 24px rgba(0,0,0,0.18);flex:1;max-width:600px;">
+                
+                    <div style="position:relative;display:flex;align-items:center;">
+                        <i class="fas fa-layer-group" style="position:absolute;left:14px;color:#94a3b8;font-size:13px;pointer-events:none;"></i>
+                        <select name="category_id" onchange="this.form.submit()" 
+                                style="appearance:none;-webkit-appearance:none;padding:10px 32px 10px 38px;border:none;background:transparent;font-size:13px;font-weight:700;color:#374151;outline:none;cursor:pointer;width:175px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">
+                            <option value="">Tất cả danh mục</option>
+                            <?php if(isset($categories)) foreach($categories as $cat): ?>
+                            <option value="<?php echo $cat['maDanhMuc']; ?>" <?php echo (isset($_GET['category_id']) && $_GET['category_id'] == $cat['maDanhMuc']) ? 'selected' : ''; ?>>
+                                <?php echo htmlspecialchars($cat['tenDanhMuc']); ?>
+                            </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <i class="fas fa-chevron-down" style="position:absolute;right:12px;color:#cbd5e1;font-size:11px;pointer-events:none;"></i>
+                    </div>
+
+                    <div style="width:1px;height:24px;background:#e2e8f0;margin:0 4px;"></div>
+
+                    <div style="position:relative;flex:1;display:flex;align-items:center;">
+                        <input type="text" name="keyword" id="searchKeyword" placeholder="Nhập mã, tên, thành phần..."
+                            value="<?php echo htmlspecialchars($keyword ?? $_GET['keyword'] ?? ''); ?>"
+                            style="width:100%;padding:10px 36px 10px 14px;border:none;background:transparent;font-size:13px;color:#1e293b;outline:none;">
+                        
+                        <?php if(!empty($_GET['keyword']) || !empty($_GET['category_id'])): ?>
+                        <a href="<?php echo BASE_URL; ?>medicine/index" 
+                        style="position:absolute;right:10px;width:24px;height:24px;background:#fef2f2;color:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:12px;transition:all .2s;"
+                        onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'" title="Xóa bộ lọc">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        <?php endif; ?>
+                    </div>
+
                     <button type="submit"
-                            style="padding:9px 14px;border:1.5px solid rgba(255,255,255,.4);border-left:none;border-radius:0 9px 9px 0;background:rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:13px;">
-                        <i class="fas fa-search"></i>
+                            style="padding:10px 20px;border:none;border-radius:9px;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;cursor:pointer;font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(37,99,235,.25);transition:transform .2s;"
+                            onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <i class="fas fa-search"></i> <span>Tìm</span>
                     </button>
                 </form>
             </div>
         </div>
 
-        <!-- Alerts -->
-        <div style="padding:0 24px;">
-            <?php if (isset($_SESSION['success'])): ?>
-            <div style="margin-top:14px;padding:11px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;color:#15803d;font-size:13px;font-weight:600;">
-                <i class="fas fa-check-circle"></i> <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
+        <?php
+        $toastMsg = ''; $toastType = 'success'; $toastIcon = 'fa-check'; $toastColors = ['#34d399', '#10b981']; 
+
+        if (isset($_SESSION['success'])) {
+            $toastMsg = $_SESSION['success']; unset($_SESSION['success']);
+        } elseif (isset($_SESSION['warning'])) { 
+            $toastMsg = $_SESSION['warning']; $toastType = 'warning'; $toastIcon = 'fa-exclamation-triangle'; $toastColors = ['#fcd34d', '#f59e0b']; unset($_SESSION['warning']);
+        } elseif (isset($_SESSION['error'])) { 
+            $toastMsg = $_SESSION['error']; $toastType = 'error'; $toastIcon = 'fa-times-circle'; $toastColors = ['#f87171', '#ef4444']; unset($_SESSION['error']);
+        }
+
+        if ($toastMsg !== ''):
+        ?>
+        <style>
+            .glass-toast-med { position: fixed; top: 84px; right: 24px; width: max-content; max-width: 420px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 16px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); padding: 18px 24px; display: flex; align-items: flex-start; gap: 16px; z-index: 9999999; font-family: 'Inter', sans-serif; transform: translateX(120%); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; }
+            .glass-toast-med.show { transform: translateX(0); }
+            .toast-icon-wrapper-med { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, <?php echo $toastColors[0]; ?>, <?php echo $toastColors[1]; ?>); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            .toast-icon-wrapper-med i { color: #ffffff; font-size: 16px; }
+            .toast-text-title-med { font-size: 15px; font-weight: 800; color: #1f2937; }
+            .toast-text-msg-med { font-size: 13.5px; color: #4b5563; margin-top: 4px; }
+            .toast-progress-med { position: absolute; bottom: 0; left: 0; height: 4px; background: linear-gradient(90deg, <?php echo $toastColors[0]; ?>, <?php echo $toastColors[1]; ?>); width: 100%; transform-origin: left; animation: progressShrinkMed 4s linear forwards; }
+            @keyframes progressShrinkMed { 0% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+        </style>
+        <div id="medToast" class="glass-toast-med">
+            <div class="toast-icon-wrapper-med"><i class="fas <?php echo $toastIcon; ?>"></i></div>
+            <div>
+                <div class="toast-text-title-med">
+                    <?php echo $toastType == 'success' ? 'Thành công!' : ($toastType == 'warning' ? 'Lưu ý' : 'Lỗi hệ thống'); ?>
+                </div>
+                <div class="toast-text-msg-med"><?php echo $toastMsg; ?></div>
             </div>
-            <?php endif; ?>
-            <?php if (isset($_SESSION['warning'])): ?>
-            <div style="margin-top:14px;padding:11px 16px;background:#fefce8;border:1.5px solid #fde68a;border-radius:9px;color:#ca8a04;font-size:13px;font-weight:600;">
-                <i class="fas fa-exclamation-triangle"></i> <?php echo $_SESSION['warning']; unset($_SESSION['warning']); ?>
-            </div>
-            <?php endif; ?>
+            <div class="toast-progress-med"></div>
         </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toast = document.getElementById('medToast');
+                if (toast) {
+                    setTimeout(() => toast.classList.add('show'), 150);
+                    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 4000);
+                }
+            });
+        </script>
+        <?php endif; ?>
 
         <!-- Table -->
         <div style="padding:16px 24px 24px;overflow-x:auto;">

@@ -7,9 +7,19 @@ class MedicineController extends Controller {
     public function index() {
         $this->checkLogin();
         
-        $medicineModel = $this->model('MedicineModel');
-        $data['medicines'] = $medicineModel->getAllWithCategory();
-        $this->view('medicine/index', $data);
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            $categoryModel = $this->model('CategoryModel');
+            
+            $data['medicines'] = $medicineModel->getAllWithCategory();
+            $data['categories'] = $categoryModel->all();
+            $this->view('medicine/index', $data);
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            $data['medicines'] = [];
+            $data['categories'] = [];
+            $this->view('medicine/index', $data);
+        }
     }
 
     public function add() {
@@ -82,10 +92,36 @@ class MedicineController extends Controller {
     public function search() {
         $this->checkLogin();
         
-        $keyword = $_GET['keyword'] ?? '';
-        $medicineModel = $this->model('MedicineModel');
-        $data['medicines'] = $medicineModel->search($keyword);
-        $this->view('medicine/index', $data);
+        $keyword = trim($_GET['keyword'] ?? '');
+        $categoryId = trim($_GET['category_id'] ?? '');
+        
+        if ($keyword === '' && $categoryId === '') {
+            redirect('medicine/index');
+            exit;
+        }
+
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            $categoryModel = $this->model('CategoryModel');
+            
+            $data['medicines'] = $medicineModel->search($keyword, $categoryId);
+            $data['categories'] = $categoryModel->all();
+            $data['keyword'] = $keyword;
+            $data['category_id'] = $categoryId;
+
+            if (empty($data['medicines'])) {
+                $_SESSION['warning'] = 'Không tìm thấy thuốc phù hợp';
+            }
+            
+            $this->view('medicine/index', $data);
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            $data['medicines'] = [];
+            $data['categories'] = [];
+            $data['keyword'] = $keyword;
+            $data['category_id'] = $categoryId;
+            $this->view('medicine/index', $data);
+        }
     }
 
     public function updatePrice() {

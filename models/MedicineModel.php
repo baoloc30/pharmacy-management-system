@@ -86,15 +86,40 @@ class MedicineModel extends Model {
         return $stmt->execute();
     }
 
-    public function search($keyword) {
+    public function search($keyword, $categoryId = null) {
         $sql = "SELECT t.*, d.tenDanhMuc 
                 FROM thuoc t 
                 LEFT JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
-                WHERE (t.tenThuoc LIKE ? OR t.thanhPhan LIKE ?)";
-        $keyword = "%$keyword%";
+                WHERE 1=1";
+        
+        $params = [];
+        $types = "";
+
+        // Lọc theo danh mục
+        if (!empty($categoryId)) {
+            $sql .= " AND t.maDanhMuc = ?";
+            $types .= "i";
+            $params[] = $categoryId;
+        }
+
+        if ($keyword !== '') {
+            $sql .= " AND (t.maThuoc LIKE ? OR t.tenThuoc LIKE ? OR t.congDung LIKE ? OR t.thanhPhan LIKE ? OR d.tenDanhMuc LIKE ?)";
+            $kw = "%$keyword%";
+            $types .= "sssss";
+            array_push($params, $kw, $kw, $kw, $kw, $kw);
+        }
+
+        $sql .= " ORDER BY t.maThuoc DESC";
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ss", $keyword, $keyword);
-        $stmt->execute();
+        if (!$stmt) throw new Exception("Lỗi prepare database");
+
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        
+        if (!$stmt->execute()) throw new Exception("Lỗi execute database");
+
         $result = $stmt->get_result();
         return $result ? $result->fetch_all(MYSQLI_ASSOC) : [];
     }
