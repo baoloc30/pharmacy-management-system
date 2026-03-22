@@ -12,8 +12,14 @@
                 <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;">Thông tin đầy đủ về thuốc</div>
             </div>
         </div>
-        <a href="javascript:history.back()"
-           style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;background:rgba(255,255,255,.2);color:#fff;font-size:13px;font-weight:600;text-decoration:none;">
+        <?php 
+            $backUrl = isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'medicine/detail') === false 
+                       ? $_SERVER['HTTP_REFERER'] 
+                       : BASE_URL . 'medicine/index'; 
+        ?>
+        <a href="<?php echo $backUrl; ?>"
+           style="display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:10px;background:rgba(255,255,255,.2);color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;transition:background .2s;"
+           onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">
             <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
@@ -36,21 +42,24 @@
                     <i class="fas fa-pills" style="font-size:48px;color:#93c5fd;"></i>
                 </div>
                 <?php endif; ?>
-
-                <?php if (isAdmin()): ?>
-                <div style="margin-top:16px;">
-                    <a href="<?php echo BASE_URL; ?>medicine/edit/<?php echo $medicine['maThuoc']; ?>"
-                       style="display:inline-flex;align-items:center;gap:7px;padding:9px 20px;border-radius:9px;background:#fefce8;color:#ca8a04;border:1px solid #fde68a;font-size:13px;font-weight:600;text-decoration:none;">
-                        <i class="fas fa-edit"></i> Chỉnh sửa
-                    </a>
-                </div>
-                <?php endif; ?>
             </div>
 
             <!-- Thông tin -->
             <div>
-                <h2 style="font-size:20px;font-weight:800;color:#1e293b;margin:0 0 4px;"><?php echo htmlspecialchars($medicine['tenThuoc']); ?></h2>
-                <div style="font-size:13px;color:#64748b;margin-bottom:16px;">Mã thuốc: <strong><?php echo $medicine['maThuoc']; ?></strong></div>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:20px;">
+                    <div>
+                        <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin:0 0 4px;"><?php echo htmlspecialchars($medicine['tenThuoc']); ?></h2>
+                        <div style="font-size:13px;color:#64748b;">Mã thuốc: <strong><?php echo $medicine['maThuoc']; ?></strong></div>
+                    </div>
+                    
+                    <?php if (isAdmin()): ?>
+                    <a href="<?php echo BASE_URL; ?>medicine/edit/<?php echo $medicine['maThuoc']; ?>"
+                       style="display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:9px;background:#fefce8;color:#ca8a04;border:1px solid #fde68a;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;transition:all 0.2s;box-shadow:0 2px 6px rgba(250,204,21,.15);"
+                       onmouseover="this.style.background='#fef08a'" onmouseout="this.style.background='#fefce8'">
+                        <i class="fas fa-edit"></i> Chỉnh sửa
+                    </a>
+                    <?php endif; ?>
+                </div>
 
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
                     <div style="padding:12px 14px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0;">

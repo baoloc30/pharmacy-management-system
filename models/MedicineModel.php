@@ -127,11 +127,15 @@ class MedicineModel extends Model {
     public function getDetail($id) {
         $sql = "SELECT t.*, d.tenDanhMuc 
                 FROM thuoc t 
-                JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
+                LEFT JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
                 WHERE t.maThuoc = ?";
+                
         $stmt = $this->db->prepare($sql);
+        if (!$stmt) throw new Exception("Lỗi prepare database");
+        
         $stmt->bind_param("i", $id);
-        $stmt->execute();
+        if (!$stmt->execute()) throw new Exception("Lỗi execute database");
+        
         return $stmt->get_result()->fetch_assoc();
     }
 

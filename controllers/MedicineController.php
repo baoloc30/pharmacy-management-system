@@ -158,12 +158,31 @@ class MedicineController extends Controller {
         $this->view('medicine/update_price', $data);
     }
 
-    public function detail($id) {
+    public function detail($id = null) {
         $this->checkLogin();
-        $medicineModel = $this->model('MedicineModel');
-        $data['medicine'] = $medicineModel->getDetail($id);
-        if (!$data['medicine']) redirect('medicine/index');
-        $this->view('medicine/detail', $data);
+        
+        if (empty($id) || !is_numeric($id)) {
+            redirect('medicine/index');
+            exit;
+        }
+
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            $data['medicine'] = $medicineModel->getDetail($id);
+            
+            if (!$data['medicine']) {
+                $_SESSION['warning'] = 'Thuốc này không tồn tại hoặc đã bị xóa khỏi hệ thống.';
+                redirect('medicine/index');
+                exit;
+            }
+            
+            $this->view('medicine/detail', $data);
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            redirect('medicine/index');
+            exit;
+        }
     }
 
     public function updateUnit() {
