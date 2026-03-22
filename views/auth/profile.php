@@ -136,26 +136,83 @@ $homeUrl = BASE_URL . 'home/' . (Session::get('role') === 'QuanLy' ? 'admin' : '
 </div>
 
 <script>
-document.getElementById('profileForm').addEventListener('submit', function(e) {
-    let ok = true;
-    ['hoTenError','sdtError','emailError'].forEach(function(id){ document.getElementById(id).textContent = ''; });
-    if (!document.getElementById('hoTen').value.trim()) {
-        document.getElementById('hoTenError').textContent = 'Vui lòng nhập họ tên';
-        ok = false;
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('editBtn').addEventListener('click', function() {
+        document.querySelectorAll('.editable-input').forEach(el => {
+            el.removeAttribute('readonly');
+            el.removeAttribute('disabled');
+        });
+        
+        this.classList.add('d-none');
+        document.getElementById('saveBtn').classList.remove('d-none');
+        document.getElementById('hoTen').focus();
+    });
+
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        }, 3000);
+    });
+
+    const toastSuccess = document.getElementById('toastSuccess');
+    if (toastSuccess) {
+        setTimeout(() => {
+            toastSuccess.classList.add('show');
+        }, 100);
+
+        setTimeout(() => {
+            toastSuccess.classList.remove('show');
+            setTimeout(() => toastSuccess.remove(), 400); 
+        }, 3000);
     }
-    const sdt = document.getElementById('soDienThoai').value.trim();
-    if (sdt && !/^[0-9]{10}$/.test(sdt)) {
-        document.getElementById('sdtError').textContent = 'SĐT không hợp lệ (10 chữ số)';
-        ok = false;
-    }
-    const email = document.getElementById('email').value.trim();
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById('emailError').textContent = 'Email sai định dạng';
-        ok = false;
-    }
-    if (!ok) { e.preventDefault(); return; }
-    const btn = document.getElementById('saveProfileBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+
+    document.getElementById('profileForm').addEventListener('submit', function(e) {
+        let valid = true;
+        const hoTen = document.getElementById('hoTen').value.trim();
+        const sdt = document.getElementById('soDienThoai').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const ngaySinh = document.getElementById('ngaySinh').value;
+
+        ['hoTenError', 'sdtError', 'emailError', 'ngaySinhError'].forEach(id => document.getElementById(id).textContent = '');
+
+        if (!hoTen) {
+            document.getElementById('hoTenError').textContent = 'Vui lòng nhập họ tên';
+            valid = false;
+        }
+        if (sdt && !/^[0-9]{10}$/.test(sdt)) {
+            document.getElementById('sdtError').textContent = 'Số điện thoại không được chứa chữ cái hoặc không đủ 10 số';
+            valid = false;
+        }
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            document.getElementById('emailError').textContent = 'Email sai định dạng';
+            valid = false;
+        }
+
+        if (ngaySinh) {
+            const selectedDate = new Date(ngaySinh);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+            
+            if (selectedDate > today) {
+                document.getElementById('ngaySinhError').textContent = 'Ngày sinh không được lớn hơn ngày hiện tại';
+                valid = false;
+            }
+        }
+        
+        if (!valid) {
+            e.preventDefault();
+            setTimeout(() => {
+                ['hoTenError', 'sdtError', 'emailError', 'ngaySinhError'].forEach(id => document.getElementById(id).textContent = '');
+            }, 3000);
+            return false;
+        }
+        
+        const saveBtn = document.getElementById('saveBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+    });
 });
 </script>

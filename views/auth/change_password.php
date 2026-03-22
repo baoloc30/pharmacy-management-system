@@ -2,9 +2,9 @@
 <div class="content-wrapper">
 <div style="max-width:520px;margin:0 auto;">
 <div style="background:#fff;border-radius:16px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;">
-
-  <div style="padding:20px 24px;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;gap:14px;">
-    <div style="width:48px;height:48px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+<div style="padding:20px 24px;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;gap:14px;">
+    
+  <div style="width:48px;height:48px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
       <i class="fas fa-shield-alt" style="color:#fff;font-size:20px;"></i>
     </div>
     <div>

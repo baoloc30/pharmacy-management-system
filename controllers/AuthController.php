@@ -117,11 +117,15 @@ class AuthController extends Controller {
             if(empty($profileData['hoTen'])) {
                 $error = 'Vui lòng nhập họ tên';
             } else {
-                if($userModel->updateProfile(Session::get('user_id'), $profileData)) {
-                    Session::set('nhan_vien_name', $profileData['hoTen']);
-                    $success = 'Cập nhật thông tin thành công';
-                } else {
-                    $error = 'Cập nhật thông tin thất bại';
+                try {
+                    if($userModel->updateProfile(Session::get('user_id'), $profileData)) {
+                        Session::set('nhan_vien_name', $profileData['hoTen']);
+                        $success = 'Cập nhật thông tin thành công';
+                    } else {
+                        $error = 'Cập nhật thông tin thất bại';
+                    }
+                } catch (Exception $e) {
+                    $error = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
         }
