@@ -14,8 +14,8 @@ body{font-family:'Inter',Arial,sans-serif;background:#f1f5f9;display:flex;flex-d
 .inv-header .brand i{font-size:26px;color:#fff;}
 .inv-header .brand span{font-size:22px;font-weight:800;color:#fff;letter-spacing:1px;}
 .inv-header .subtitle{font-size:13px;color:rgba(255,255,255,.8);font-weight:500;}
-.inv-meta{padding:16px 28px;background:#f0f7ff;border-bottom:1px solid #dbeafe;display:flex;flex-wrap:wrap;gap:16px;}
-.inv-meta .meta-item{flex:1;min-width:160px;}
+.inv-meta{padding:16px 28px;background:#f0f7ff;border-bottom:1px solid #dbeafe;display:grid;grid-template-columns:repeat(3, 1fr);gap:16px;}
+.inv-meta .meta-item{min-width:0; overflow:hidden;}
 .inv-meta .meta-label{font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
 .inv-meta .meta-value{font-size:13px;font-weight:600;color:#1e293b;}
 .inv-body{padding:20px 28px;}
@@ -69,14 +69,29 @@ tfoot td{padding:10px 12px;font-weight:700;border-top:2px solid #bfdbfe;}
       <div class="meta-label">Nhân viên</div>
       <div class="meta-value"><?php echo htmlspecialchars($invoice['tenNhanVien'] ?? ''); ?></div>
     </div>
-    <div class="meta-item">
+    <div class="meta-item" style="grid-column: span 2;">
       <div class="meta-label">Khách hàng</div>
-      <div class="meta-value"><?php echo htmlspecialchars($invoice['hoTen'] ?? 'Khách lẻ'); ?></div>
+      <div class="meta-value">
+        <?php 
+          if (!empty($invoice['hoTen'])) {
+              echo htmlspecialchars($invoice['hoTen']);
+              if (!empty($invoice['soDienThoai'])) {
+                  echo ' - ' . htmlspecialchars($invoice['soDienThoai']);
+              }
+          } else {
+              echo 'Khách lẻ';
+          }
+        ?>
+      </div>
     </div>
-    <?php if(!empty($invoice['phuongThucThanhToan'])): ?>
+    <?php 
+    if(!empty($invoice['phuongThucThanhToan'])): 
+        $pt = $invoice['phuongThucThanhToan'];
+        $ptLabel = $pt === 'TienMat' ? 'Tiền mặt' : ($pt === 'ChuyenKhoan' ? 'Chuyển khoản' : ($pt === 'The' ? 'Thẻ' : $pt));
+    ?>
     <div class="meta-item">
       <div class="meta-label">Thanh toán</div>
-      <div class="meta-value"><?php echo htmlspecialchars($invoice['phuongThucThanhToan']); ?></div>
+      <div class="meta-value"><?php echo $ptLabel; ?></div>
     </div>
     <?php endif; ?>
   </div>
@@ -126,8 +141,8 @@ tfoot td{padding:10px 12px;font-weight:700;border-top:2px solid #bfdbfe;}
 
   <div class="inv-footer">
     <i class="fas fa-heart" style="color:#dc2626;"></i>
-    Cảm ơn quý khách! Hẹn gặp lại. &nbsp;·&nbsp;
-    <strong>PHARMACARE</strong>
+    Cảm ơn quý khách! Hẹn gặp lại
+    <br><strong>PHARMACARE</strong>
   </div>
 </div>
 

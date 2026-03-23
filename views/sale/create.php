@@ -213,14 +213,18 @@
 <!-- MODAL THÀNH CÔNG -->
 <div id="successModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.7);z-index:10300;align-items:center;justify-content:center;padding:20px;">
   <div style="background:#fff;border-radius:16px;width:100%;max-width:360px;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,.3);text-align:center;">
-    <div style="padding:14px 20px;background:linear-gradient(135deg,#15803d,#16a34a);"><span style="font-size:14px;font-weight:700;color:#fff;">Thanh toán thành công</span></div>
+    <div style="position:relative; padding:15px 20px; background:linear-gradient(135deg,#15803d,#16a34a); display:flex; align-items:center; justify-content:center;">
+        <span style="font-size:15px; font-weight:700; color:#fff;">Thanh toán thành công</span>
+        <button onclick="closeSuccessModal()" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.2); border:none; color:#fff; width:28px; height:28px; border-radius:8px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.3)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
     <div style="padding:28px 24px;">
       <div style="width:64px;height:64px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;"><i class="fas fa-check-circle" style="font-size:32px;color:#16a34a;"></i></div>
       <div id="successMsg" style="font-size:14px;color:#374151;margin-bottom:4px;"></div>
       <div id="successChange" style="font-size:13px;margin-bottom:20px;"></div>
       <div style="display:flex;gap:8px;justify-content:center;">
-        <button onclick="printInvoice()" style="padding:9px 18px;border-radius:8px;border:1.5px solid #bfdbfe;background:#eff6ff;color:#1d4ed8;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-print"></i> In hóa đơn</button>
-        <button onclick="resetSale()" style="padding:9px 18px;border-radius:8px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-plus"></i> Hóa đơn mới</button>
+        <button onclick="printInvoice()" style="padding:9px 24px;border-radius:8px;border:none;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(37,99,235,.25);"><i class="fas fa-print"></i> In hóa đơn</button>
       </div>
     </div>
   </div>
@@ -265,7 +269,15 @@ function searchMedicine(){
         if(kw.length<1){ document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">Nhập tên thuốc để tìm kiếm</div>'; return; }
         document.getElementById('searchResults').innerHTML='<div style="padding:16px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Đang tìm...</div>';
         $.get('<?php echo BASE_URL; ?>sale/searchMedicine',{keyword:kw},function(res){
-            if(!res.medicines||res.medicines.length===0){ document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">Không tìm thấy thuốc</div>'; return; }
+            if(!res.success) {
+                document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#dc2626;font-size:13px;"><i class="fas fa-exclamation-triangle"></i> '+res.message+'</div>';
+                return;
+            }
+            if(!res.medicines || res.medicines.length===0){ 
+                document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">Không tìm thấy thuốc phù hợp</div>'; 
+                return; 
+            }
+            
             var html='';
             res.medicines.forEach(function(m){
                 var low=parseInt(m.soLuongTon)<=0;
@@ -274,7 +286,9 @@ function searchMedicine(){
                 html+='<div style="text-align:right;"><div style="font-size:13px;font-weight:700;color:#1d4ed8;white-space:nowrap;">'+fmt(m.giaBan)+'</div>'+(low?'<div style="font-size:10px;color:#dc2626;font-weight:700;">Hết hàng</div>':'')+'</div></div>';
             });
             document.getElementById('searchResults').innerHTML=html;
-        },'json');
+        },'json').fail(function() {
+            document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#dc2626;font-size:13px;"><i class="fas fa-exclamation-triangle"></i> Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau</div>';
+        });
     },300);
 }
 
@@ -294,7 +308,7 @@ function addToCart(m,unit,price){
     closeUnitModal();
     var existing=cart.find(function(i){ return i.maThuoc==m.maThuoc&&i.donViTinh==unit; });
     if(existing){
-        if(existing.soLuong>=parseInt(m.soLuongTon)){ alert('Không đủ tồn kho'); return; }
+        if(existing.soLuong>=parseInt(m.soLuongTon)){ alert('Số lượng tồn kho không đủ. Vui lòng chọn lại'); return; }
         existing.soLuong++; existing.thanhTien=existing.soLuong*existing.donGia;
     } else {
         cart.push({maThuoc:m.maThuoc,tenThuoc:m.tenThuoc,donViTinh:unit,soLuong:1,donGia:parseFloat(price),thanhTien:parseFloat(price),soLuongTon:parseInt(m.soLuongTon)});
@@ -337,7 +351,13 @@ function renderCart(){
 function changeQty(i,delta){
     cart[i].soLuong+=delta;
     if(cart[i].soLuong<=0){ cart.splice(i,1); }
-    else { if(cart[i].soLuong>cart[i].soLuongTon){ cart[i].soLuong=cart[i].soLuongTon; alert('Không đủ tồn kho'); } cart[i].thanhTien=cart[i].soLuong*cart[i].donGia; }
+    else { 
+        if(cart[i].soLuong>cart[i].soLuongTon){ 
+            cart[i].soLuong=cart[i].soLuongTon; 
+            alert('Số lượng tồn kho không đủ. Vui lòng chọn lại'); 
+        } 
+        cart[i].thanhTien=cart[i].soLuong*cart[i].donGia; 
+    }
     renderCart();
 }
 function removeFromCart(i){ cart.splice(i,1); renderCart(); }
@@ -381,10 +401,39 @@ function calcChange(){
 function findCustomer(){
     var phone=document.getElementById('customerPhone').value.trim();
     if(!phone){ alert('Nhập số điện thoại'); return; }
+    
+    document.getElementById('customerInfo').innerHTML='<div style="padding:8px 12px;font-size:13px;color:#64748b;"><i class="fas fa-spinner fa-spin"></i> Đang tìm kiếm...</div>';
+    
     $.get('<?php echo BASE_URL; ?>customer/search',{phone:phone},function(res){
-        if(res.success&&res.customer){ selectedCustomer=res.customer; document.getElementById('customerInfo').innerHTML='<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#15803d;display:flex;align-items:center;gap:8px;"><i class="fas fa-check-circle"></i><b>'+res.customer.hoTen+'</b> &nbsp;·&nbsp; Điểm: '+res.customer.diemTichLuy+'</div>'; }
-        else { selectedCustomer=null; document.getElementById('customerInfo').innerHTML='<div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;color:#dc2626;"><i class="fas fa-times-circle"></i> Không tìm thấy khách hàng</div>'; }
+        if(res.success && res.customer){ 
+            var customers = Array.isArray(res.customer) ? res.customer : [res.customer];
+            
+            if(customers.length === 1) {
+                selectCustomer(customers[0]);
+            } else if(customers.length > 1) {
+                var html = '<div style="background:#fff;border:1.5px solid #bfdbfe;border-radius:8px;margin-top:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.05);">';
+                html += '<div style="padding:8px 12px;background:#eff6ff;font-size:12px;font-weight:700;color:#1e40af;border-bottom:1px solid #bfdbfe;">Có ' + customers.length + ' khách hàng phù hợp. Vui lòng chọn:</div>';
+                
+                customers.forEach(function(c) {
+                    html += '<div onclick=\'selectCustomer(' + JSON.stringify(c).replace(/"/g, "&quot;") + ')\' style="padding:10px 12px;border-bottom:1px solid #e2e8f0;cursor:pointer;font-size:13px;color:#1e293b;display:flex;justify-content:space-between;align-items:center;transition:background 0.2s;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#fff\'">';
+                    html += '<span><i class="fas fa-user-circle" style="color:#94a3b8;margin-right:6px;font-size:15px;"></i><b>' + c.hoTen + '</b> - ' + c.soDienThoai + '</span>';
+                    html += '<span style="color:#2563eb;font-weight:700;font-size:12px;background:#eff6ff;padding:4px 10px;border-radius:6px;">Chọn</span>';
+                    html += '</div>';
+                });
+                html += '</div>';
+                document.getElementById('customerInfo').innerHTML = html;
+            }
+        } else { 
+            selectedCustomer=null; 
+            document.getElementById('customerInfo').innerHTML='<div style="padding:8px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;color:#dc2626;"><i class="fas fa-times-circle"></i> Khách hàng chưa tồn tại</div>'; 
+        }
     },'json');
+}
+
+function selectCustomer(c) {
+    selectedCustomer = c;
+    document.getElementById('customerPhone').value = c.soDienThoai;
+    document.getElementById('customerInfo').innerHTML = '<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#15803d;display:flex;align-items:center;gap:8px;"><i class="fas fa-check-circle"></i><b>' + c.hoTen + '</b> &nbsp;·&nbsp; ' + c.soDienThoai + '</div>';
 }
 function openAddCustomerModal(){ document.getElementById('addCustomerModal').style.display='flex'; }
 function closeAddCustomerModal(){ document.getElementById('addCustomerModal').style.display='none'; }
@@ -434,11 +483,15 @@ function doCheckout(){
 }
 
 function printInvoice(){ if(lastInvoiceId) window.open('<?php echo BASE_URL; ?>sale/print/'+lastInvoiceId,'_blank'); }
-function resetSale(){
+
+function closeSuccessModal(){
     cart=[]; selectedCustomer=null; lastInvoiceId=null;
     document.getElementById('successModal').style.display='none';
-    renderCart(); openSaleModal();
+    document.getElementById('customerInfo').innerHTML='';
+    document.getElementById('customerPhone').value='';
+    renderCart(); 
 }
-document.getElementById('successModal').addEventListener('click',function(e){ if(e.target===this) this.style.display='none'; });
+
+document.getElementById('successModal').addEventListener('click',function(e){ if(e.target===this) closeSuccessModal(); });
 function fmt(n){ return new Intl.NumberFormat('vi-VN').format(n)+'đ'; }
 </script>

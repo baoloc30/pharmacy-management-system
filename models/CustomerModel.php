@@ -128,11 +128,14 @@ class CustomerModel extends Model {
     }
 
     public function findByPhone($phone) {
-        $sql = "SELECT * FROM {$this->table} WHERE soDienThoai=?";
+        $sql = "SELECT * FROM {$this->table} WHERE soDienThoai LIKE ? ORDER BY hoTen ASC LIMIT 5";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("s", $phone);
+        $searchPhone = "%" . $phone;
+        $stmt->bind_param("s", $searchPhone);
         $stmt->execute();
-        return $stmt->get_result()->fetch_assoc();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        
+        return empty($result) ? false : $result;
     }
 
     public function lastId() {

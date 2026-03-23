@@ -74,11 +74,18 @@ class SaleController extends Controller {
 
     public function searchMedicine() {
         $this->checkLogin();
-        $keyword = $_GET['keyword'] ?? '';
-        $medicineModel = $this->model('MedicineModel');
-        $medicines = $medicineModel->search($keyword);
-        header('Content-Type: application/json');
-        echo json_encode(['medicines' => $medicines]);
+        $keyword = trim($_GET['keyword'] ?? '');
+        
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            $medicines = $medicineModel->search($keyword);
+            
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'medicines' => $medicines]);
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau']);
+        }
         exit;
     }
 }
