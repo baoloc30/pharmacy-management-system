@@ -20,6 +20,8 @@ class CustomerController extends Controller {
             $customerModel = $this->model('CustomerModel');
             $hoTen = trim($_POST['hoTen'] ?? '');
             $soDienThoai = trim($_POST['soDienThoai'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $ngaySinh = !empty($_POST['ngaySinh']) ? $_POST['ngaySinh'] : null;
 
             // Validate
             if (empty($hoTen) || empty($soDienThoai)) {
@@ -28,6 +30,10 @@ class CustomerController extends Controller {
                 $data['error'] = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)';
             } elseif ($customerModel->phoneExists($soDienThoai)) {
                 $data['error'] = 'Số điện thoại này đã tồn tại trong hệ thống';
+            } elseif (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) { 
+                $data['error'] = 'Email không đúng định dạng';
+            } elseif ($ngaySinh && strtotime($ngaySinh) > time()) { 
+                $data['error'] = 'Ngày sinh không được lớn hơn ngày hiện tại';
             } else {
                 $customerData = [
                     'hoTen'       => $hoTen,
@@ -38,17 +44,24 @@ class CustomerController extends Controller {
                     'gioiTinh'    => $_POST['gioiTinh'] ?? 'Nam',
                     'ghiChu'      => $_POST['ghiChu'] ?? ''
                 ];
-                if ($customerModel->createCustomer($customerData)) {
-                    // AJAX request
-                    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
-                        $newId = $customerModel->lastId();
-                        $customer = $customerModel->getCustomerById($newId);
-                        echo json_encode(['success' => true, 'customer' => $customer]);
+                
+                try {
+                    if ($customerModel->createCustomer($customerData)) {
+                        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH'])) {
+                            $newId = $customerModel->lastId();
+                            $customer = $customerModel->getCustomerById($newId);
+                            echo json_encode(['success' => true, 'customer' => $customer]);
+                            exit;
+                        }
+                        
+                        $_SESSION['success'] = 'Thêm khách hàng thành công';
+                        redirect('customer/index');
                         exit;
+                    } else {
+                        throw new Exception("Lỗi Database");
                     }
-                    redirect('customer/index');
-                } else {
-                    $data['error'] = 'Có lỗi xảy ra, vui lòng thử lại';
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
 
@@ -63,40 +76,69 @@ class CustomerController extends Controller {
 
     public function edit($id) {
         $this->checkLogin();
-        $customerModel = $this->model('CustomerModel');
-        $data['customer'] = $customerModel->getCustomerById($id);
-
-        if (!$data['customer']) {
+        
+        try {
+            $customerModel = $this->model('CustomerModel');
+            $data['customer'] = $customerModel->getCustomerById($id);
+            
+            if (!$data['customer']) {
+                redirect('customer/index');
+                exit;
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
             redirect('customer/index');
+            exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $hoTen       = trim($_POST['hoTen'] ?? '');
             $soDienThoai = trim($_POST['soDienThoai'] ?? '');
+            $email       = trim($_POST['email'] ?? '');
+            $ngaySinh    = !empty($_POST['ngaySinh']) ? $_POST['ngaySinh'] : null;
 
+            // Validate
             if (empty($hoTen) || empty($soDienThoai)) {
                 $data['error'] = 'Vui lòng nhập đầy đủ họ tên và số điện thoại';
             } elseif (!preg_match('/^[0-9]{10}$/', $soDienThoai)) {
-                $data['error'] = 'Vui lòng nhập đúng định dạng số điện thoại';
+                $data['error'] = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)';
             } elseif ($customerModel->phoneExistsExcept($soDienThoai, $id)) {
                 $data['error'] = 'Số điện thoại này đã được sử dụng cho khách hàng khác';
+            } elseif (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $data['error'] = 'Email không đúng định dạng';
+            } elseif ($ngaySinh && strtotime($ngaySinh) > time()) {
+                $data['error'] = 'Ngày sinh không được lớn hơn ngày hiện tại';
             } else {
                 $updateData = [
                     'hoTen'       => $hoTen,
                     'soDienThoai' => $soDienThoai,
-                    'email'       => $_POST['email'] ?? '',
+                    'email'       => $email,
                     'diaChi'      => $_POST['diaChi'] ?? '',
-                    'ngaySinh'    => $_POST['ngaySinh'] ?? null,
+                    'ngaySinh'    => $ngaySinh,
                     'gioiTinh'    => $_POST['gioiTinh'] ?? 'Nam',
                     'ghiChu'      => $_POST['ghiChu'] ?? ''
                 ];
-                if ($customerModel->updateCustomer($id, $updateData)) {
-                    $data['success'] = 'Cập nhật thành công';
-                    $data['customer'] = $customerModel->getCustomerById($id);
-                } else {
-                    $data['error'] = 'Cập nhật thất bại';
+                
+                try {
+                    if ($customerModel->updateCustomer($id, $updateData)) {
+                        $_SESSION['success'] = 'Cập nhật thành công';
+                        redirect('customer/index');
+                        exit;
+                    } else {
+                        throw new Exception("Lỗi Database");
+                    }
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
+            
+            $data['customer']['hoTen'] = $hoTen;
+            $data['customer']['soDienThoai'] = $soDienThoai;
+            $data['customer']['email'] = $email;
+            $data['customer']['ngaySinh'] = $ngaySinh;
+            $data['customer']['diaChi'] = $_POST['diaChi'] ?? '';
+            $data['customer']['gioiTinh'] = $_POST['gioiTinh'] ?? 'Nam';
+            $data['customer']['ghiChu'] = $_POST['ghiChu'] ?? '';
         }
 
         $this->view('customer/edit', $data);

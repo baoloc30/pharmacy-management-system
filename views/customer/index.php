@@ -29,6 +29,36 @@
         </div>
     </div>
 
+    <?php if (isset($_SESSION['success'])): ?>
+    <style>
+        .glass-toast-cust { position: fixed; top: 64px; right: 24px; width: max-content; max-width: 420px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 16px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); padding: 18px 24px; display: flex; align-items: flex-start; gap: 16px; z-index: 9999999; font-family: 'Inter', sans-serif; transform: translateX(120%); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; }
+        .glass-toast-cust.show { transform: translateX(0); }
+        .toast-icon-wrapper-cust { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, #34d399, #10b981); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35); }
+        .toast-icon-wrapper-cust i { color: #ffffff; font-size: 18px; }
+        .toast-text-title-cust { font-size: 15px; font-weight: 800; color: #1f2937; }
+        .toast-text-msg-cust { font-size: 13.5px; color: #4b5563; margin-top: 4px; }
+        .toast-progress-cust { position: absolute; bottom: 0; left: 0; height: 4px; background: linear-gradient(90deg, #34d399, #10b981); width: 100%; transform-origin: left; animation: progressShrinkCust 4s linear forwards; }
+        @keyframes progressShrinkCust { 0% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+    </style>
+    <div id="custToast" class="glass-toast-cust">
+        <div class="toast-icon-wrapper-cust"><i class="fas fa-check"></i></div>
+        <div>
+            <div class="toast-text-title-cust">Thành công!</div>
+            <div class="toast-text-msg-cust"><?php echo $_SESSION['success']; ?></div>
+        </div>
+        <div class="toast-progress-cust"></div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toast = document.getElementById('custToast');
+            if (toast) {
+                setTimeout(() => toast.classList.add('show'), 150);
+                setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 4000);
+            }
+        });
+    </script>
+    <?php unset($_SESSION['success']); endif; ?>
+
     <div style="padding:16px 24px 24px;overflow-x:auto;">
         <?php if (empty($customers)): ?>
         <div style="padding:32px;text-align:center;color:#64748b;font-size:14px;">

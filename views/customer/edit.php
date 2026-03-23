@@ -25,11 +25,6 @@
         </a>
     </div>
 
-    <?php if (isset($success)): ?>
-    <div style="margin:14px 24px 0;padding:11px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;color:#15803d;font-size:13px;font-weight:600;">
-        <i class="fas fa-check-circle"></i> <?php echo $success; ?>
-    </div>
-    <?php endif; ?>
     <?php if (isset($error)): ?>
     <div style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600;">
         <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
@@ -41,24 +36,30 @@
             <div>
                 <label class="cust-label">Họ tên <span style="color:#ef4444;">*</span></label>
                 <input type="text" name="hoTen" id="hoTen" class="cust-input"
-                    value="<?php echo htmlspecialchars($customer['hoTen']); ?>" required>
+                    value="<?php echo htmlspecialchars($customer['hoTen'] ?? ''); ?>"
+                    oninput="validateHoTen()">
                 <span class="field-err" id="hoTenError"></span>
             </div>
             <div>
                 <label class="cust-label">Số điện thoại <span style="color:#ef4444;">*</span></label>
                 <input type="text" name="soDienThoai" id="soDienThoai" class="cust-input"
-                    value="<?php echo htmlspecialchars($customer['soDienThoai']); ?>" maxlength="10" required>
+                    value="<?php echo htmlspecialchars($customer['soDienThoai'] ?? ''); ?>" maxlength="10"
+                    oninput="validateSdt()">
                 <span class="field-err" id="sdtError"></span>
             </div>
             <div>
                 <label class="cust-label">Email</label>
-                <input type="email" name="email" class="cust-input"
-                    value="<?php echo htmlspecialchars($customer['email'] ?? ''); ?>">
+                <input type="email" name="email" id="email" class="cust-input"
+                    value="<?php echo htmlspecialchars($customer['email'] ?? ''); ?>"
+                    oninput="validateEmail()">
+                <span class="field-err" id="emailError"></span>
             </div>
             <div>
                 <label class="cust-label">Ngày sinh</label>
-                <input type="date" name="ngaySinh" class="cust-input"
-                    value="<?php echo $customer['ngaySinh'] ?? ''; ?>">
+                <input type="date" name="ngaySinh" id="ngaySinh" class="cust-input"
+                    value="<?php echo $customer['ngaySinh'] ?? ''; ?>"
+                    onchange="validateNgaySinh()">
+                <span class="field-err" id="ngaySinhError"></span>
             </div>
             <div>
                 <label class="cust-label">Giới tính</label>
@@ -94,26 +95,66 @@
 </div>
 
 <script>
+function validateHoTen() {
+    const val = document.getElementById('hoTen').value.trim();
+    const inp = document.getElementById('hoTen');
+    const err = document.getElementById('hoTenError');
+    if (!val) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng không bỏ trống thông tin này'; return false; }
+    inp.className = 'cust-input ok'; err.textContent = ''; return true;
+}
+function validateSdt() {
+    const val = document.getElementById('soDienThoai').value.trim();
+    const inp = document.getElementById('soDienThoai');
+    const err = document.getElementById('sdtError');
+    if (!val) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng không bỏ trống thông tin này'; return false; }
+    if (!/^[0-9]{10}$/.test(val)) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)'; return false; }
+    inp.className = 'cust-input ok'; err.textContent = ''; return true;
+}
+function validateEmail() {
+    const val = document.getElementById('email').value.trim();
+    const inp = document.getElementById('email');
+    const err = document.getElementById('emailError');
+    if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { 
+        inp.className = 'cust-input error'; 
+        err.textContent = 'Email sai định dạng'; 
+        return false; 
+    }
+    inp.className = val ? 'cust-input ok' : 'cust-input'; 
+    err.textContent = ''; 
+    return true;
+}
+function validateNgaySinh() {
+    const val = document.getElementById('ngaySinh').value;
+    const inp = document.getElementById('ngaySinh');
+    const err = document.getElementById('ngaySinhError');
+    if (val) {
+        const selectedDate = new Date(val);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+        if (selectedDate > today) {
+            inp.className = 'cust-input error'; 
+            err.textContent = 'Ngày sinh không được lớn hơn ngày hiện tại'; 
+            return false;
+        }
+    }
+    inp.className = val ? 'cust-input ok' : 'cust-input'; 
+    err.textContent = ''; 
+    return true;
+}
+
 document.getElementById('editCustomerForm').addEventListener('submit', function(e) {
-    let valid = true;
-    const hoTen = document.getElementById('hoTen').value.trim();
-    const sdt = document.getElementById('soDienThoai').value.trim();
-    document.getElementById('hoTenError').textContent = '';
-    document.getElementById('sdtError').textContent = '';
-    if (!hoTen) {
-        document.getElementById('hoTenError').textContent = 'Vui lòng không bỏ trống thông tin này';
-        document.getElementById('hoTen').className = 'cust-input error';
-        valid = false;
+    const v1 = validateHoTen(), v2 = validateSdt(), v3 = validateEmail(), v4 = validateNgaySinh();
+    if (!v1 || !v2 || !v3 || !v4) {
+        e.preventDefault();
+    } else {
+        const btn = document.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
     }
-    if (!sdt) {
-        document.getElementById('sdtError').textContent = 'Vui lòng không bỏ trống thông tin này';
-        document.getElementById('soDienThoai').className = 'cust-input error';
-        valid = false;
-    } else if (!/^[0-9]{10}$/.test(sdt)) {
-        document.getElementById('sdtError').textContent = 'Vui lòng nhập đúng định dạng số điện thoại';
-        document.getElementById('soDienThoai').className = 'cust-input error';
-        valid = false;
-    }
-    if (!valid) e.preventDefault();
 });
+
+<?php if (isset($error) && strpos($error, 'điện thoại') !== false): ?>
+document.getElementById('soDienThoai').className = 'cust-input error';
+document.getElementById('sdtError').textContent = '<?php echo addslashes($error); ?>';
+<?php endif; ?>
 </script>

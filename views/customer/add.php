@@ -67,14 +67,18 @@
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
             <div>
                 <label class="cust-label">Email</label>
-                <input type="email" name="email" class="cust-input"
+                <input type="email" name="email" id="email" class="cust-input"
                     placeholder="example@email.com"
-                    value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>">
+                    value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>"
+                    oninput="validateEmail()">
+                <span class="field-err" id="emailError"></span>
             </div>
             <div>
                 <label class="cust-label">Ngày sinh</label>
-                <input type="date" name="ngaySinh" class="cust-input"
-                    value="<?php echo $_POST['ngaySinh'] ?? ''; ?>">
+                <input type="date" name="ngaySinh" id="ngaySinh" class="cust-input"
+                    value="<?php echo $_POST['ngaySinh'] ?? ''; ?>"
+                    onchange="validateNgaySinh()">
+                <span class="field-err" id="ngaySinhError"></span>
             </div>
             <div>
                 <label class="cust-label">Giới tính</label>
@@ -106,7 +110,7 @@
             </a>
             <button type="submit" id="submitBtn"
                style="padding:10px 26px;border-radius:9px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(21,128,61,.3);">
-                <i class="fas fa-save"></i> Lưu khách hàng
+                <i class="fas fa-save"></i> Lưu
             </button>
         </div>
     </form>
@@ -126,12 +130,53 @@ function validateSdt() {
     const inp = document.getElementById('soDienThoai');
     const err = document.getElementById('sdtError');
     if (!val) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng không bỏ trống thông tin này'; return false; }
-    if (!/^[0-9]{10}$/.test(val)) { inp.className = 'cust-input error'; err.textContent = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)'; return false; }
+    if (!/^[0-9]{10}$/.test(val)) { 
+        inp.className = 'cust-input error'; 
+        err.textContent = 'Vui lòng nhập đúng định dạng số điện thoại (10 chữ số)'; 
+        return false; 
+    }
     inp.className = 'cust-input ok'; err.textContent = ''; return true;
 }
+function validateEmail() {
+    const val = document.getElementById('email').value.trim();
+    const inp = document.getElementById('email');
+    const err = document.getElementById('emailError');
+    if (val && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { 
+        inp.className = 'cust-input error'; 
+        err.textContent = 'Email sai định dạng'; 
+        return false; 
+    }
+    inp.className = val ? 'cust-input ok' : 'cust-input'; 
+    err.textContent = ''; 
+    return true;
+}
+function validateNgaySinh() {
+    const val = document.getElementById('ngaySinh').value;
+    const inp = document.getElementById('ngaySinh');
+    const err = document.getElementById('ngaySinhError');
+    if (val) {
+        const selectedDate = new Date(val);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (selectedDate > today) {
+            inp.className = 'cust-input error'; 
+            err.textContent = 'Ngày sinh không được lớn hơn ngày hiện tại'; 
+            return false;
+        }
+    }
+    inp.className = val ? 'cust-input ok' : 'cust-input'; 
+    err.textContent = ''; 
+    return true;
+}
 document.getElementById('addCustForm').addEventListener('submit', function(e) {
-    const v1 = validateHoTen(), v2 = validateSdt();
-    if (!v1 || !v2) e.preventDefault();
+    const v1 = validateHoTen(), v2 = validateSdt(), v3 = validateEmail(), v4 = validateNgaySinh();
+    if (!v1 || !v2 || !v3 || !v4) {
+        e.preventDefault();
+    } else {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+    }
 });
 <?php if (isset($error) && strpos($error, 'điện thoại') !== false): ?>
 document.getElementById('soDienThoai').className = 'cust-input error';
