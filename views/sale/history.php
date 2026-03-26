@@ -132,41 +132,67 @@
 
 <script>
 function viewDetail(id) {
-    document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
-    document.getElementById('detailOverlay').style.display = 'flex';
-    $.get('<?php echo BASE_URL; ?>sale/detail/' + id, function(data) {
-        let ptLabel = data.phuongThucThanhToan=='TienMat'?'Tiền mặt':(data.phuongThucThanhToan=='ChuyenKhoan'?'Chuyển khoản':'Thẻ');
-        let html = `<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #e2e8f0;">
-            <div><div style="font-size:11px;color:#64748b;margin-bottom:2px;">Mã hóa đơn</div><div style="font-size:15px;font-weight:700;color:#1d4ed8;">${data.maHoaDonCode}</div></div>
-            <div><div style="font-size:11px;color:#64748b;margin-bottom:2px;">Ngày lập</div><div style="font-size:13px;font-weight:600;color:#374151;">${data.ngayLap}</div></div>
-            <div><div style="font-size:11px;color:#64748b;margin-bottom:2px;">Khách hàng</div><div style="font-size:13px;font-weight:600;color:#374151;">${data.tenKhachHang||'Khách lẻ'}</div></div>
-            <div><div style="font-size:11px;color:#64748b;margin-bottom:2px;">Thanh toán</div><div style="font-size:13px;font-weight:600;color:#374151;">${ptLabel}</div></div>
-        </div>`;
-        html += `<table style="width:100%;border-collapse:collapse;">
-            <thead><tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
-                <th style="padding:9px 12px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:left;">Tên thuốc</th>
-                <th style="padding:9px 12px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;">ĐVT</th>
-                <th style="padding:9px 12px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:center;">SL</th>
-                <th style="padding:9px 12px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:right;">Đơn giá</th>
-                <th style="padding:9px 12px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:right;">Thành tiền</th>
-            </tr></thead><tbody>`;
-        data.items.forEach((item, i) => {
-            html += `<tr style="background:${i%2==0?'#fff':'#f0f7ff'};">
-                <td style="padding:9px 12px;font-size:13px;color:#374151;">${item.tenThuoc}</td>
-                <td style="padding:9px 12px;font-size:13px;color:#374151;">${item.donViTinh}</td>
-                <td style="padding:9px 12px;font-size:13px;color:#374151;text-align:center;">${item.soLuong}</td>
-                <td style="padding:9px 12px;font-size:13px;color:#374151;text-align:right;">${fmt(item.donGia)}</td>
-                <td style="padding:9px 12px;font-size:13px;font-weight:600;color:#374151;text-align:right;">${fmt(item.thanhTien)}</td>
-            </tr>`;
+  document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:40px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:28px;margin-bottom:10px;"></i><br><span style="font-size:13px;">Đang tải dữ liệu...</span></div>';
+  document.getElementById('detailOverlay').style.display = 'flex';
+
+  $.ajax({
+    url: '<?php echo BASE_URL; ?>sale/detail/' + id,
+    type: 'GET',
+    dataType: 'text',
+    success: function(rawText) {
+      try {
+        var jsonStart = rawText.indexOf('{');
+        if(jsonStart === -1) throw new Error("Server không trả về dữ liệu JSON hợp lệ.");
+        var cleanJson = rawText.substring(jsonStart);
+
+        var res = JSON.parse(cleanJson);
+
+        var data = (res.success !== undefined) ? res.data : res;
+
+        if (!data || !data.items) {
+            throw new Error("Dữ liệu hóa đơn trống hoặc thiếu thông tin thuốc.");
+        }
+
+        var html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
+        html += '<thead><tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">';
+        html += '<th style="padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;text-align:left;white-space:nowrap;">Tên thuốc</th>';
+        html += '<th style="padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;text-align:left;white-space:nowrap;">ĐVT</th>';
+        html += '<th style="padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;text-align:right;white-space:nowrap;">SL</th>';
+        html += '<th style="padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;text-align:right;white-space:nowrap;">Đơn giá</th>';
+        html += '<th style="padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;text-align:right;white-space:nowrap;">Thành tiền</th>';
+        html += '</tr></thead><tbody>';
+
+        data.items.forEach(function(item, i) {
+          var bg = i % 2 === 0 ? '#fff' : '#f0f7ff';
+          html += '<tr style="background:' + bg + ';">';
+          html += '<td style="padding:9px 12px;font-weight:600;color:#1e293b;">' + (item.tenThuoc || '') + '</td>';
+          html += '<td style="padding:9px 12px;color:#475569;">' + (item.donViTinh || '') + '</td>';
+          html += '<td style="padding:9px 12px;text-align:right;color:#374151;">' + (item.soLuong || 0) + '</td>';
+          html += '<td style="padding:9px 12px;text-align:right;color:#374151;">' + fmt(item.donGia || 0) + '</td>';
+          html += '<td style="padding:9px 12px;text-align:right;font-weight:700;color:#15803d;">' + fmt(item.thanhTien || 0) + '</td>';
+          html += '</tr>';
         });
-        html += `</tbody><tfoot><tr style="background:#f0f7ff;border-top:2px solid #dbeafe;">
-            <td colspan="4" style="padding:10px 12px;font-size:13px;font-weight:700;color:#374151;text-align:right;">Tổng tiền:</td>
-            <td style="padding:10px 12px;font-size:14px;font-weight:900;color:#15803d;text-align:right;">${fmt(data.tongTien)}</td>
-        </tr></tfoot></table>`;
+
+        html += '</tbody>';
+        html += '<tfoot><tr style="background:#f0f7ff;border-top:2px solid #bfdbfe;">';
+        html += '<td colspan="4" style="padding:10px 12px;text-align:right;font-weight:700;color:#1e293b;">Tổng tiền:</td>';
+        html += '<td style="padding:10px 12px;text-align:right;font-weight:800;color:#dc2626;font-size:15px;">' + fmt(data.tongTien || 0) + '</td>';
+        html += '</tr></tfoot></table></div>';
+        
         document.getElementById('detailBody').innerHTML = html;
-    }, 'json');
+
+      } catch(err) {
+         console.error("Lỗi JS:", err);
+         document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:30px;color:#dc2626;font-size:14px;font-weight:600;"><i class="fas fa-exclamation-triangle" style="font-size:24px;margin-bottom:10px;display:block;"></i>Lỗi hiển thị dữ liệu bảng. Vui lòng nhấn F12 (tab Console) để xem chi tiết.</div>';
+      }
+    },
+    error: function(xhr) {
+      document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:30px;color:#dc2626;font-size:14px;font-weight:600;"><i class="fas fa-exclamation-triangle" style="font-size:24px;margin-bottom:10px;display:block;"></i>Không thể kết nối máy chủ (Lỗi ' + xhr.status + ')</div>';
+    }
+  });
 }
+
 function closeDetail() { document.getElementById('detailOverlay').style.display = 'none'; }
+document.getElementById('detailOverlay').addEventListener('click', function(e) { if (e.target === this) closeDetail(); });
 function fmt(n) { return new Intl.NumberFormat('vi-VN').format(n) + 'đ'; }
-document.getElementById('detailOverlay').addEventListener('click', function(e){ if(e.target===this) closeDetail(); });
 </script>

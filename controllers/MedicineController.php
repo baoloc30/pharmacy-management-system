@@ -22,6 +22,35 @@ class MedicineController extends Controller {
         }
     }
 
+    private function standardizeFilename($string) {
+        $accents_regex = array(
+            'a'=>'á|à|ả|ã|ạ|ă|ắ|ằ|ẳ|ẵ|ặ|â|ấ|ầ|ẩ|ẫ|ậ',
+            'd'=>'đ',
+            'e'=>'é|è|ẻ|ẽ|ẹ|ê|ế|ề|ể|ễ|ệ',
+            'i'=>'í|ì|ỉ|ĩ|ị',
+            'o'=>'ó|ò|ỏ|õ|ọ|ô|ố|ồ|ổ|ỗ|ộ|ơ|ớ|ờ|ở|ỡ|ợ',
+            'u'=>'ú|ù|ủ|ũ|ụ|ư|ứ|ừ|ử|ữ|ự',
+            'y'=>'ý|ỳ|ỷ|ỹ|ỵ',
+            'A'=>'Á|À|Ả|Ã|Ạ|Ă|Ắ|Ằ|Ẳ|Ẵ|Ặ|Â|Ấ|Ầ|Ẩ|Ẫ|Ậ',
+            'D'=>'Đ',
+            'E'=>'É|È|Ẻ|Ẽ|Ẹ|Ê|Ế|Ề|Ể|Ễ|Ệ',
+            'I'=>'Í|Ì|Ỉ|Ĩ|Ị',
+            'O'=>'Ó|Ò|Ỏ|Õ|Ọ|Ô|Ố|Ồ|Ổ|Ỗ|Ộ|Ơ|Ớ|Ờ|Ở|Ỡ|Ợ',
+            'U'=>'Ú|Ù|Ủ|Ũ|Ụ|Ư|Ứ|Ừ|Ử|Ữ|Ự',
+            'Y'=>'Ý|Ỳ|Ỷ|Ỹ|Ỵ',
+        );
+        foreach($accents_regex as $nonAccent=>$accent){
+            $string = preg_replace("/($accent)/i", $nonAccent, $string);
+        }
+        
+        $string = strtolower($string);
+        $string = preg_replace('/[^a-z0-9]/', '-', $string);
+        $string = preg_replace('/-+/', '-', $string);
+        $string = trim($string, '-');
+        
+        return $string;
+    }
+
     public function add() {
         $this->checkLogin();
         $this->checkRole('QuanLy');
@@ -31,23 +60,74 @@ class MedicineController extends Controller {
         
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $medicineData = [
-                'maDanhMuc' => $_POST['maDanhMuc'],
-                'tenThuoc' => $_POST['tenThuoc'],
-                'donViTinh' => $_POST['donViTinh'],
-                'giaBan' => $_POST['giaBan'],
-                'giaNhap' => $_POST['giaNhap'],
-                'soLuongTon' => $_POST['soLuongTon'],
-                'hanSuDung' => $_POST['hanSuDung'],
-                'xuatXu' => $_POST['xuatXu'],
-                'thanhPhan' => $_POST['thanhPhan'],
-                'congDung' => $_POST['congDung'],
-                'cachDung' => $_POST['cachDung']
+                'maDanhMuc' => $_POST['maDanhMuc'] ?? '',
+                'tenThuoc'  => trim($_POST['tenThuoc'] ?? ''),
+                'donViTinh' => trim($_POST['donViTinh'] ?? ''),
+                'giaBan'    => $_POST['giaBan'] ?? '',
+                'giaNhap'   => $_POST['giaNhap'] ?? '',
+                'soLuongTon'=> $_POST['soLuongTon'] ?? 0,
+                'hanSuDung' => $_POST['hanSuDung'] ?? '',
+                'xuatXu'    => trim($_POST['xuatXu'] ?? ''),
+                'thanhPhan' => trim($_POST['thanhPhan'] ?? ''),
+                'congDung'  => trim($_POST['congDung'] ?? ''),
+                'cachDung'  => trim($_POST['cachDung'] ?? '')
             ];
+
+            $hinhAnhFileName = null;
             
-            $medicineModel = $this->model('MedicineModel');
-            if($medicineModel->create($medicineData)) {
-                redirect('medicine/index');
+            if (isset($_FILES['hinhAnh']) && $_FILES['hinhAnh']['error'] == UPLOAD_ERR_OK) {
+                
+                $uploadDir = 'uploads/medicines/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+                $fileInfo = pathinfo($_FILES['hinhAnh']['name']);
+                $ext = strtolower($fileInfo['extension']);
+                $allowed = ['jpg', 'jpeg', 'png'];
+
+                if (in_array($ext, $allowed)) {
+                    if ($_FILES['hinhAnh']['size'] <= 2 * 1024 * 1024) {
+                        $standardName = $this->standardizeFilename($medicineData['tenThuoc']);                        
+                        if(empty($standardName)) $standardName = "thuoc_" . time();
+                        $newFileName = $standardName . '.' . $ext;
+                        if (file_exists($uploadDir . $newFileName)) {
+                            unlink($uploadDir . $newFileName);
+                        }
+                        if (move_uploaded_file($_FILES['hinhAnh']['tmp_name'], $uploadDir . $newFileName)) {
+                            $hinhAnhFileName = $newFileName;
+                        } else {
+                            $data['error'] = 'Lỗi không thể lưu file ảnh vào thư mục.';
+                        }
+                    } else {
+                        $data['error'] = 'Kích thước ảnh quá lớn (tối đa 2MB).';
+                    }
+                } else {
+                    $data['error'] = 'Định dạng ảnh không hợp lệ (chỉ chấp nhận JPG, JPEG, PNG).';
+                }
             }
+            
+            $medicineData['hinhAnh'] = $hinhAnhFileName;
+            
+            if (!isset($data['error'])) {
+                try {
+                    $medicineModel = $this->model('MedicineModel');
+                    if($medicineModel->create($medicineData)) {
+                        $_SESSION['success'] = 'Thêm thuốc thành công';
+                        redirect('medicine/index');
+                        exit;
+                    }
+                } catch (Exception $e) {
+                    if($hinhAnhFileName && file_exists('uploads/medicines/'.$hinhAnhFileName)){
+                        unlink('uploads/medicines/'.$hinhAnhFileName);
+                    }
+                    if ($e->getCode() == 1062) {
+                        $data['error'] = 'Tên thuốc này đã tồn tại trong hệ thống. Vui lòng kiểm tra lại!';
+                    } else {
+                        $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+                    }
+                }
+            }
+
+            $data['medicine'] = $medicineData;
         }
         
         $this->view('medicine/add', $data);
@@ -57,16 +137,88 @@ class MedicineController extends Controller {
         $this->checkLogin();
         $this->checkRole('QuanLy');
         
-        $medicineModel = $this->model('MedicineModel');
-        $categoryModel = $this->model('CategoryModel');
-        
-        $data['medicine'] = $medicineModel->find($id);
-        $data['categories'] = $categoryModel->all();
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            $categoryModel = $this->model('CategoryModel');
+            
+            $data['medicine'] = $medicineModel->getDetail($id);
+            if (!$data['medicine']) {
+                redirect('medicine/index');
+                exit;
+            }
+            $data['categories'] = $categoryModel->all();
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            redirect('medicine/index');
+            exit;
+        }
         
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            if($medicineModel->update($id, $_POST)) {
-                redirect('medicine/index');
+            $medicineData = [
+                'maDanhMuc' => $_POST['maDanhMuc'] ?? '',
+                'tenThuoc'  => trim($_POST['tenThuoc'] ?? ''),
+                'donViTinh' => trim($_POST['donViTinh'] ?? ''),
+                'giaBan'    => $_POST['giaBan'] ?? '',
+                'giaNhap'   => $_POST['giaNhap'] ?? '',
+                'hanSuDung' => $_POST['hanSuDung'] ?? '',
+                'xuatXu'    => trim($_POST['xuatXu'] ?? ''),
+                'thanhPhan' => trim($_POST['thanhPhan'] ?? ''),
+                'congDung'  => trim($_POST['congDung'] ?? ''),
+                'cachDung'  => trim($_POST['cachDung'] ?? '')
+            ];
+
+            $hinhAnhFileName = $_POST['hinhAnhCu'] ?? null;
+            
+            if (isset($_FILES['hinhAnh']) && $_FILES['hinhAnh']['error'] == UPLOAD_ERR_OK) {
+                $uploadDir = 'uploads/medicines/';
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+                $fileInfo = pathinfo($_FILES['hinhAnh']['name']);
+                $ext = strtolower($fileInfo['extension']);
+                $allowed = ['jpg', 'jpeg', 'png'];
+
+                if (in_array($ext, $allowed)) {
+                    if ($_FILES['hinhAnh']['size'] <= 2 * 1024 * 1024) { 
+                        $standardName = $this->standardizeFilename($medicineData['tenThuoc']);
+                        if(empty($standardName)) $standardName = "thuoc_" . time();
+                        
+                        $newFileName = $standardName . '_' . time() . '.' . $ext;
+
+                        if (move_uploaded_file($_FILES['hinhAnh']['tmp_name'], $uploadDir . $newFileName)) {
+                            if ($hinhAnhFileName && file_exists($uploadDir . $hinhAnhFileName)) {
+                                unlink($uploadDir . $hinhAnhFileName);
+                            }
+                            $hinhAnhFileName = $newFileName;
+                        } else {
+                            $data['error'] = 'Lỗi không thể lưu file ảnh mới.';
+                        }
+                    } else {
+                        $data['error'] = 'Kích thước ảnh quá lớn (tối đa 2MB).';
+                    }
+                } else {
+                    $data['error'] = 'Định dạng ảnh không hợp lệ (chỉ chấp nhận JPG, JPEG, PNG).';
+                }
             }
+            
+            $medicineData['hinhAnh'] = $hinhAnhFileName;
+
+            if (!isset($data['error'])) {
+                try {
+                    if($medicineModel->update($id, $medicineData)) {
+                        $_SESSION['success'] = 'Cập nhật thuốc thành công';
+                        redirect('medicine/index');
+                        exit;
+                    }
+                } catch (Exception $e) {
+                    if ($e->getCode() == 1062) {
+                        $data['error'] = 'Tên thuốc này đã tồn tại trong hệ thống. Vui lòng kiểm tra lại!';
+                    } else {
+                        $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+                    }
+                }
+            }
+            
+            $data['medicine'] = array_merge($data['medicine'], $medicineData);
         }
         
         $this->view('medicine/edit', $data);
@@ -76,16 +228,22 @@ class MedicineController extends Controller {
         $this->checkLogin();
         $this->checkRole('QuanLy');
         
-        $medicineModel = $this->model('MedicineModel');
-        // Kiểm tra thuốc đã có giao dịch chưa
-        if ($medicineModel->hasTransactions($id)) {
-            // Chuyển sang trạng thái ngừng bán
-            $medicineModel->setStatus($id, 'NgungBan');
-            $_SESSION['warning'] = 'Thuốc đã phát sinh giao dịch nên không thể xóa hoàn toàn. Hệ thống đã chuyển sang trạng thái ngừng bán.';
-        } else {
-            $medicineModel->deleteById($id);
-            $_SESSION['success'] = 'Xóa thuốc thành công';
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            
+            if ($medicineModel->hasTransactions($id)) {
+                $medicineModel->setStatus($id, 'NgungBan');
+                
+                $_SESSION['warning'] = 'Thuốc đã phát sinh giao dịch nên không thể xóa hoàn toàn. Hệ thống đã chuyển sang trạng thái ngừng kinh doanh';
+            } else {
+                $medicineModel->deleteById($id);
+                $_SESSION['success'] = 'Xóa thuốc thành công';
+            }
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
         }
+        
         redirect('medicine/index');
     }
 

@@ -18,13 +18,51 @@
         </a>
     </div>
 
-    <div style="padding:16px 24px 24px;">
-        <?php if (isset($_SESSION['error'])): ?>
-        <div style="margin-bottom:14px;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600;">
-            <i class="fas fa-exclamation-triangle"></i> <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
-        </div>
-        <?php endif; ?>
+    <?php
+        $toastMsg = ''; $toastType = 'success'; $toastIcon = 'fa-check'; $toastColors = ['#34d399', '#10b981']; 
 
+        if (isset($_SESSION['success'])) {
+            $toastMsg = $_SESSION['success']; unset($_SESSION['success']);
+        } elseif (isset($_SESSION['warning'])) { 
+            $toastMsg = $_SESSION['warning']; $toastType = 'warning'; $toastIcon = 'fa-exclamation-triangle'; $toastColors = ['#fcd34d', '#f59e0b']; unset($_SESSION['warning']);
+        } elseif (isset($_SESSION['error'])) { 
+            $toastMsg = $_SESSION['error']; $toastType = 'error'; $toastIcon = 'fa-times-circle'; $toastColors = ['#f87171', '#ef4444']; unset($_SESSION['error']);
+        }
+
+        if ($toastMsg !== ''):
+        ?>
+        <style>
+            .glass-toast-cat { position: fixed; top: 64px; right: 24px; width: max-content; max-width: 420px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 16px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12); padding: 18px 24px; display: flex; align-items: flex-start; gap: 16px; z-index: 9999999; font-family: 'Inter', sans-serif; transform: translateX(120%); transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; }
+            .glass-toast-cat.show { transform: translateX(0); }
+            .toast-icon-wrapper-cat { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, <?php echo $toastColors[0]; ?>, <?php echo $toastColors[1]; ?>); display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+            .toast-icon-wrapper-cat i { color: #ffffff; font-size: 16px; }
+            .toast-text-title-cat { font-size: 15px; font-weight: 800; color: #1f2937; }
+            .toast-text-msg-cat { font-size: 13.5px; color: #4b5563; margin-top: 4px; }
+            .toast-progress-cat { position: absolute; bottom: 0; left: 0; height: 4px; background: linear-gradient(90deg, <?php echo $toastColors[0]; ?>, <?php echo $toastColors[1]; ?>); width: 100%; transform-origin: left; animation: progressShrinkCat 4s linear forwards; }
+            @keyframes progressShrinkCat { 0% { transform: scaleX(1); } 100% { transform: scaleX(0); } }
+        </style>
+        <div id="catToast" class="glass-toast-cat">
+            <div class="toast-icon-wrapper-cat"><i class="fas <?php echo $toastIcon; ?>"></i></div>
+            <div>
+                <div class="toast-text-title-cat">
+                    <?php echo $toastType == 'success' ? 'Thành công!' : ($toastType == 'warning' ? 'Lưu ý' : 'Lỗi hệ thống'); ?>
+                </div>
+                <div class="toast-text-msg-cat"><?php echo $toastMsg; ?></div>
+            </div>
+            <div class="toast-progress-cat"></div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const toast = document.getElementById('catToast');
+                if (toast) {
+                    setTimeout(() => toast.classList.add('show'), 150);
+                    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 600); }, 4000);
+                }
+            });
+        </script>
+    <?php endif; ?>
+
+    <div style="padding:16px 24px 24px;">
         <?php if (empty($categories)): ?>
         <div style="padding:32px;text-align:center;color:#64748b;font-size:14px;">
             <i class="fas fa-list" style="font-size:32px;color:#cbd5e1;margin-bottom:10px;display:block;"></i>
@@ -95,11 +133,11 @@
         <div style="padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:10px;">
             <button onclick="document.getElementById('deleteOverlay').style.display='none'"
                     style="padding:9px 20px;border-radius:9px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;">
-                Hủy bỏ
+                Hủy
             </button>
             <a id="deleteConfirmBtn" href="#"
                style="padding:9px 20px;border-radius:9px;background:#fee2e2;color:#dc2626;border:1px solid #fecaca;font-size:13px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
-                <i class="fas fa-trash"></i> Đồng ý xóa
+                <i class="fas fa-trash"></i> Xác nhận
             </a>
         </div>
     </div>

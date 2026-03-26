@@ -24,15 +24,19 @@
         </a>
     </div>
 
-    <?php if (isset($success)): ?>
-    <div style="margin:14px 24px 0;padding:11px 16px;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:9px;color:#15803d;font-size:13px;font-weight:600;">
-        <i class="fas fa-check-circle"></i> <?php echo $success; ?>
-    </div>
-    <?php endif; ?>
     <?php if (isset($error)): ?>
-    <div style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600;">
+    <div id="serverErrorMsg" style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600; transition: opacity 0.5s ease;">
         <i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?>
     </div>
+    <script>
+        setTimeout(function() {
+            const errMsg = document.getElementById('serverErrorMsg');
+            if (errMsg) {
+                errMsg.style.opacity = '0'; 
+                setTimeout(() => errMsg.style.display = 'none', 500); 
+            }
+        }, 3000);
+    </script>
     <?php endif; ?>
 
     <form method="POST" action="" id="editCategoryForm" style="padding:22px 24px;">
@@ -93,11 +97,29 @@
 
 <script>
 function confirmUpdate() {
-    const ten = document.getElementById('tenDanhMuc').value.trim();
-    document.getElementById('tenError').textContent = '';
+    const tenInput = document.getElementById('tenDanhMuc');
+    const tenError = document.getElementById('tenError');
+    const ten = tenInput.value.trim();
+    
+    tenError.style.transition = 'none';
+    tenError.style.opacity = '1';
+    tenError.textContent = '';
+
     if (!ten) {
-        document.getElementById('tenError').textContent = 'Chưa chọn đầy đủ thông tin. Vui lòng chọn lại!';
-        document.getElementById('tenDanhMuc').style.borderColor = '#ef4444';
+        tenError.textContent = 'Chưa nhập đầy đủ thông tin. Vui lòng nhập lại!'; 
+        tenInput.style.borderColor = '#ef4444';
+        
+        tenError.style.transition = 'opacity 0.5s ease';
+        setTimeout(function() {
+            tenError.style.opacity = '0';          
+            tenInput.style.borderColor = '#cbd5e1'; 
+            
+            setTimeout(() => {
+                tenError.textContent = '';
+                tenError.style.opacity = '1';
+            }, 500);
+        }, 3000);
+        
         return;
     }
     document.getElementById('confirmOverlay').style.display = 'flex';
