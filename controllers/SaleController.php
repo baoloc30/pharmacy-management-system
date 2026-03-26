@@ -43,24 +43,47 @@ class SaleController extends Controller {
 
     public function history() {
         $this->checkLogin();
-        $invoiceModel = $this->model('InvoiceModel');
-        $keyword  = $_GET['keyword'] ?? '';
-        $fromDate = $_GET['from_date'] ?? '';
-        $toDate   = $_GET['to_date'] ?? '';
-        $data['invoices']  = $invoiceModel->getFiltered($keyword, $fromDate, $toDate);
-        $data['keyword']   = $keyword;
-        $data['from_date'] = $fromDate;
-        $data['to_date']   = $toDate;
-        $this->view('sale/history', $data);
+        try {
+            $invoiceModel = $this->model('InvoiceModel');
+            $keyword  = $_GET['keyword'] ?? '';
+            $fromDate = $_GET['from_date'] ?? '';
+            $toDate   = $_GET['to_date'] ?? '';
+            
+            $data['invoices']  = $invoiceModel->getFiltered($keyword, $fromDate, $toDate);
+            $data['keyword']   = $keyword;
+            $data['from_date'] = $fromDate;
+            $data['to_date']   = $toDate;
+            
+            $this->view('sale/history', $data);
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            $data['invoices']  = [];
+            $data['keyword']   = $_GET['keyword'] ?? '';
+            $data['from_date'] = $_GET['from_date'] ?? '';
+            $data['to_date']   = $_GET['to_date'] ?? '';
+            
+            $this->view('sale/history', $data);
+        }
     }
 
     public function detail($id) {
         $this->checkLogin();
-        $invoiceModel = $this->model('InvoiceModel');
-        $data['invoice'] = $invoiceModel->getDetail($id);
-        if (!$data['invoice']) redirect('sale/history');
-        header('Content-Type: application/json');
-        echo json_encode($data['invoice']);
+        
+        try {
+            $invoiceModel = $this->model('InvoiceModel');
+            $invoice = $invoiceModel->getDetail($id);
+            
+            header('Content-Type: application/json');
+            if (!$invoice) {
+                echo json_encode(['success' => false, 'message' => 'Hóa đơn không tồn tại']);
+            } else {
+                echo json_encode(['success' => true, 'data' => $invoice]);
+            }
+        } catch (Exception $e) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau']);
+        }
         exit;
     }
 

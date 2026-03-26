@@ -70,8 +70,7 @@
   <?php if(empty($invoices)): ?>
   <div style="padding:40px;text-align:center;color:#94a3b8;">
     <i class="fas fa-receipt" style="font-size:40px;margin-bottom:12px;display:block;"></i>
-    <div style="font-size:14px;font-weight:600;">Chưa có lịch sử mua hàng</div>
-    <div style="font-size:13px;margin-top:4px;">Khách hàng này chưa có hóa đơn nào trong khoảng thời gian đã chọn.</div>
+    <div style="font-size:14px;font-weight:600;">Khách hàng này chưa có lịch sử mua hàng</div>
   </div>
   <?php else: ?>
   <div style="overflow-x:auto;">
@@ -95,8 +94,12 @@
           <td style="padding:10px 14px;color:#374151;"><?php echo htmlspecialchars($inv['tenNhanVien']); ?></td>
           <td style="padding:10px 14px;text-align:right;font-weight:700;color:#15803d;"><?php echo formatCurrency($inv['tongTien']); ?></td>
           <td style="padding:10px 14px;">
+            <?php 
+              $pt = $inv['phuongThucThanhToan'];
+              $ptLabel = $pt === 'TienMat' ? 'Tiền Mặt' : ($pt === 'ChuyenKhoan' ? 'Chuyển Khoản' : ($pt === 'The' ? 'Thẻ' : $pt));
+            ?>
             <span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">
-              <?php echo htmlspecialchars($inv['phuongThucThanhToan']); ?>
+              <?php echo $ptLabel; ?>
             </span>
           </td>
           <td style="padding:10px 14px;text-align:center;">
@@ -135,8 +138,14 @@
 function viewDetail(id) {
   document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:30px;color:#94a3b8;"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i></div>';
   document.getElementById('detailOverlay').style.display = 'flex';
-  $.get('<?php echo BASE_URL; ?>sale/detail/' + id, function(data) {
-    if (!data) { document.getElementById('detailBody').innerHTML = '<p style="color:#dc2626;">Không thể tải dữ liệu.</p>'; return; }
+  
+  $.get('<?php echo BASE_URL; ?>sale/detail/' + id, function(res) {
+    if (!res.success) { 
+        document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:30px;color:#dc2626;font-size:14px;font-weight:600;"><i class="fas fa-exclamation-triangle" style="font-size:24px;margin-bottom:10px;display:block;"></i>' + res.message + '</div>'; 
+        return; 
+    }
+    
+    var data = res.data;
     document.getElementById('detailTitle').textContent = 'Chi tiết hóa đơn';
     var html = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;">';
     html += '<thead><tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">';
@@ -146,6 +155,7 @@ function viewDetail(id) {
     html += '<th style="padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;text-align:right;white-space:nowrap;">Đơn giá</th>';
     html += '<th style="padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;text-align:right;white-space:nowrap;">Thành tiền</th>';
     html += '</tr></thead><tbody>';
+    
     data.items.forEach(function(item, i) {
       var bg = i % 2 === 0 ? '#fff' : '#f0f7ff';
       html += '<tr style="background:' + bg + ';">';
@@ -156,21 +166,20 @@ function viewDetail(id) {
       html += '<td style="padding:9px 12px;text-align:right;font-weight:700;color:#15803d;">' + fmt(item.thanhTien) + '</td>';
       html += '</tr>';
     });
+    
     html += '</tbody>';
     html += '<tfoot><tr style="background:#f0f7ff;border-top:2px solid #bfdbfe;">';
     html += '<td colspan="4" style="padding:10px 12px;text-align:right;font-weight:700;color:#1e293b;">Tổng tiền:</td>';
     html += '<td style="padding:10px 12px;text-align:right;font-weight:800;color:#dc2626;font-size:15px;">' + fmt(data.tongTien) + '</td>';
     html += '</tr></tfoot></table></div>';
     document.getElementById('detailBody').innerHTML = html;
+    
   }, 'json').fail(function() {
-    document.getElementById('detailBody').innerHTML = '<p style="color:#dc2626;padding:20px;">Không thể tải dữ liệu.</p>';
+    document.getElementById('detailBody').innerHTML = '<div style="text-align:center;padding:30px;color:#dc2626;font-size:14px;font-weight:600;"><i class="fas fa-exclamation-triangle" style="font-size:24px;margin-bottom:10px;display:block;"></i>Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau</div>';
   });
 }
-function closeDetail() {
-  document.getElementById('detailOverlay').style.display = 'none';
-}
-document.getElementById('detailOverlay').addEventListener('click', function(e) {
-  if (e.target === this) closeDetail();
-});
+
+function closeDetail() { document.getElementById('detailOverlay').style.display = 'none'; }
+document.getElementById('detailOverlay').addEventListener('click', function(e) { if (e.target === this) closeDetail(); });
 function fmt(n) { return new Intl.NumberFormat('vi-VN').format(n) + 'đ'; }
 </script>

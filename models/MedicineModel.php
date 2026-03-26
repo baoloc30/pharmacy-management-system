@@ -53,12 +53,12 @@ class MedicineModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO thuoc (maDanhMuc, tenThuoc, donViTinh, giaBan, giaNhap, 
+        $sql = "INSERT INTO thuoc (maDanhMuc, hinhAnh,tenThuoc, donViTinh, giaBan, giaNhap, 
                                    soLuongTon, hanSuDung, xuatXu, thanhPhan, congDung, cachDung) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("issddisssss", 
-            $data['maDanhMuc'], $data['tenThuoc'], $data['donViTinh'], 
+        $stmt->bind_param("isssddisssss", 
+            $data['maDanhMuc'], $data['hinhAnh'], $data['tenThuoc'], $data['donViTinh'], 
             $data['giaBan'], $data['giaNhap'], $data['soLuongTon'], 
             $data['hanSuDung'], $data['xuatXu'], $data['thanhPhan'], 
             $data['congDung'], $data['cachDung']
@@ -67,13 +67,13 @@ class MedicineModel extends Model {
     }
 
     public function update($id, $data) {
-        $sql = "UPDATE thuoc SET maDanhMuc=?, tenThuoc=?, donViTinh=?, giaBan=?, 
-                xuatXu=?, thanhPhan=?, congDung=?, cachDung=? 
+        $sql = "UPDATE thuoc SET maDanhMuc=?, hinhAnh=?, tenThuoc=?, donViTinh=?, giaBan=?, 
+                giaNhap=?, hanSuDung=?, xuatXu=?, thanhPhan=?, congDung=?, cachDung=? 
                 WHERE maThuoc=?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("issdssssi", 
-            $data['maDanhMuc'], $data['tenThuoc'], $data['donViTinh'], 
-            $data['giaBan'], $data['xuatXu'], $data['thanhPhan'], 
+        $stmt->bind_param("isssddsssssi", 
+            $data['maDanhMuc'], $data['hinhAnh'], $data['tenThuoc'], $data['donViTinh'], 
+            $data['giaBan'], $data['giaNhap'], $data['hanSuDung'], $data['xuatXu'], $data['thanhPhan'], 
             $data['congDung'], $data['cachDung'], $id
         );
         return $stmt->execute();

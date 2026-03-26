@@ -59,6 +59,13 @@
     </script>
     <?php unset($_SESSION['success']); endif; ?>
 
+    <?php if (isset($error)): ?>
+    <div style="margin:16px 24px 0;padding:12px 18px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;color:#dc2626;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-exclamation-triangle" style="font-size:16px;"></i> 
+        <?php echo $error; ?>
+    </div>
+    <?php endif; ?>
+
     <div style="padding:16px 24px 24px;overflow-x:auto;">
         <?php if (empty($customers)): ?>
         <div style="padding:32px;text-align:center;color:#64748b;font-size:14px;">

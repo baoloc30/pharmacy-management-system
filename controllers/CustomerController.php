@@ -6,11 +6,20 @@ class CustomerController extends Controller {
 
     public function index() {
         $this->checkLogin();
-        $search = $_GET['search'] ?? '';
-        $customerModel = $this->model('CustomerModel');
-        $data['customers'] = $customerModel->getAllCustomers($search);
-        $data['search'] = $search;
-        $this->view('customer/index', $data);
+        $search = trim($_GET['search'] ?? '');
+        
+        try {
+            $customerModel = $this->model('CustomerModel');
+            $data['customers'] = $customerModel->getAllCustomers($search);
+            $data['search'] = $search;
+            $this->view('customer/index', $data);
+            
+        } catch (Exception $e) {
+            $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            $data['customers'] = [];
+            $data['search'] = $search;
+            $this->view('customer/index', $data);
+        }
     }
 
     public function add() {
@@ -146,20 +155,31 @@ class CustomerController extends Controller {
 
     public function history($id) {
         $this->checkLogin();
-        $customerModel = $this->model('CustomerModel');
-        $invoiceModel  = $this->model('InvoiceModel');
+        
+        try {
+            $customerModel = $this->model('CustomerModel');
+            $invoiceModel  = $this->model('InvoiceModel');
 
-        $data['customer'] = $customerModel->getCustomerById($id);
-        if (!$data['customer']) redirect('customer/index');
+            $data['customer'] = $customerModel->getCustomerById($id);
+            if (!$data['customer']) {
+                redirect('customer/index');
+                exit;
+            }
 
-        $fromDate = $_GET['from_date'] ?? '';
-        $toDate   = $_GET['to_date'] ?? '';
+            $fromDate = $_GET['from_date'] ?? '';
+            $toDate   = $_GET['to_date'] ?? '';
 
-        $data['invoices']  = $invoiceModel->getByCustomer($id, $fromDate, $toDate);
-        $data['from_date'] = $fromDate;
-        $data['to_date']   = $toDate;
+            $data['invoices']  = $invoiceModel->getByCustomer($id, $fromDate, $toDate);
+            $data['from_date'] = $fromDate;
+            $data['to_date']   = $toDate;
 
-        $this->view('customer/history', $data);
+            $this->view('customer/history', $data);
+            
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+            redirect('customer/index');
+            exit;
+        }
     }
 
     public function search() {

@@ -2,6 +2,7 @@
 .med-label{font-size:12px;font-weight:700;color:#475569;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px;}
 .med-input{width:100%;padding:10px 13px;border:1.5px solid #cbd5e1;border-radius:9px;font-size:13px;color:#1e293b;background:#fff;outline:none;box-sizing:border-box;font-family:inherit;transition:all .2s;}
 .med-input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+.med-input.error{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.1);}
 .field-err{font-size:11px;color:#ef4444;font-weight:600;margin-top:4px;display:block;min-height:16px;}
 </style>
 
@@ -15,7 +16,7 @@
             </div>
             <div>
                 <div style="font-size:17px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.5px;">Chỉnh sửa thuốc</div>
-                <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;"><?php echo htmlspecialchars($medicine['tenThuoc']); ?></div>
+                <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:2px;"><?php echo htmlspecialchars($medicine['tenThuoc'] ?? ''); ?></div>
             </div>
         </div>
         <a href="<?php echo BASE_URL; ?>medicine/index"
@@ -25,39 +26,97 @@
     </div>
 
     <?php if (isset($error)): ?>
-    <div style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600;">
+    <div id="serverErrorMsg" style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600; transition: opacity 0.5s ease;">
         <i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?>
     </div>
+    <script>
+        setTimeout(function() {
+            const errMsg = document.getElementById('serverErrorMsg');
+            if (errMsg) {
+                errMsg.style.opacity = '0'; 
+                setTimeout(() => errMsg.style.display = 'none', 500); 
+            }
+        }, 3000);
+    </script>
     <?php endif; ?>
 
-    <form method="POST" action="" style="padding:22px 24px;">
+    <form method="POST" action="" id="editMedForm" enctype="multipart/form-data" style="padding:22px 24px;">
+        <input type="hidden" name="hinhAnhCu" value="<?php echo htmlspecialchars($medicine['hinhAnh'] ?? ''); ?>">
+
+        <div style="margin-bottom:14px; display:flex; gap:20px; align-items:flex-start; background:#fff; padding:18px; border:1px solid #e2e8f0; border-radius:12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+            <div style="position:relative; width:160px; height:160px; border:2px dashed #CBD5E1; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#94A3B8; overflow:hidden; background:#f8fafc; cursor:pointer; transition:all .2s ease;"
+                 onclick="document.getElementById('hinhAnhInput').click()"
+                 onmouseover="this.style.borderColor='#2563eb'; this.style.background='#eff6ff'; document.getElementById('hoverOverlay').style.opacity='1'; document.getElementById('defaultIcon').style.scale='1.1';"
+                 onmouseout="this.style.borderColor='#CBD5E1'; this.style.background='#f8fafc'; document.getElementById('hoverOverlay').style.opacity='0'; document.getElementById('defaultIcon').style.scale='1';">
+                
+                <div id="imagePreview" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%;">
+                    <?php if(!empty($medicine['hinhAnh'])): ?>
+                        <img src="<?php echo BASE_URL . 'uploads/medicines/' . $medicine['hinhAnh']; ?>" style="width:100%; height:100%; object-fit:cover;" id="defaultIcon">
+                    <?php else: ?>
+                        <i class="fas fa-image" style="font-size:36px; transition: scale .2s;" id="defaultIcon"></i>
+                    <?php endif; ?>
+                </div>
+
+                <div id="hoverOverlay" style="position:absolute; inset:0; background:rgba(37,99,235, 0.85); color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; opacity:0; transition:opacity .2s; font-size:12px; font-weight:700;">
+                    <i class="fas fa-sync-alt" style="font-size:24px; margin-bottom:8px;"></i>
+                    <span id="overlayText">Đổi ảnh</span>
+                </div>
+            </div>
+
+            <div style="flex:1; padding-top:10px;">
+                <label class="med-label" style="display:block; margin-bottom:10px; font-size:14px; font-weight:700;">Hình ảnh thuốc</label>
+                <input type="file" name="hinhAnh" id="hinhAnhInput" accept="image/jpeg, image/png" onchange="previewImage(this)" style="display:none;">
+                <div style="font-size:11px; color:#64748B; line-height:1.5;">
+                    • Nhấp vào khung bên trái để đổi ảnh.<br>
+                    • Bỏ trống nếu muốn giữ nguyên ảnh hiện tại.<br>
+                    • Kích thước: Tối đa 2MB (.jpg, .png, .jpeg).
+                </div>
+            </div>
+        </div>
+
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
             <div>
                 <label class="med-label">Danh mục <span style="color:#ef4444;">*</span></label>
-                <select name="maDanhMuc" class="med-input" required>
+                <select name="maDanhMuc" id="maDanhMuc" class="med-input">
                     <option value="">-- Chọn danh mục --</option>
                     <?php foreach ($categories as $cat): ?>
-                    <option value="<?php echo $cat['maDanhMuc']; ?>" <?php echo $medicine['maDanhMuc'] == $cat['maDanhMuc'] ? 'selected' : ''; ?>>
+                    <option value="<?php echo $cat['maDanhMuc']; ?>" <?php echo ($medicine['maDanhMuc'] == $cat['maDanhMuc']) ? 'selected' : ''; ?>>
                         <?php echo htmlspecialchars($cat['tenDanhMuc']); ?>
                     </option>
                     <?php endforeach; ?>
                 </select>
+                <span class="field-err" id="maDanhMucError"></span>
             </div>
             <div>
                 <label class="med-label">Tên thuốc <span style="color:#ef4444;">*</span></label>
-                <input type="text" name="tenThuoc" class="med-input" value="<?php echo htmlspecialchars($medicine['tenThuoc']); ?>" required>
+                <input type="text" name="tenThuoc" id="tenThuoc" class="med-input" value="<?php echo htmlspecialchars($medicine['tenThuoc'] ?? ''); ?>">
+                <span class="field-err" id="tenThuocError"></span>
             </div>
         </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
             <div>
                 <label class="med-label">Đơn vị tính <span style="color:#ef4444;">*</span></label>
-                <input type="text" name="donViTinh" class="med-input" value="<?php echo htmlspecialchars($medicine['donViTinh']); ?>" required>
+                <input type="text" name="donViTinh" id="donViTinh" class="med-input" value="<?php echo htmlspecialchars($medicine['donViTinh'] ?? ''); ?>">
+                <span class="field-err" id="donViTinhError"></span>
+            </div>
+            <div>
+                <label class="med-label">Giá nhập <span style="color:#ef4444;">*</span></label>
+                <input type="number" name="giaNhap" id="giaNhap" class="med-input" value="<?php echo htmlspecialchars($medicine['giaNhap'] ?? ''); ?>">
+                <span class="field-err" id="giaNhapError"></span>
             </div>
             <div>
                 <label class="med-label">Giá bán <span style="color:#ef4444;">*</span></label>
-                <input type="number" name="giaBan" id="giaBan" class="med-input" value="<?php echo $medicine['giaBan']; ?>" min="1" required>
+                <input type="number" name="giaBan" id="giaBan" class="med-input" value="<?php echo $medicine['giaBan'] ?? ''; ?>">
                 <span class="field-err" id="giaBanError"></span>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+            <div>
+                <label class="med-label">Hạn sử dụng <span style="color:#ef4444;">*</span></label>
+                <input type="date" name="hanSuDung" id="hanSuDung" class="med-input" value="<?php echo htmlspecialchars($medicine['hanSuDung'] ?? ''); ?>">
+                <span class="field-err" id="hanSuDungError"></span>
             </div>
             <div>
                 <label class="med-label">Xuất xứ</label>
@@ -83,7 +142,7 @@
                style="padding:10px 22px;border-radius:9px;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px;">
                 <i class="fas fa-times"></i> Hủy bỏ
             </a>
-            <button type="submit"
+            <button type="submit" id="saveBtn"
                style="padding:10px 26px;border-radius:9px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 12px rgba(21,128,61,.3);">
                 <i class="fas fa-save"></i> Cập nhật
             </button>
@@ -93,12 +152,74 @@
 </div>
 
 <script>
-document.querySelector('form').addEventListener('submit', function(e) {
-    const giaBan = parseFloat(document.getElementById('giaBan').value);
-    document.getElementById('giaBanError').textContent = '';
-    if (!giaBan || giaBan <= 0) {
+function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+document.getElementById('editMedForm').addEventListener('submit', function(e) {
+    let valid = true;
+    
+    document.querySelectorAll('.field-err').forEach(el => el.textContent = '');
+    document.querySelectorAll('.med-input').forEach(el => el.classList.remove('error'));
+
+    const reqFields = [
+        {id: 'maDanhMuc', err: 'maDanhMucError'},
+        {id: 'tenThuoc', err: 'tenThuocError'},
+        {id: 'donViTinh', err: 'donViTinhError'},
+        {id: 'giaNhap', err: 'giaNhapError'},
+        {id: 'giaBan', err: 'giaBanError'},
+        {id: 'hanSuDung', err: 'hanSuDungError'}
+    ];
+
+    reqFields.forEach(field => {
+        const el = document.getElementById(field.id);
+        if (!el.value.trim()) {
+            document.getElementById(field.err).textContent = 'Vui lòng nhập đầy đủ thông tin';
+            el.classList.add('error');
+            valid = false;
+        }
+    });
+
+    const giaBanEl = document.getElementById('giaBan');
+    if (giaBanEl.value.trim() && parseFloat(giaBanEl.value) <= 0) {
         document.getElementById('giaBanError').textContent = 'Giá bán thuốc phải là số dương';
-        e.preventDefault();
+        giaBanEl.classList.add('error');
+        valid = false;
+    }
+
+    const giaNhapEl = document.getElementById('giaNhap');
+    if (giaNhapEl.value.trim() && parseFloat(giaNhapEl.value) <= 0) {
+        document.getElementById('giaNhapError').textContent = 'Giá nhập thuốc phải là số dương';
+        giaNhapEl.classList.add('error');
+        valid = false;
+    }
+
+    const hanSuDungEl = document.getElementById('hanSuDung');
+    if (hanSuDungEl.value.trim()) {
+        const hsd = new Date(hanSuDungEl.value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        if (hsd <= today) {
+            document.getElementById('hanSuDungError').textContent = 'Hạn sử dụng phải lớn hơn ngày hiện tại';
+            hanSuDungEl.classList.add('error');
+            valid = false;
+        }
+    }
+
+    if (!valid) {
+        e.preventDefault(); 
+    } else {
+        const btn = document.getElementById('saveBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
     }
 });
 </script>

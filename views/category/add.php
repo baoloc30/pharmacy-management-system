@@ -26,9 +26,18 @@
     </div>
 
     <?php if (isset($error)): ?>
-    <div style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600;">
+    <div id="serverErrorMsg" style="margin:14px 24px 0;padding:11px 16px;background:#fef2f2;border:1.5px solid #fecaca;border-radius:9px;color:#b91c1c;font-size:13px;font-weight:600; transition: opacity 0.5s ease;">
         <i class="fas fa-exclamation-triangle"></i> <?php echo $error; ?>
     </div>
+    <script>
+        setTimeout(function() {
+            const errMsg = document.getElementById('serverErrorMsg');
+            if (errMsg) {
+                errMsg.style.opacity = '0';
+                setTimeout(() => errMsg.style.display = 'none', 500);
+            }
+        }, 3000);
+    </script>
     <?php endif; ?>
 
     <form method="POST" action="" id="addCategoryForm" style="padding:22px 24px;">
@@ -76,10 +85,10 @@
             <p style="color:#374151;font-size:14px;margin:0;">Bạn có chắc chắn muốn thêm danh mục này không?</p>
         </div>
         <div style="padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:10px;">
-            <button onclick="document.getElementById('confirmOverlay').style.display='none'"
-                    style="padding:9px 20px;border-radius:9px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;">
+            <a href="<?php echo BASE_URL; ?>category/index"
+               style="padding:9px 20px;border-radius:9px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;">
                 Từ chối
-            </button>
+            </a>
             <button onclick="document.getElementById('addCategoryForm').submit()"
                     style="padding:9px 20px;border-radius:9px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">
                 Đồng ý
@@ -90,15 +99,34 @@
 
 <script>
 function confirmAdd() {
-    const ten = document.getElementById('tenDanhMuc').value.trim();
-    document.getElementById('tenError').textContent = '';
+    const tenInput = document.getElementById('tenDanhMuc');
+    const tenError = document.getElementById('tenError');
+    const ten = tenInput.value.trim();
+    
+    tenError.style.transition = 'none';
+    tenError.style.opacity = '1';
+    tenError.textContent = '';
+
     if (!ten) {
-        document.getElementById('tenError').textContent = 'Vui lòng nhập tên danh mục';
-        document.getElementById('tenDanhMuc').style.borderColor = '#ef4444';
+        tenError.textContent = 'Vui lòng nhập tên danh mục'; 
+        tenInput.style.borderColor = '#ef4444';
+        
+        tenError.style.transition = 'opacity 0.5s ease';
+        setTimeout(function() {
+            tenError.style.opacity = '0';
+            tenInput.style.borderColor = '#cbd5e1';
+            
+            setTimeout(() => {
+                tenError.textContent = '';
+                tenError.style.opacity = '1';
+            }, 500);
+        }, 3000);
+        
         return;
     }
     document.getElementById('confirmOverlay').style.display = 'flex';
 }
+
 document.getElementById('confirmOverlay').addEventListener('click', function(e) {
     if (e.target === this) this.style.display = 'none';
 });
