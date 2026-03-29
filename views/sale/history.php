@@ -166,7 +166,7 @@ function viewDetail(id) {
           var bg = i % 2 === 0 ? '#fff' : '#f0f7ff';
           html += '<tr style="background:' + bg + ';">';
           html += '<td style="padding:9px 12px;font-weight:600;color:#1e293b;">' + (item.tenThuoc || '') + '</td>';
-          html += '<td style="padding:9px 12px;color:#475569;">' + (item.donViTinh || '') + '</td>';
+          html += '<td style="padding:9px 12px;color:#475569;">' + (item.donViBan || item.donViTinh || '') + '</td>';
           html += '<td style="padding:9px 12px;text-align:right;color:#374151;">' + (item.soLuong || 0) + '</td>';
           html += '<td style="padding:9px 12px;text-align:right;color:#374151;">' + fmt(item.donGia || 0) + '</td>';
           html += '<td style="padding:9px 12px;text-align:right;font-weight:700;color:#15803d;">' + fmt(item.thanhTien || 0) + '</td>';

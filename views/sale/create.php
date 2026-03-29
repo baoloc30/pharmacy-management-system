@@ -38,9 +38,24 @@
     <!-- Tìm thuốc -->
     <div style="padding:14px 16px;background:linear-gradient(135deg,#0891b2,#06b6d4);">
       <div style="display:flex;gap:8px;">
-        <input type="text" id="searchInput" placeholder="Nhập tên thuốc..."
-          style="flex:1;padding:9px 13px;border:none;border-radius:8px;font-size:13px;outline:none;"
-          oninput="searchMedicine()" onkeydown="if(event.key==='Enter'){event.preventDefault();searchMedicine();}">
+        <select id="searchCategory" onchange="searchMedicine()" style="padding:9px 10px;border:none;border-radius:8px;font-size:13px;outline:none;cursor:pointer;background:#fff;color:#374151;width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+          <option value="">Tất cả danh mục</option>
+          <?php if(isset($categories)) foreach($categories as $cat): ?>
+          <option value="<?php echo $cat['maDanhMuc']; ?>"><?php echo htmlspecialchars($cat['tenDanhMuc']); ?></option>
+          <?php endforeach; ?>
+        </select>
+        
+        <div style="flex:1; position:relative; display:flex; align-items:center;">
+            <input type="text" id="searchInput" placeholder="Nhập tên thuốc bằng phím hoặc giọng nói..."
+              style="width:100%; padding:9px 36px 9px 13px; border:none; border-radius:8px; font-size:13px; outline:none; box-sizing:border-box;"
+              oninput="searchMedicine()" onkeydown="if(event.key==='Enter'){event.preventDefault();searchMedicine();}">
+            
+            <button id="micBtn" onclick="startDictation()" title="Tìm kiếm bằng giọng nói"
+              style="position:absolute; right:6px; background:transparent; border:none; color:#3b82f6; cursor:pointer; font-size:16px; padding:6px; display:flex; align-items:center; justify-content:center; transition:all 0.2s;">
+                <i class="fas fa-microphone" id="micIcon"></i>
+            </button>
+        </div>
+          
         <button onclick="searchMedicine()" style="padding:9px 16px;border-radius:8px;border:none;background:rgba(255,255,255,.25);color:#fff;font-size:13px;cursor:pointer;font-weight:700;"><i class="fas fa-search"></i></button>
       </div>
     </div>
@@ -134,7 +149,6 @@
             style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;cursor:pointer;box-sizing:border-box;">
             <option value="TienMat">💵 Tiền mặt</option>
             <option value="ChuyenKhoan">🏦 Chuyển khoản</option>
-            <option value="The">💳 Thẻ</option>
           </select>
         </div>
       </div>
@@ -165,7 +179,22 @@
           <span id="changeAmount" style="font-size:22px;font-weight:900;">0đ</span>
         </div>
       </div>
+
+      <!--https://unspotted-unthriftily-delicia.ngrok-free.dev/CNM_QUANLYNHATHUOC/sale/webhook-->
+      <!--ngrok http 80-->
+      <div id="qrSection" style="display:none; text-align:center; margin-top:14px; padding:16px; background:#f8fafc; border:1.5px dashed #cbd5e1; border-radius:12px; transition:all 0.3s;">
+          <div style="font-size:13px; font-weight:700; color:#1e40af; margin-bottom:10px;">
+              <i class="fas fa-qrcode"></i> Quét mã QR để thanh toán
+          </div>
+          <img id="vietqrImage" src="" alt="VietQR" style="width:100%; max-width:220px; border-radius:8px; box-shadow:0 4px 14px rgba(0,0,0,0.1); background:#fff; padding:6px;">
+          
+          <div style="font-size:12.5px; color:#475569; margin-top:12px; line-height:1.5;">
+              Ngân hàng: <strong>MBBank</strong><br>
+              STK: <strong style="color:#1d4ed8; font-size:14px;">0355165612</strong>
+          </div>
+      </div>
     </div>
+
     <!-- Footer -->
     <div style="padding:14px 18px;border-top:1px solid #e2e8f0;background:#f8fafc;">
       <button onclick="doCheckout()" id="confirmPayBtn"
@@ -234,6 +263,8 @@
 var cart = [];
 var selectedCustomer = null;
 var lastInvoiceId = null;
+var paymentInterval = null;
+var currentOrderCode = "";
 
 /* ---- MODAL 1 ---- */
 function openSaleModal(){
@@ -256,7 +287,10 @@ function openPayModal(){
     updatePayCalc();
     document.getElementById('payModal').style.display='flex';
 }
-function closePayModal(){ document.getElementById('payModal').style.display='none'; }
+function closePayModal(){ 
+    clearInterval(paymentInterval);
+    document.getElementById('payModal').style.display='none'; 
+}
 function backToCart(){ closePayModal(); openSaleModal(); }
 document.getElementById('payModal').addEventListener('click',function(e){ if(e.target===this) closePayModal(); });
 
@@ -266,9 +300,16 @@ function searchMedicine(){
     clearTimeout(searchTimer);
     searchTimer = setTimeout(function(){
         var kw = document.getElementById('searchInput').value.trim();
-        if(kw.length<1){ document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">Nhập tên thuốc để tìm kiếm</div>'; return; }
+        var catId = document.getElementById('searchCategory').value;
+        
+        if(kw.length < 1 && catId === ''){ 
+            document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">Nhập tên thuốc hoặc chọn danh mục để tìm kiếm</div>'; 
+            return; 
+        }
+        
         document.getElementById('searchResults').innerHTML='<div style="padding:16px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fas fa-spinner fa-spin"></i> Đang tìm...</div>';
-        $.get('<?php echo BASE_URL; ?>sale/searchMedicine',{keyword:kw},function(res){
+        
+        $.get('<?php echo BASE_URL; ?>sale/searchMedicine', {keyword:kw, category_id:catId}, function(res){
             if(!res.success) {
                 document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#dc2626;font-size:13px;"><i class="fas fa-exclamation-triangle"></i> '+res.message+'</div>';
                 return;
@@ -292,30 +333,105 @@ function searchMedicine(){
     },300);
 }
 
+/* ---- TÌM KIẾM BẰNG GIỌNG NÓI ---- */
+function startDictation() {
+    if (window.hasOwnProperty('webkitSpeechRecognition') || window.hasOwnProperty('SpeechRecognition')) {
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        var recognition = new SpeechRecognition();
+        
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "vi-VN";
+        
+        var micBtn = document.getElementById('micBtn');
+        var micIcon = document.getElementById('micIcon');
+        var searchInput = document.getElementById('searchInput');
+
+        micBtn.style.color = '#ef4444';
+        micIcon.classList.remove('fa-microphone');
+        micIcon.classList.add('fa-microphone-lines', 'fa-beat-fade');
+        searchInput.placeholder = "Đang lắng nghe...";
+        searchInput.value = "";
+
+        recognition.start();
+
+        recognition.onresult = function(e) {
+            var transcript = e.results[0][0].transcript;
+            transcript = transcript.replace(/[.,]/g, '');
+            
+            searchInput.value = transcript;
+            recognition.stop();
+            
+            resetMicUI();
+            
+            searchMedicine();
+        };
+
+        recognition.onerror = function(e) {
+            console.log("Lỗi nhận diện giọng nói: " + e.error);
+            recognition.stop();
+            resetMicUI();
+            if (e.error === 'not-allowed') {
+                alert("Vui lòng cấp quyền sử dụng Micro cho trình duyệt để dùng tính năng này!");
+            } else {
+                alert("Không nhận diện được giọng nói, vui lòng thử lại.");
+            }
+        };
+        
+        recognition.onend = function() {
+            resetMicUI();
+        };
+
+        function resetMicUI() {
+            micBtn.style.color = '#3b82f6';
+            micIcon.classList.remove('fa-microphone-lines', 'fa-beat-fade');
+            micIcon.classList.add('fa-microphone');
+            searchInput.placeholder = "Nhập tên thuốc bằng phím hoặc giọng nói...";
+        }
+
+    } else {
+        alert("Trình duyệt của bạn không hỗ trợ tìm kiếm giọng nói. Vui lòng dùng Google Chrome, Cốc Cốc hoặc Edge.");
+    }
+}
+
 function selectMedicine(m){ openUnitModal(m); }
 
 /* ---- MODAL ĐƠN VỊ ---- */
 function openUnitModal(m){
-    document.getElementById('unitMedicineName').textContent=m.tenThuoc;
-    var opts='<button onclick="addToCart('+JSON.stringify(m).replace(/"/g,'&quot;')+',\''+m.donViTinh+'\','+m.giaBan+')" style="width:100%;padding:12px 16px;border-radius:10px;border:1.5px solid #bfdbfe;background:#eff6ff;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span style="font-weight:700;color:#1e40af;">'+m.donViTinh+'</span><span style="font-weight:800;color:#1d4ed8;">'+fmt(m.giaBan)+'</span></button>';
-    document.getElementById('unitOptions').innerHTML=opts;
-    document.getElementById('unitModal').style.display='flex';
+    document.getElementById('unitMedicineName').textContent = m.tenThuoc;
+    var opts = '<button onclick="addToCart('+JSON.stringify(m).replace(/"/g,'&quot;')+',\''+m.donViTinh+'\','+m.giaBan+', false, 1)" style="width:100%;padding:12px 16px;border-radius:10px;border:1.5px solid #bfdbfe;background:#eff6ff;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:10px;"><span style="font-weight:700;color:#1e40af;">'+m.donViTinh+' (Chẵn)</span><span style="font-weight:800;color:#1d4ed8;">'+fmt(m.giaBan)+'</span></button>';
+    if(m.donViLe && m.donViLe.trim() !== '' && parseInt(m.soLuongQuyDoi) > 1) {
+        opts += '<button onclick="addToCart('+JSON.stringify(m).replace(/"/g,'&quot;')+',\''+m.donViLe+'\','+m.giaBanLe+', true, '+m.soLuongQuyDoi+')" style="width:100%;padding:12px 16px;border-radius:10px;border:1.5px solid #fecaca;background:#fef2f2;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;"><span style="font-weight:700;color:#b91c1c;">'+m.donViLe+' (Lẻ - 1 '+m.donViTinh+' = '+m.soLuongQuyDoi+' '+m.donViLe+')</span><span style="font-weight:800;color:#dc2626;">'+fmt(m.giaBanLe)+'</span></button>';
+    }
+    document.getElementById('unitOptions').innerHTML = opts;
+    document.getElementById('unitModal').style.display = 'flex';
 }
+
 function closeUnitModal(){ document.getElementById('unitModal').style.display='none'; }
 document.getElementById('unitModal').addEventListener('click',function(e){ if(e.target===this) closeUnitModal(); });
 
-function addToCart(m,unit,price){
+function addToCart(m, unit, price, isRetail, quyDoi){
     closeUnitModal();
-    var existing=cart.find(function(i){ return i.maThuoc==m.maThuoc&&i.donViTinh==unit; });
+    var existing = cart.find(function(i){ return i.maThuoc == m.maThuoc && i.donViTinh == unit; });
     if(existing){
-        if(existing.soLuong>=parseInt(m.soLuongTon)){ alert('Số lượng tồn kho không đủ. Vui lòng chọn lại'); return; }
-        existing.soLuong++; existing.thanhTien=existing.soLuong*existing.donGia;
+        existing.soLuong++; 
+        existing.thanhTien = existing.soLuong * existing.donGia;
     } else {
-        cart.push({maThuoc:m.maThuoc,tenThuoc:m.tenThuoc,donViTinh:unit,soLuong:1,donGia:parseFloat(price),thanhTien:parseFloat(price),soLuongTon:parseInt(m.soLuongTon)});
+        cart.push({
+            maThuoc: m.maThuoc, 
+            tenThuoc: m.tenThuoc, 
+            donViTinh: unit, 
+            soLuong: 1, 
+            donGia: parseFloat(price), 
+            thanhTien: parseFloat(price), 
+            soLuongTon: parseFloat(m.soLuongTon),
+            isRetail: isRetail,
+            soLuongQuyDoi: parseInt(quyDoi)
+        });
     }
     renderCart();
-    document.getElementById('searchInput').value='';
-    document.getElementById('searchResults').innerHTML='<div style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">Nhập tên thuốc để tìm kiếm</div>';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '<div style="padding:18px;text-align:center;color:#94a3b8;font-size:13px;">Nhập tên thuốc để tìm kiếm</div>';
     document.getElementById('searchInput').focus();
 }
 
@@ -364,16 +480,48 @@ function removeFromCart(i){ cart.splice(i,1); renderCart(); }
 
 /* ---- THANH TOÁN ---- */
 function updatePayCalc(){
-    var total=cart.reduce(function(s,i){ return s+i.thanhTien; },0);
-    var disc=parseFloat(document.getElementById('discountInput').value)||0;
-    if(disc>total) disc=total;
-    var final=total-disc;
-    document.getElementById('payTotal').textContent=fmt(total);
-    document.getElementById('payDiscount').textContent='-'+fmt(disc);
-    document.getElementById('payFinal').textContent=fmt(final);
-    var method=document.getElementById('paymentMethod').value;
-    document.getElementById('cashSection').style.display=method==='TienMat'?'block':'none';
-    buildQuickCash(final); calcChange();
+    var total = cart.reduce(function(s,i){ return s+i.thanhTien; },0);
+    var disc = parseFloat(document.getElementById('discountInput').value)||0;
+    if(disc > total) disc = total;
+    var final = total - disc;
+    
+    document.getElementById('payTotal').textContent = fmt(total);
+    document.getElementById('payDiscount').textContent = '-'+fmt(disc);
+    document.getElementById('payFinal').textContent = fmt(final);
+    
+    var method = document.getElementById('paymentMethod').value;
+    
+    document.getElementById('cashSection').style.display = (method === 'TienMat') ? 'block' : 'none';
+    document.getElementById('qrSection').style.display = (method === 'ChuyenKhoan') ? 'block' : 'none';
+    
+    clearInterval(paymentInterval);
+    
+    if (method === 'ChuyenKhoan' && final > 0) {
+        currentOrderCode = "DH" + Math.floor(Math.random() * 1000000); 
+        
+        var bankId = "MBBank"; 
+        var accountNo = "0355165612"; 
+        var addInfo = currentOrderCode;
+        
+        var qrUrl = "https://img.vietqr.io/image/" + bankId + "-" + accountNo + "-compact2.png?amount=" + final + "&addInfo=" + encodeURIComponent(addInfo);
+        document.getElementById('vietqrImage').src = qrUrl;
+        
+        paymentInterval = setInterval(function() {
+            $.get('<?php echo BASE_URL; ?>sale/checkPayment', {code: currentOrderCode}, function(res) {
+                if (res.paid) {
+                    clearInterval(paymentInterval);
+                    
+                    var btn = document.getElementById('confirmPayBtn');
+                    btn.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+                    btn.innerHTML = '<i class="fas fa-check-double"></i> Đã nhận tiền! Đang xuất hóa đơn...';
+                    
+                    setTimeout(function() {
+                        doCheckout();
+                    }, 800);
+                }
+            }, 'json');
+        }, 3000);
+    }
 }
 
 function buildQuickCash(final){

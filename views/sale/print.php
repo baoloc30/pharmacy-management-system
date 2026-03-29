@@ -113,7 +113,7 @@ tfoot td{padding:10px 12px;font-weight:700;border-top:2px solid #bfdbfe;}
         <tr>
           <td class="text-center" style="color:#94a3b8;"><?php echo $i+1; ?></td>
           <td style="font-weight:600;color:#1e293b;"><?php echo htmlspecialchars($item['tenThuoc']); ?></td>
-          <td><?php echo htmlspecialchars($item['donViTinh']); ?></td>
+          <td><?php echo htmlspecialchars(!empty($item['donViBan']) ? $item['donViBan'] : $item['donViTinh']); ?></td>
           <td class="text-right"><?php echo $item['soLuong']; ?></td>
           <td class="text-right"><?php echo number_format($item['donGia'],0,',','.'); ?>đ</td>
           <td class="text-right" style="font-weight:600;"><?php echo number_format($item['thanhTien'],0,',','.'); ?>đ</td>

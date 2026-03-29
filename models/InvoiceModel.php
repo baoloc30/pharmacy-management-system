@@ -33,24 +33,37 @@ class InvoiceModel extends Model {
                 $maThuoc = (int)$item['maThuoc'];
                 $soLuong = (int)$item['soLuong'];
                 $donGia  = (float)$item['donGia'];
+                
+                // --- XỬ LÝ LOGIC ĐƠN VỊ LẺ ---
+                $isRetail = isset($item['isRetail']) ? $item['isRetail'] : false;
+                $soLuongQuyDoi = (isset($item['soLuongQuyDoi']) && (int)$item['soLuongQuyDoi'] > 0) ? (int)$item['soLuongQuyDoi'] : 1;
+                
+                // Tính toán số lượng thực tế cần trừ trong kho (tính theo đơn vị chẵn)
+                if ($isRetail) {
+                    $soLuongTruKho = (float)($soLuong / $soLuongQuyDoi);
+                } else {
+                    $soLuongTruKho = (float)$soLuong; 
+                }
 
                 // Lấy tồn kho hiện tại trước khi trừ
                 $stmtTon = $this->db->prepare("SELECT soLuongTon FROM thuoc WHERE maThuoc=?");
                 $stmtTon->bind_param("i", $maThuoc);
                 $stmtTon->execute();
-                $tonTruoc = (int)$stmtTon->get_result()->fetch_assoc()['soLuongTon'];
-                $tonSau   = $tonTruoc - $soLuong;
+                $tonTruoc = (float)$stmtTon->get_result()->fetch_assoc()['soLuongTon'];
+                $tonSau   = $tonTruoc - $soLuongTruKho;
 
                 // Insert chi tiết hóa đơn (thanhTien là GENERATED COLUMN)
-                $sql = "INSERT INTO ct_hoadon (maHoaDon, maThuoc, soLuong, donGia) VALUES (?, ?, ?, ?)";
+                $donViBan = isset($item['donViTinh']) ? $item['donViTinh'] : '';
+                
+                $sql = "INSERT INTO ct_hoadon (maHoaDon, maThuoc, donViBan, soLuong, donGia) VALUES (?, ?, ?, ?, ?)";
                 $stmt = $this->db->prepare($sql);
-                $stmt->bind_param("iiid", $maHoaDon, $maThuoc, $soLuong, $donGia);
+                $stmt->bind_param("iisid", $maHoaDon, $maThuoc, $donViBan, $soLuong, $donGia);
                 $stmt->execute();
                 
                 // Cập nhật tồn kho
                 $sql = "UPDATE thuoc SET soLuongTon = soLuongTon - ? WHERE maThuoc = ?";
                 $stmt = $this->db->prepare($sql);
-                $stmt->bind_param("ii", $soLuong, $maThuoc);
+                $stmt->bind_param("di", $soLuongTruKho, $maThuoc); 
                 $stmt->execute();
                 
                 // Ghi lịch sử xuất
@@ -58,7 +71,7 @@ class InvoiceModel extends Model {
                 $sql = "INSERT INTO lichsunhap_xuat (maThuoc, loaiGiaoDich, soLuong, tonKhoTruoc, tonKhoSau, maChungTu, loaiChungTu, maNhanVien) 
                         VALUES (?, 'Xuat', ?, ?, ?, ?, 'HoaDon', ?)";
                 $stmt = $this->db->prepare($sql);
-                $stmt->bind_param("iiiiii", $maThuoc, $soLuong, $tonTruoc, $tonSau, $maHoaDon, $maNV);
+                $stmt->bind_param("iidddi", $maThuoc, $soLuongTruKho, $tonTruoc, $tonSau, $maHoaDon, $maNV);
                 $stmt->execute();
             }
             
