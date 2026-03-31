@@ -108,6 +108,28 @@
                 <span class="field-err" id="giaBanError"></span>
             </div>
         </div>
+            
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;margin-bottom:24px;">
+            <div>
+                <label class="med-label">Đơn vị lẻ</label>
+                <input type="text" name="donViLe" class="med-input" 
+                        placeholder="VD: Viên, Gói (Để trống nếu ko có)" 
+                        value="<?php echo htmlspecialchars($medicine['donViLe'] ?? ''); ?>">
+            </div>
+            <div>
+                <label class="med-label">Quy đổi (1 Chẵn = ? Lẻ)</label>
+                <input type="number" name="soLuongQuyDoi" class="med-input" 
+                        placeholder="VD: 10" min="1" 
+                        value="<?php echo htmlspecialchars($medicine['soLuongQuyDoi'] ?? '1'); ?>">
+                <span style="font-size:11.5px; color:#64748b; font-weight:500; margin-top:5px; display:block;">Mặc định là 1 nếu không bán lẻ</span>
+            </div>
+            <div>
+                <label class="med-label">Giá bán lẻ</label>
+                <input type="number" name="giaBanLe" class="med-input" 
+                        placeholder="VD: 1500" min="0" 
+                        value="<?php echo htmlspecialchars($medicine['giaBanLe'] ?? ''); ?>">
+            </div>
+        </div>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
             <div>

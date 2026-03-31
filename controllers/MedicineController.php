@@ -60,17 +60,21 @@ class MedicineController extends Controller {
         
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $medicineData = [
-                'maDanhMuc' => $_POST['maDanhMuc'] ?? '',
-                'tenThuoc'  => trim($_POST['tenThuoc'] ?? ''),
-                'donViTinh' => trim($_POST['donViTinh'] ?? ''),
-                'giaBan'    => $_POST['giaBan'] ?? '',
-                'giaNhap'   => $_POST['giaNhap'] ?? '',
-                'soLuongTon'=> $_POST['soLuongTon'] ?? 0,
-                'hanSuDung' => $_POST['hanSuDung'] ?? '',
-                'xuatXu'    => trim($_POST['xuatXu'] ?? ''),
-                'thanhPhan' => trim($_POST['thanhPhan'] ?? ''),
-                'congDung'  => trim($_POST['congDung'] ?? ''),
-                'cachDung'  => trim($_POST['cachDung'] ?? '')
+                'maDanhMuc'     => $_POST['maDanhMuc'] ?? '',
+                'tenThuoc'      => trim($_POST['tenThuoc'] ?? ''),
+                'donViTinh'     => trim($_POST['donViTinh'] ?? ''),
+                'donViLe'       => trim($_POST['donViLe'] ?? ''),
+                'soLuongQuyDoi' => $_POST['soLuongQuyDoi'] ?? 1,
+                'giaBan'        => $_POST['giaBan'] ?? '',
+                'giaBanLe'      => $_POST['giaBanLe'] ?? null,
+                'giaNhap'       => $_POST['giaNhap'] ?? '',
+                'soLuongTon'    => $_POST['soLuongTon'] ?? 0,
+                'hanSuDung'     => $_POST['hanSuDung'] ?? '',
+                'xuatXu'        => trim($_POST['xuatXu'] ?? ''),
+                'thanhPhan'     => trim($_POST['thanhPhan'] ?? ''),
+                'congDung'      => trim($_POST['congDung'] ?? ''),
+                'cachDung'      => trim($_POST['cachDung'] ?? ''),
+                'trangThai'     => 'DangBan'
             ];
 
             $hinhAnhFileName = null;
@@ -155,16 +159,21 @@ class MedicineController extends Controller {
         
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
             $medicineData = [
-                'maDanhMuc' => $_POST['maDanhMuc'] ?? '',
-                'tenThuoc'  => trim($_POST['tenThuoc'] ?? ''),
-                'donViTinh' => trim($_POST['donViTinh'] ?? ''),
-                'giaBan'    => $_POST['giaBan'] ?? '',
-                'giaNhap'   => $_POST['giaNhap'] ?? '',
-                'hanSuDung' => $_POST['hanSuDung'] ?? '',
-                'xuatXu'    => trim($_POST['xuatXu'] ?? ''),
-                'thanhPhan' => trim($_POST['thanhPhan'] ?? ''),
-                'congDung'  => trim($_POST['congDung'] ?? ''),
-                'cachDung'  => trim($_POST['cachDung'] ?? '')
+                'maDanhMuc'     => $_POST['maDanhMuc'] ?? '',
+                'tenThuoc'      => trim($_POST['tenThuoc'] ?? ''),
+                'donViTinh'     => trim($_POST['donViTinh'] ?? ''),
+                'donViLe'       => trim($_POST['donViLe'] ?? ''),
+                'soLuongQuyDoi' => $_POST['soLuongQuyDoi'] ?? 1,
+                'giaBan'        => $_POST['giaBan'] ?? '',
+                'giaBanLe'      => $_POST['giaBanLe'] ?? null,
+                'giaNhap'       => $_POST['giaNhap'] ?? '',
+                'hanSuDung'     => $_POST['hanSuDung'] ?? '',
+                'xuatXu'        => trim($_POST['xuatXu'] ?? ''),
+                'thanhPhan'     => trim($_POST['thanhPhan'] ?? ''),
+                'congDung'      => trim($_POST['congDung'] ?? ''),
+                'cachDung'      => trim($_POST['cachDung'] ?? ''),
+                'soLuongTon'    => $data['medicine']['soLuongTon'],
+                'trangThai'     => $data['medicine']['trangThai']
             ];
 
             $hinhAnhFileName = $_POST['hinhAnhCu'] ?? null;

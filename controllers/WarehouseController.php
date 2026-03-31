@@ -82,7 +82,7 @@ class WarehouseController extends Controller {
 
             foreach ($updates as $maThuoc => $soLuong) {
                 if ($soLuong === '' || $soLuong === null) continue;
-                if (!is_numeric($soLuong) || $soLuong < 0 || floor($soLuong) != $soLuong) {
+                if (!is_numeric($soLuong) || $soLuong < 0) {
                     $hasError = true;
                     break;
                 }
@@ -91,11 +91,17 @@ class WarehouseController extends Controller {
             if ($hasError) {
                 $data['error'] = 'Số lượng không hợp lệ, vui lòng chọn lại';
             } else {
-                foreach ($updates as $maThuoc => $soLuong) {
-                    if ($soLuong === '' || $soLuong === null) continue;
-                    $medicineModel->updateStockDirect((int)$maThuoc, (int)$soLuong, $maNhanVien);
+                try {
+                    foreach ($updates as $maThuoc => $soLuong) {
+                        if ($soLuong === '' || $soLuong === null) continue;
+                        $medicineModel->updateStockDirect((int)$maThuoc, (float)$soLuong, $maNhanVien);
+                    }
+                    $_SESSION['success'] = 'Cập nhật tồn kho thành công';
+                    redirect('warehouse/stock');
+                    exit;
+                } catch (Exception $e) {
+                    $data['error'] = 'Lỗi kết nối cơ sở dữ liệu khi cập nhật tồn kho';
                 }
-                $data['success'] = 'Cập nhật tồn kho thành công';
                 $data['medicines'] = $medicineModel->getStock();
             }
         }

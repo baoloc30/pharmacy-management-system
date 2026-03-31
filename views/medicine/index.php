@@ -136,8 +136,22 @@
                         <td style="padding:10px 14px;color:#64748b;"><?php echo $i + 1; ?></td>
                         <td style="padding:10px 14px;font-weight:600;color:#1e293b;"><?php echo htmlspecialchars($medicine['tenThuoc']); ?></td>
                         <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($medicine['tenDanhMuc']); ?></td>
-                        <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($medicine['donViTinh']); ?></td>
-                        <td style="padding:10px 14px;text-align:right;font-weight:600;color:#1e293b;"><?php echo formatCurrency($medicine['giaBan']); ?></td>
+                        <td style="padding:10px 14px;color:#475569;">
+                            <div style="font-weight:700; color:#1e293b;"><?php echo htmlspecialchars($medicine['donViTinh']); ?></div>
+                            <?php if(!empty($medicine['donViLe'])): ?>
+                                <div style="font-size:11px; color:#d97706; margin-top:3px; font-weight:600;">
+                                    <i class="fas fa-level-down-alt" style="margin-right:2px;"></i> Lẻ: <?php echo htmlspecialchars($medicine['donViLe']); ?> (x<?php echo $medicine['soLuongQuyDoi']; ?>)
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding:10px 14px;text-align:right;">
+                            <div style="font-weight:700; color:#1d4ed8;"><?php echo formatCurrency($medicine['giaBan']); ?></div>
+                            <?php if(!empty($medicine['donViLe']) && isset($medicine['giaBanLe'])): ?>
+                                <div style="font-size:11px; color:#ea580c; margin-top:3px; font-weight:600;">
+                                    <i class="fas fa-level-down-alt" style="margin-right:2px;"></i> Lẻ: <?php echo formatCurrency($medicine['giaBanLe']); ?>
+                                </div>
+                            <?php endif; ?>
+                        </td>
                         <td style="padding:10px 14px;text-align:right;font-weight:700;color:<?php echo $medicine['soLuongTon'] <= 10 ? '#dc2626' : '#1e293b'; ?>;">
                             <?php echo $medicine['soLuongTon']; ?>
                         </td>

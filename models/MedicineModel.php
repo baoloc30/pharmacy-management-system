@@ -53,28 +53,42 @@ class MedicineModel extends Model {
     }
 
     public function create($data) {
-        $sql = "INSERT INTO thuoc (maDanhMuc, hinhAnh,tenThuoc, donViTinh, giaBan, giaNhap, 
-                                   soLuongTon, hanSuDung, xuatXu, thanhPhan, congDung, cachDung) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $donViLe = !empty($data['donViLe']) ? $data['donViLe'] : "";
+        $soLuongQuyDoi = !empty($data['soLuongQuyDoi']) ? (int)$data['soLuongQuyDoi'] : 1;
+        $giaBanLe = !empty($data['giaBanLe']) ? (float)$data['giaBanLe'] : 0;
+        
+        $sql = "INSERT INTO thuoc (maDanhMuc, tenThuoc, donViTinh, donViLe, soLuongQuyDoi, giaBan, giaBanLe, giaNhap, soLuongTon, hanSuDung, xuatXu, thanhPhan, congDung, cachDung, hinhAnh, trangThai, ngayTao) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("isssddisssss", 
-            $data['maDanhMuc'], $data['hinhAnh'], $data['tenThuoc'], $data['donViTinh'], 
-            $data['giaBan'], $data['giaNhap'], $data['soLuongTon'], 
-            $data['hanSuDung'], $data['xuatXu'], $data['thanhPhan'], 
-            $data['congDung'], $data['cachDung']
+        $stmt->bind_param("isssiddddsssssss", 
+            $data['maDanhMuc'], $data['tenThuoc'], $data['donViTinh'], 
+            $donViLe, $soLuongQuyDoi, $data['giaBan'], $giaBanLe, 
+            $data['giaNhap'], $data['soLuongTon'], $data['hanSuDung'], 
+            $data['xuatXu'], $data['thanhPhan'], $data['congDung'], 
+            $data['cachDung'], $data['hinhAnh'], $data['trangThai']
         );
         return $stmt->execute();
     }
 
     public function update($id, $data) {
-        $sql = "UPDATE thuoc SET maDanhMuc=?, hinhAnh=?, tenThuoc=?, donViTinh=?, giaBan=?, 
-                giaNhap=?, hanSuDung=?, xuatXu=?, thanhPhan=?, congDung=?, cachDung=? 
+        $donViLe = !empty($data['donViLe']) ? $data['donViLe'] : "";
+        $soLuongQuyDoi = !empty($data['soLuongQuyDoi']) ? (int)$data['soLuongQuyDoi'] : 1;
+        $giaBanLe = !empty($data['giaBanLe']) ? (float)$data['giaBanLe'] : 0;
+
+        $sql = "UPDATE thuoc SET 
+                maDanhMuc=?, tenThuoc=?, donViTinh=?, donViLe=?, soLuongQuyDoi=?, 
+                giaBan=?, giaBanLe=?, giaNhap=?, soLuongTon=?, hanSuDung=?, 
+                xuatXu=?, thanhPhan=?, congDung=?, cachDung=?, hinhAnh=?, trangThai=? 
                 WHERE maThuoc=?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("isssddsssssi", 
-            $data['maDanhMuc'], $data['hinhAnh'], $data['tenThuoc'], $data['donViTinh'], 
-            $data['giaBan'], $data['giaNhap'], $data['hanSuDung'], $data['xuatXu'], $data['thanhPhan'], 
-            $data['congDung'], $data['cachDung'], $id
+        $stmt->bind_param("isssiddddsssssssi", 
+            $data['maDanhMuc'], $data['tenThuoc'], $data['donViTinh'], 
+            $donViLe, $soLuongQuyDoi, $data['giaBan'], $giaBanLe, 
+            $data['giaNhap'], $data['soLuongTon'], $data['hanSuDung'], 
+            $data['xuatXu'], $data['thanhPhan'], $data['congDung'], 
+            $data['cachDung'], $data['hinhAnh'], $data['trangThai'], 
+            $id
         );
         return $stmt->execute();
     }
@@ -193,12 +207,12 @@ class MedicineModel extends Model {
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $row = $stmt->get_result()->fetch_assoc();
-        $oldQty = $row['soLuongTon'];
+        $oldQty = (float)$row['soLuongTon'];
 
         // Cập nhật
         $sql = "UPDATE thuoc SET soLuongTon=? WHERE maThuoc=?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ii", $newQty, $id);
+        $stmt->bind_param("di", $newQty, $id); 
         $stmt->execute();
 
         // Ghi lịch sử
@@ -206,7 +220,7 @@ class MedicineModel extends Model {
         $sql = "INSERT INTO lichsunhap_xuat (maThuoc, loaiGiaoDich, soLuong, tonKhoTruoc, tonKhoSau, loaiChungTu, maNhanVien, ghiChu)
                 VALUES (?, 'DieuChinh', ?, ?, ?, 'DieuChinh', ?, 'Cập nhật tồn kho thủ công')";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("iiiii", $id, $diff, $oldQty, $newQty, $maNhanVien);
+        $stmt->bind_param("idddi", $id, $diff, $oldQty, $newQty, $maNhanVien);
         return $stmt->execute();
     }
 }

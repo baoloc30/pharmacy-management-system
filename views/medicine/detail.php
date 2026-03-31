@@ -90,6 +90,30 @@
                     </div>
                 </div>
 
+                <?php if (!empty($medicine['donViLe'])): ?>
+                <div style="margin-bottom:16px; padding:14px 16px; background:#fff7ed; border-radius:10px; border:1px dashed #fdba74;">
+                    <div style="font-size:12px;color:#c2410c;font-weight:700;text-transform:uppercase;margin-bottom:10px;">
+                        <i class="fas fa-box-open" style="margin-right:4px;"></i> Thông tin bán lẻ (Bóc hộp)
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;">
+                        <div>
+                            <div style="font-size:11px;color:#fb923c;font-weight:600;">Đơn vị lẻ</div>
+                            <div style="font-size:14px;font-weight:800;color:#9a3412;"><?php echo htmlspecialchars($medicine['donViLe']); ?></div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px;color:#fb923c;font-weight:600;">Tỷ lệ quy đổi</div>
+                            <div style="font-size:14px;font-weight:800;color:#9a3412;">
+                                1 <?php echo htmlspecialchars($medicine['donViTinh']); ?> = <?php echo $medicine['soLuongQuyDoi']; ?> <?php echo htmlspecialchars($medicine['donViLe']); ?>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="font-size:11px;color:#fb923c;font-weight:600;">Giá bán lẻ</div>
+                            <div style="font-size:14px;font-weight:800;color:#9a3412;"><?php echo formatCurrency($medicine['giaBanLe'] ?? 0); ?></div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;
                     background:<?php echo $medicine['trangThai'] == 'DangBan' ? '#f0fdf4' : '#f8fafc'; ?>;
                     color:<?php echo $medicine['trangThai'] == 'DangBan' ? '#15803d' : '#64748b'; ?>;
