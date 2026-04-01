@@ -6,7 +6,6 @@ class UserModel extends Model {
     protected $primaryKey = 'idTaiKhoan';
 
     public function login($username, $password) {
-        // Hỗ trợ đăng nhập bằng tên đăng nhập HOẶC email
         $sql = "SELECT t.*, n.hoTen FROM taikhoan t 
                 JOIN nhanvien n ON t.maNhanVien = n.maNhanVien 
                 WHERE t.tenDangNhap = ? OR n.email = ?";
@@ -17,13 +16,10 @@ class UserModel extends Model {
         $user = $result->fetch_assoc();
         
         if ($user) {
-            // Thử password_verify trước (mật khẩu đã hash)
             if (password_verify($password, $user['matKhau'])) {
                 return $user;
             }
-            // Fallback: so sánh plain text (mật khẩu chưa hash trong DB)
             if ($user['matKhau'] === $password) {
-                // Tự động nâng cấp lên hash
                 $newHash = password_hash($password, PASSWORD_DEFAULT);
                 $upd = $this->db->prepare("UPDATE taikhoan SET matKhau=? WHERE idTaiKhoan=?");
                 $upd->bind_param("si", $newHash, $user['idTaiKhoan']);
@@ -103,6 +99,22 @@ class UserModel extends Model {
         return $stmt->get_result()->num_rows > 0;
     }
 
+    public function emailExists($email) {
+        $sql = "SELECT maNhanVien FROM nhanvien WHERE email = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
+    }
+
+    public function phoneExists($phone) {
+        $sql = "SELECT maNhanVien FROM nhanvien WHERE soDienThoai = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("s", $phone);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
+    }
+
     public function findByUsername($username) {
         $sql = "SELECT t.idTaiKhoan, t.tenDangNhap, t.matKhau, t.trangThai, n.email 
                 FROM taikhoan t JOIN nhanvien n ON t.maNhanVien = n.maNhanVien
@@ -137,7 +149,7 @@ class UserModel extends Model {
             return true;
         } catch (Exception $e) {
             $this->db->rollback();
-            return false;
+            return $e->getMessage(); 
         }
     }
 
@@ -152,16 +164,37 @@ class UserModel extends Model {
     }
 
     public function updateEmployee($id, $data) {
-        $sql = "UPDATE nhanvien n JOIN taikhoan t ON n.maNhanVien = t.maNhanVien
-                SET n.hoTen=?, n.soDienThoai=?, n.email=?, n.diaChi=?, n.ngaySinh=?, n.gioiTinh=?, t.vaiTro=?
-                WHERE t.idTaiKhoan=?";
+        try {
+            $sql = "UPDATE nhanvien n JOIN taikhoan t ON n.maNhanVien = t.maNhanVien
+                    SET n.hoTen=?, n.soDienThoai=?, n.email=?, n.diaChi=?, n.ngaySinh=?, n.gioiTinh=?, t.vaiTro=?
+                    WHERE t.idTaiKhoan=?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->bind_param("sssssssi",
+                $data['hoTen'], $data['soDienThoai'], $data['email'],
+                $data['diaChi'], $data['ngaySinh'], $data['gioiTinh'],
+                $data['vaiTro'], $id
+            );
+            $stmt->execute();
+            return true;
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
+    }
+
+    public function emailExistsExclude($email, $idTaiKhoan) {
+        $sql = "SELECT n.maNhanVien FROM nhanvien n JOIN taikhoan t ON n.maNhanVien = t.maNhanVien WHERE n.email = ? AND t.idTaiKhoan != ?";
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("sssssssi",
-            $data['hoTen'], $data['soDienThoai'], $data['email'],
-            $data['diaChi'], $data['ngaySinh'], $data['gioiTinh'],
-            $data['vaiTro'], $id
-        );
-        return $stmt->execute();
+        $stmt->bind_param("si", $email, $idTaiKhoan);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
+    }
+
+    public function phoneExistsExclude($phone, $idTaiKhoan) {
+        $sql = "SELECT n.maNhanVien FROM nhanvien n JOIN taikhoan t ON n.maNhanVien = t.maNhanVien WHERE n.soDienThoai = ? AND t.idTaiKhoan != ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("si", $phone, $idTaiKhoan);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
     }
 
     public function getAllEmployees() {
@@ -176,5 +209,51 @@ class UserModel extends Model {
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("i", $id);
         return $stmt->execute();
+    }
+
+    public function activate($id) {
+        $sql = "UPDATE taikhoan SET trangThai='HoatDong' WHERE idTaiKhoan=?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $id);
+        return $stmt->execute();
+    }
+
+    public function getAllPermissions() {
+        $sql = "SELECT * FROM quyen";
+        return $this->db->query($sql)->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getEmployeePermissions($maNhanVien) {
+        $sql = "SELECT maQuyen FROM phanquyen WHERE maNhanVien = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $maNhanVien);
+        $stmt->execute();
+        $result = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return array_column($result, 'maQuyen'); 
+    }
+
+    public function updateEmployeePermissions($maNhanVien, $permissions) {
+        $this->db->begin_transaction();
+        try {
+            $sqlDel = "DELETE FROM phanquyen WHERE maNhanVien = ?";
+            $stmtDel = $this->db->prepare($sqlDel);
+            $stmtDel->bind_param("i", $maNhanVien);
+            $stmtDel->execute();
+
+            if (!empty($permissions)) {
+                $sqlIns = "INSERT INTO phanquyen (maNhanVien, maQuyen) VALUES (?, ?)";
+                $stmtIns = $this->db->prepare($sqlIns);
+                foreach ($permissions as $maQuyen) {
+                    $stmtIns->bind_param("ii", $maNhanVien, $maQuyen);
+                    $stmtIns->execute();
+                }
+            }
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollback();
+            return false;
+        }
     }
 }

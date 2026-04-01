@@ -58,10 +58,17 @@ class WarehouseController extends Controller {
         $this->checkLogin();
         $this->checkRole('QuanLy');
         
-        $medicineModel = $this->model('MedicineModel');
-        
-        $data['low_stock'] = $medicineModel->getLowStock(10);
-        $data['expired'] = $medicineModel->getExpired(30);
+        $data = [];
+        try {
+            $medicineModel = $this->model('MedicineModel');
+            
+            $data['low_stock'] = $medicineModel->getLowStock(10);
+            $data['expired'] = $medicineModel->getExpired(30);
+        } catch (Exception $e) {
+            $data['error'] = 'Không thể truy xuất dữ liệu';
+            $data['low_stock'] = [];
+            $data['expired'] = [];
+        }
         
         $this->view('warehouse/alert', $data);
     }
@@ -117,16 +124,49 @@ class WarehouseController extends Controller {
         $fromDate = $_GET['from_date'] ?? '';
         $toDate   = $_GET['to_date'] ?? '';
         $type     = $_GET['type'] ?? '';
+        $search   = trim($_GET['search'] ?? '');
 
-        // Validate ngày
-        if (!empty($fromDate) && !empty($toDate) && $fromDate > date('Y-m-d')) {
+        $currentDate = date('Y-m-d');
+        if (($fromDate && $fromDate > $currentDate) || ($toDate && $toDate > $currentDate)) {
             $data['error'] = 'Khoảng thời gian không hợp lệ, vui lòng chọn lại!';
+        } elseif ($fromDate && $toDate && $fromDate > $toDate) {
+            $data['error'] = 'Ngày bắt đầu không thể lớn hơn ngày kết thúc!';
         }
 
-        $data['history']   = $warehouseModel->getHistory($fromDate, $toDate, $type);
+        if (!isset($data['error'])) {
+            $data['history'] = $warehouseModel->getHistory($fromDate, $toDate, $type, $search);
+        } else {
+            $data['history'] = []; 
+        }
+
         $data['from_date'] = $fromDate;
         $data['to_date']   = $toDate;
         $data['type']      = $type;
+        $data['search']    = $search;
+        
         $this->view('warehouse/history', $data);
+    }
+
+    public function ajaxGetDetail() {
+        $this->checkLogin();
+        header('Content-Type: application/json');
+        
+        $id = $_GET['id'] ?? 0;
+        $type = $_GET['type'] ?? '';
+        
+        if (!$id || !$type) {
+            echo json_encode(['success' => false, 'message' => 'Dữ liệu không hợp lệ']);
+            exit;
+        }
+        
+        $warehouseModel = $this->model('WarehouseModel');
+        $data = $warehouseModel->getTransactionDetail($id, $type);
+        
+        if ($data) {
+            echo json_encode(['success' => true, 'data' => $data]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Không tìm thấy chi tiết chứng từ']);
+        }
+        exit;
     }
 }

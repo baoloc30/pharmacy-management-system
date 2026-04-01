@@ -18,14 +18,18 @@ class WorkShiftModel extends Model {
     }
 
     public function assignShift($data) {
-        $sql = "INSERT INTO lichlamviec (maNhanVien, ngayLam, caLam, gioBatDau, gioKetThuc, ghiChu) 
-                VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $this->db->prepare($sql);
-        $ghiChu = $data['ghiChu'] ?? '';
-        $stmt->bind_param("isssss", 
-            $data['maNhanVien'], $data['ngayLam'], $data['caLam'],
-            $data['gioBatDau'], $data['gioKetThuc'], $ghiChu
-        );
-        return $stmt->execute();
+        try {
+            $sql = "INSERT INTO lichlamviec (maNhanVien, ngayLam, caLam, gioBatDau, gioKetThuc, ghiChu) 
+                    VALUES (?, ?, ?, ?, ?, ?)";
+            $stmt = $this->db->prepare($sql);
+            $ghiChu = $data['ghiChu'] ?? '';
+            $stmt->bind_param("isssss", 
+                $data['maNhanVien'], $data['ngayLam'], $data['caLam'],
+                $data['gioBatDau'], $data['gioKetThuc'], $ghiChu
+            );
+            return $stmt->execute();
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }

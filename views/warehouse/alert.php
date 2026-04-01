@@ -13,6 +13,12 @@
   </div>
 </div>
 
+<?php if(isset($error)): ?>
+<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:14px;padding:16px 20px;margin-bottom:16px;color:#dc2626;font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;box-shadow:0 2px 14px rgba(0,0,0,.07);">
+  <i class="fas fa-exclamation-triangle" style="font-size:18px;"></i> <?php echo $error; ?>
+</div>
+<?php endif; ?>
+
 <!-- Sắp hết hàng -->
 <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
   <div style="padding:12px 20px;background:linear-gradient(135deg,#92400e,#b45309);display:flex;align-items:center;justify-content:space-between;">
@@ -75,7 +81,7 @@
   </div>
   <div style="overflow-x:auto;">
     <?php if(empty($expired)): ?>
-      <div style="padding:30px;text-align:center;color:#15803d;font-size:13px;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Không có thuốc nào sắp hết hạn</div>
+      <div style="padding:30px;text-align:center;color:#15803d;font-size:13px;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Không có sản phẩm nào hết hạn hoặc sắp hết hạn.</div>
     <?php else: ?>
     <table style="width:100%;border-collapse:collapse;">
       <thead>
@@ -114,5 +120,4 @@
     <?php endif; ?>
   </div>
 </div>
-
 </div>
