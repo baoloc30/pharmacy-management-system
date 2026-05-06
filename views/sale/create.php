@@ -227,10 +227,25 @@
       <button onclick="closeAddCustomerModal()" style="background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:8px;cursor:pointer;">✕</button>
     </div>
     <div style="padding:18px 20px;">
-      <div style="margin-bottom:11px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Họ tên <span style="color:#dc2626;">*</span></label><input type="text" id="newHoTen" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"></div>
-      <div style="margin-bottom:11px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Số điện thoại <span style="color:#dc2626;">*</span></label><input type="text" id="newSoDienThoai" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"></div>
-      <div style="margin-bottom:11px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Địa chỉ</label><input type="text" id="newDiaChi" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"></div>
-      <div style="margin-bottom:16px;"><label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Email</label><input type="email" id="newEmail" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;"></div>
+      <div style="margin-bottom:11px;">
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Họ tên <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="newHoTen" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+          <span id="newHoTenErr" style="color:#dc2626; font-size:11px; font-weight:600; display:block; margin-top:4px;"></span>
+      </div>
+      <div style="margin-bottom:11px;">
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Số điện thoại <span style="color:#dc2626;">*</span></label>
+          <input type="text" id="newSoDienThoai" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+          <span id="newSdtErr" style="color:#dc2626; font-size:11px; font-weight:600; display:block; margin-top:4px;"></span>
+      </div>
+      <div style="margin-bottom:11px;">
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Email</label>
+          <input type="email" id="newEmail" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+          <span id="newEmailErr" style="color:#dc2626; font-size:11px; font-weight:600; display:block; margin-top:4px;"></span>
+      </div>
+      <div style="margin-bottom:20px;">
+          <label style="font-size:12px;font-weight:700;color:#374151;display:block;margin-bottom:5px;">Địa chỉ</label>
+          <input type="text" id="newDiaChi" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;box-sizing:border-box;">
+      </div>
       <div style="display:flex;gap:8px;">
         <button onclick="closeAddCustomerModal()" style="flex:1;padding:9px;border-radius:8px;border:1.5px solid #e2e8f0;background:#f1f5f9;color:#64748b;font-size:13px;font-weight:600;cursor:pointer;">Hủy</button>
         <button onclick="saveNewCustomer()" style="flex:2;padding:9px;border-radius:8px;border:none;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;font-size:13px;font-weight:700;cursor:pointer;"><i class="fas fa-save"></i> Lưu khách hàng</button>
@@ -588,13 +603,65 @@ function closeAddCustomerModal(){ document.getElementById('addCustomerModal').st
 document.getElementById('addCustomerModal').addEventListener('click',function(e){ if(e.target===this) closeAddCustomerModal(); });
 
 function saveNewCustomer(){
-    var hoTen=document.getElementById('newHoTen').value.trim(), sdt=document.getElementById('newSoDienThoai').value.trim();
-    if(!hoTen||!sdt){ alert('Vui lòng nhập họ tên và số điện thoại'); return; }
+    var hoTen = document.getElementById('newHoTen').value.trim();
+    var sdt = document.getElementById('newSoDienThoai').value.trim();
+    var email = document.getElementById('newEmail').value.trim();
+    var diaChi = document.getElementById('newDiaChi').value.trim();
+
+    var ok = true;
+    var errorIds = ['newHoTenErr', 'newSdtErr', 'newEmailErr'];
+    
+    errorIds.forEach(function(id){ document.getElementById(id).textContent = ''; });
+
+    if(!hoTen){ 
+        document.getElementById('newHoTenErr').textContent = 'Vui lòng nhập họ tên khách hàng'; 
+        ok = false; 
+    }
+
+    if(!sdt){ 
+        document.getElementById('newSdtErr').textContent = 'Vui lòng nhập số điện thoại'; 
+        ok = false; 
+    } else if(!/^[0-9]{10}$/.test(sdt)){ 
+        document.getElementById('newSdtErr').textContent = 'Số điện thoại phải gồm đúng 10 chữ số'; 
+        ok = false; 
+    }
+
+    if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ 
+        document.getElementById('newEmailErr').textContent = 'Email sai định dạng'; 
+        ok = false; 
+    }
+
+    if(!ok) {
+        setTimeout(function() {
+            errorIds.forEach(function(id){ document.getElementById(id).textContent = ''; });
+        }, 3000);
+        return;
+    }
+
     $.ajax({ url:'<?php echo BASE_URL; ?>customer/add', type:'POST', headers:{'X-Requested-With':'XMLHttpRequest'},
-        data:{hoTen:hoTen,soDienThoai:sdt,diaChi:document.getElementById('newDiaChi').value,email:document.getElementById('newEmail').value}, dataType:'json',
+        data:{hoTen:hoTen, soDienThoai:sdt, diaChi:diaChi, email:email}, dataType:'json',
         success:function(res){
-            if(res.success){ selectedCustomer={maKhachHang:res.customer.maKhachHang,hoTen:hoTen,diemTichLuy:0}; document.getElementById('customerPhone').value=sdt; document.getElementById('customerInfo').innerHTML='<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#15803d;"><i class="fas fa-check-circle"></i> <b>'+hoTen+'</b> đã được thêm</div>'; closeAddCustomerModal(); document.getElementById('newHoTen').value=''; document.getElementById('newSoDienThoai').value=''; document.getElementById('newDiaChi').value=''; document.getElementById('newEmail').value=''; }
-            else { alert('Lỗi: '+(res.message||'Không thể thêm khách hàng')); }
+            if(res.success){ 
+                selectedCustomer = {maKhachHang:res.customer.maKhachHang, hoTen:hoTen, diemTichLuy:0}; 
+                document.getElementById('customerPhone').value = sdt; 
+                document.getElementById('customerInfo').innerHTML = '<div style="padding:8px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;color:#15803d;"><i class="fas fa-check-circle"></i> <b>'+hoTen+'</b> đã được thêm</div>'; 
+                closeAddCustomerModal(); 
+                document.getElementById('newHoTen').value=''; 
+                document.getElementById('newSoDienThoai').value=''; 
+                document.getElementById('newDiaChi').value=''; 
+                document.getElementById('newEmail').value=''; 
+            }
+            else { 
+                if(res.message && res.message.toLowerCase().includes('điện thoại')) {
+                    document.getElementById('newSdtErr').textContent = res.message;
+                    setTimeout(function() { document.getElementById('newSdtErr').textContent = ''; }, 3000);
+                } else if(res.message && res.message.toLowerCase().includes('email')) {
+                    document.getElementById('newEmailErr').textContent = res.message;
+                    setTimeout(function() { document.getElementById('newEmailErr').textContent = ''; }, 3000);
+                } else {
+                    alert('Lỗi: ' + (res.message || 'Không thể thêm khách hàng')); 
+                }
+            }
         }
     });
 }
