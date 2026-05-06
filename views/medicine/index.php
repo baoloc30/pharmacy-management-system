@@ -42,13 +42,19 @@
                     <div style="width:1px;height:24px;background:#e2e8f0;margin:0 4px;"></div>
 
                     <div style="position:relative;flex:1;display:flex;align-items:center;">
-                        <input type="text" name="keyword" id="searchKeyword" placeholder="Nhập mã, tên, thành phần..."
+                        <input type="text" name="keyword" id="searchKeyword" placeholder="Nhập mã, tên, thành phần bằng phím hoặc giọng nói..."
                             value="<?php echo htmlspecialchars($keyword ?? $_GET['keyword'] ?? ''); ?>"
-                            style="width:100%;padding:10px 36px 10px 14px;border:none;background:transparent;font-size:13px;color:#1e293b;outline:none;">
+                            style="width:100%;padding:10px 65px 10px 14px;border:none;background:transparent;font-size:13px;color:#1e293b;outline:none;"
+                            onkeydown="if(event.key==='Enter'){this.form.submit();}">
                         
+                        <button type="button" id="micBtnIndex" onclick="startDictationIndex()" title="Tìm kiếm bằng giọng nói"
+                          style="position:absolute; right:<?php echo (!empty($_GET['keyword']) || !empty($_GET['category_id'])) ? '34px' : '8px'; ?>; background:transparent; border:none; color:#3b82f6; cursor:pointer; font-size:15px; padding:6px; display:flex; align-items:center; justify-content:center; transition:all 0.2s;">
+                            <i class="fas fa-microphone" id="micIconIndex"></i>
+                        </button>
+
                         <?php if(!empty($_GET['keyword']) || !empty($_GET['category_id'])): ?>
                         <a href="<?php echo BASE_URL; ?>medicine/index" 
-                        style="position:absolute;right:10px;width:24px;height:24px;background:#fef2f2;color:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:12px;transition:all .2s;"
+                        style="position:absolute;right:8px;width:22px;height:22px;background:#fef2f2;color:#ef4444;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:11px;transition:all .2s;"
                         onmouseover="this.style.background='#fecaca'" onmouseout="this.style.background='#fef2f2'" title="Xóa bộ lọc">
                             <i class="fas fa-times"></i>
                         </a>
@@ -182,6 +188,65 @@
         </div>
     </div>
 </div>
+
+<script>
+function startDictationIndex() {
+    if (window.hasOwnProperty('webkitSpeechRecognition') || window.hasOwnProperty('SpeechRecognition')) {
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        var recognition = new SpeechRecognition();
+
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "vi-VN";
+
+        var micBtn = document.getElementById('micBtnIndex');
+        var micIcon = document.getElementById('micIconIndex');
+        var searchInput = document.getElementById('searchKeyword');
+
+        micBtn.style.color = '#ef4444';
+        micIcon.classList.remove('fa-microphone');
+        micIcon.classList.add('fa-microphone-lines', 'fa-beat-fade');
+        searchInput.placeholder = "Đang lắng nghe...";
+        searchInput.value = "";
+
+        recognition.start();
+
+        recognition.onresult = function(e) {
+            var transcript = e.results[0][0].transcript;
+            transcript = transcript.replace(/[.,]/g, '');
+
+            searchInput.value = transcript;
+            recognition.stop();
+            
+            document.getElementById('searchMedForm').submit();
+        };
+
+        recognition.onerror = function(e) {
+            recognition.stop();
+            resetMicUIIndex();
+            if (e.error === 'not-allowed') {
+                alert("Vui lòng cấp quyền sử dụng Micro cho trình duyệt để dùng tính năng này!");
+            } else {
+                alert("Không nhận diện được giọng nói, vui lòng thử lại.");
+            }
+        };
+
+        recognition.onend = function() {
+            resetMicUIIndex();
+        };
+
+        function resetMicUIIndex() {
+            micBtn.style.color = '#3b82f6';
+            micIcon.classList.remove('fa-microphone-lines', 'fa-beat-fade');
+            micIcon.classList.add('fa-microphone');
+            searchInput.placeholder = "Nhập mã, tên, thành phần bằng phím hoặc giọng nói...";
+        }
+
+    } else {
+        alert("Trình duyệt của bạn không hỗ trợ tìm kiếm giọng nói. Vui lòng dùng Google Chrome, Cốc Cốc hoặc Edge.");
+    }
+}
+</script>
 
 <!-- Overlay xác nhận xóa -->
 <div id="deleteOverlay" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;">
