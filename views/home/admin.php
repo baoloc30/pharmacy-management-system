@@ -216,11 +216,16 @@
 </div>
 
 <script>
-$.get('<?php echo BASE_URL; ?>home/stats', function(d) {
-    if (!d) return;
-    if (d.totalMedicine !== undefined) $('#totalMedicine').text(d.totalMedicine);
-    if (d.todayRevenue !== undefined) $('#todayRevenue').text(new Intl.NumberFormat('vi-VN').format(d.todayRevenue) + 'đ');
-    if (d.lowStock !== undefined) $('#lowStock').text(d.lowStock);
-    if (d.expiringSoon !== undefined) $('#expiringSoon').text(d.expiringSoon);
-}, 'json');
+document.addEventListener("DOMContentLoaded", function() {
+    fetch('<?php echo BASE_URL; ?>home/stats')
+        .then(response => response.json())
+        .then(d => {
+            if (!d) return;
+            if (d.totalMedicine !== undefined) document.getElementById('totalMedicine').innerText = d.totalMedicine;
+            if (d.todayRevenue !== undefined) document.getElementById('todayRevenue').innerText = new Intl.NumberFormat('vi-VN').format(d.todayRevenue) + 'đ';
+            if (d.lowStock !== undefined) document.getElementById('lowStock').innerText = d.lowStock;
+            if (d.expiringSoon !== undefined) document.getElementById('expiringSoon').innerText = d.expiringSoon;
+        })
+        .catch(error => console.error("Lỗi lấy dữ liệu Dashboard: ", error));
+});
 </script>

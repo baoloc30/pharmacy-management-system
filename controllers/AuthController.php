@@ -64,7 +64,7 @@ class AuthController extends Controller {
 
     public function logout() {
         Session::destroy();
-        redirect('auth/login');
+        redirect('/');
     }
 
     public function changePassword() {

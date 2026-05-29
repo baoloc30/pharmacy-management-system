@@ -206,24 +206,28 @@ class EmployeeController extends Controller {
         $data['to_date']   = $toDate;
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $maNhanVien = $_POST['maNhanVien'] ?? '';
+            $maNhanVien = intval($_POST['maNhanVien'] ?? 0);
             $ngayLam    = $_POST['ngayLam'] ?? '';
+            $caLam      = $_POST['caLam'] ?? '';
             $gioBatDau  = $_POST['gioBatDau'] ?? '';
             $gioKetThuc = $_POST['gioKetThuc'] ?? '';
 
-            if (empty($maNhanVien) || empty($ngayLam) || empty($gioBatDau) || empty($gioKetThuc)) {
+            $allowedCa = ['Sang', 'Chieu', 'TangCa'];
+            if (!$maNhanVien || empty($ngayLam) || !in_array($caLam, $allowedCa)) {
                 $data['inline_error'] = 'Vui lòng chọn đầy đủ thông tin!';
             } else {
                 $shiftData = [
                     'maNhanVien' => $maNhanVien,
                     'ngayLam'    => $ngayLam,
-                    'caLam'      => 'TangCa',
-                    'gioBatDau'  => $gioBatDau,
-                    'gioKetThuc' => $gioKetThuc,
+                    'caLam'      => $caLam,
+                    'gioBatDau'  => $gioBatDau ?: '00:00',
+                    'gioKetThuc' => $gioKetThuc ?: '00:00',
                     'ghiChu'     => $_POST['ghiChu'] ?? ''
                 ];
                 if ($workShiftModel->assignShift($shiftData)) {
-                    $_SESSION['toast_success'] = 'Phân công tăng ca thành công'; 
+                    // Cập nhật cột lichLamViec trong bảng nhanvien
+                    $workShiftModel->updateEmployeeLichLamViec($maNhanVien);
+                    $_SESSION['toast_success'] = 'Phân công ca làm việc thành công!';
                     redirect('employee/workshift?from_date=' . $fromDate . '&to_date=' . $toDate);
                     exit;
                 } else {
@@ -234,4 +238,31 @@ class EmployeeController extends Controller {
 
         $this->view('employee/workshift', $data);
     }
+
+    public function deleteshift($id) {
+        $this->checkLogin();
+        $this->checkRole('QuanLy');
+
+        $workShiftModel = $this->model('WorkShiftModel');
+
+        // Lấy maNhanVien trước khi xóa để cập nhật lichLamViec sau
+        $shift = $workShiftModel->getShiftById(intval($id));
+
+        if ($workShiftModel->deleteShift(intval($id))) {
+            // Cập nhật cột lichLamViec trong bảng nhanvien
+            if ($shift) {
+                $workShiftModel->updateEmployeeLichLamViec($shift['maNhanVien']);
+            }
+            $_SESSION['toast_success'] = 'Đã xóa ca làm việc thành công!';
+        } else {
+            $_SESSION['toast_error'] = 'Không thể xóa ca làm việc.';
+        }
+
+        $from = $_GET['from_date'] ?? date('Y-m-d');
+        $to   = $_GET['to_date']   ?? date('Y-m-d', strtotime('+7 days'));
+        redirect('employee/workshift?from_date=' . $from . '&to_date=' . $to);
+        exit;
+    }
 }
+
+

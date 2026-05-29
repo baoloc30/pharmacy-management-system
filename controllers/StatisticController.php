@@ -10,27 +10,34 @@ class StatisticController extends Controller {
         $statisticModel = $this->model('StatisticModel');
         $data = [];
         
-        if (isset($_GET['from_date']) || isset($_GET['to_date'])) {
-            $fromDate = trim($_GET['from_date'] ?? '');
-            $toDate = trim($_GET['to_date'] ?? '');
-            
-            $data['from_date'] = $fromDate;
-            $data['to_date'] = $toDate;
-            
-            if ($fromDate === '' || $toDate === '') {
-                $data['error'] = 'Vui lòng chọn đầy đủ thông tin thống kê';
-                $data['revenue'] = [];
-            } else {
-                $data['revenue'] = $statisticModel->getRevenue($fromDate, $toDate);
-                
-                if (empty($data['revenue'])) {
-                    $data['error'] = 'Không tìm thấy dữ liệu thống kê';
-                }
-            }
+        $filters = [
+            'maNhanVien' => trim($_GET['ma_nhan_vien'] ?? ''),
+            'maThuoc'    => trim($_GET['ma_thuoc'] ?? ''),
+            'tenThuoc'   => trim($_GET['ten_thuoc'] ?? '')
+        ];
+        $data['filters'] = $filters;
+
+        $fromDate = $_GET['from_date'] ?? date('Y-m-01');
+        $toDate = $_GET['to_date'] ?? date('Y-m-d');
+        
+        $data['from_date'] = $fromDate;
+        $data['to_date'] = $toDate;
+
+        if ($fromDate === '' || $toDate === '') {
+            $data['error'] = 'Vui lòng chọn đầy đủ thời gian';
         } else {
-            $data['from_date'] = date('Y-m-01');
-            $data['to_date'] = date('Y-m-d');
-            $data['revenue'] = $statisticModel->getRevenue($data['from_date'], $data['to_date']);
+            // 1. Lấy dữ liệu Tổng
+            $data['summary'] = $statisticModel->getAggregatedRevenue($fromDate, $toDate, $filters);
+            
+            // 2. Lấy dữ liệu Biểu đồ
+            $data['chartData'] = $statisticModel->getDailyRevenue($fromDate, $toDate, $filters);
+
+            // 3. Lấy toàn bộ danh sách chi tiết (Để đẩy vào thanh cuộn)
+            $data['revenueDetails'] = $statisticModel->getRevenueDetails($fromDate, $toDate, $filters);
+
+            if (empty($data['revenueDetails'])) {
+                $data['error'] = 'Không tìm thấy dữ liệu thống kê phù hợp.';
+            }
         }
         
         $this->view('statistic/revenue', $data);

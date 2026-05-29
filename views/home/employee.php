@@ -198,10 +198,15 @@
 </div>
 
 <script>
-$.get('<?php echo BASE_URL; ?>home/stats', function(d) {
-    if (!d) return;
-    if (d.todayInvoices !== undefined) $('#todayInvoices').text(d.todayInvoices);
-    if (d.todayRevenue !== undefined) $('#todayRevenue').text(new Intl.NumberFormat('vi-VN').format(d.todayRevenue) + 'đ');
-    if (d.lowStock !== undefined) $('#lowStock').text(d.lowStock);
-}, 'json');
+document.addEventListener("DOMContentLoaded", function() {
+    fetch('<?php echo BASE_URL; ?>home/stats')
+        .then(response => response.json())
+        .then(d => {
+            if (!d) return;
+            if (d.todayInvoices !== undefined) document.getElementById('todayInvoices').innerText = d.todayInvoices;
+            if (d.todayRevenue !== undefined) document.getElementById('todayRevenue').innerText = new Intl.NumberFormat('vi-VN').format(d.todayRevenue) + 'đ';
+            if (d.lowStock !== undefined) document.getElementById('lowStock').innerText = d.lowStock;
+        })
+        .catch(error => console.error("Lỗi lấy dữ liệu Dashboard: ", error));
+});
 </script>

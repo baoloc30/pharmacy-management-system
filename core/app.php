@@ -6,6 +6,7 @@ class App {
 
     // Map URL segment -> Controller class name
     private $routes = [
+        'landing'   => 'LandingController',
         'auth'      => 'AuthController',
         'home'      => 'HomeController',
         'medicine'  => 'MedicineController',
@@ -48,6 +49,6 @@ class App {
         if (isset($_GET['url'])) {
             return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
         }
-        return ['auth', 'login'];
+        return ['landing', 'index'];
     }
 }
