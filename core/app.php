@@ -1,5 +1,6 @@
 <?php
-class App {
+class App
+{
     protected $controller = 'AuthController';
     protected $method = 'index';
     protected $params = [];
@@ -17,9 +18,11 @@ class App {
         'category'  => 'CategoryController',
         'employee'  => 'EmployeeController',
         'supplier'  => 'SupplierController',
+        'forecast'  => 'ForecastController',
     ];
 
-    public function __construct() {
+    public function __construct()
+    {
         $url = $this->parseUrl();
 
         $segment = strtolower($url[0]);
@@ -45,7 +48,8 @@ class App {
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
 
-    public function parseUrl() {
+    public function parseUrl()
+    {
         if (isset($_GET['url'])) {
             return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
         }

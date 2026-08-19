@@ -75,7 +75,7 @@
   <div style="padding:12px 20px;background:linear-gradient(135deg,#991b1b,#dc2626);display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:8px;">
       <i class="fas fa-clock" style="color:#fff;font-size:13px;"></i>
-      <span style="font-size:13px;font-weight:700;color:#fff;">Thuốc sắp hết hạn (30 ngày tới)</span>
+      <span style="font-size:13px;font-weight:700;color:#fff;">Thuốc hết hạn / sắp hết hạn</span>
     </div>
     <span style="font-size:12px;color:rgba(255,255,255,.8);"><?php echo count($expired ?? []); ?> mặt hàng</span>
   </div>

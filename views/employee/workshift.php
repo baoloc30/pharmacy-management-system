@@ -133,9 +133,20 @@ $uniqueNV    = count(array_unique(array_column($schedule ?? [], 'maNhanVien')));
       </div><!-- end grid -->
 
       <?php if(isset($inline_error)): ?>
-      <div style="margin-top:14px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-weight:600;">
+      <div id="serverInlineError" style="margin-top:14px;padding:10px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;color:#dc2626;font-size:13px;font-weight:600;transition: opacity 0.5s ease;">
         <i class="fas fa-exclamation-circle" style="margin-right:6px;"></i><?php echo htmlspecialchars($inline_error); ?>
       </div>
+      <script>
+        setTimeout(function() {
+            var errDiv = document.getElementById('serverInlineError');
+            if (errDiv) {
+                errDiv.style.opacity = '0';
+                setTimeout(function() { 
+                    errDiv.style.display = 'none';
+                }, 500);
+            }
+        }, 3000);
+      </script>
       <?php endif; ?>
     </form>
   </div>

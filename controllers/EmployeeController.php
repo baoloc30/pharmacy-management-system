@@ -215,6 +215,9 @@ class EmployeeController extends Controller {
             $allowedCa = ['Sang', 'Chieu', 'TangCa'];
             if (!$maNhanVien || empty($ngayLam) || !in_array($caLam, $allowedCa)) {
                 $data['inline_error'] = 'Vui lòng chọn đầy đủ thông tin!';
+            } elseif ($workShiftModel->checkDuplicateShift($maNhanVien, $ngayLam, $caLam)) {
+                $caNames = ['Sang' => 'Sáng', 'Chieu' => 'Chiều', 'TangCa' => 'Tăng ca'];
+                $data['inline_error'] = 'Nhân viên này đã được phân công Ca ' . $caNames[$caLam] . ' trong ngày ' . date('d/m/Y', strtotime($ngayLam)) . '. Vui lòng kiểm tra lại!';            
             } else {
                 $shiftData = [
                     'maNhanVien' => $maNhanVien,

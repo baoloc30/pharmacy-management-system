@@ -35,9 +35,9 @@ class MedicineModel extends Model {
     public function getExpired($days = 30) {
         $sql = "SELECT t.*, d.tenDanhMuc 
                 FROM thuoc t 
-                JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
-                WHERE t.hanSuDung <= DATE_ADD(CURDATE(), INTERVAL ? DAY) 
-                AND t.hanSuDung >= CURDATE()";
+                LEFT JOIN danhmucthuoc d ON t.maDanhMuc = d.maDanhMuc 
+                WHERE t.hanSuDung <= DATE_ADD(CURDATE(), INTERVAL ? DAY)
+                ORDER BY t.hanSuDung ASC";
         $stmt = $this->db->prepare($sql);
         $stmt->bind_param("i", $days);
         $stmt->execute();

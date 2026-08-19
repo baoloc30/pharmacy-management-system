@@ -32,6 +32,14 @@ class WorkShiftModel extends Model {
         return $stmt->get_result()->fetch_assoc();
     }
 
+    public function checkDuplicateShift($maNhanVien, $ngayLam, $caLam) {
+        $sql = "SELECT maLich FROM lichlamviec WHERE maNhanVien = ? AND ngayLam = ? AND caLam = ?";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("iss", $maNhanVien, $ngayLam, $caLam);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0;
+    }
+
     public function assignShift($data) {
         try {
             $sql = "INSERT INTO lichlamviec (maNhanVien, ngayLam, caLam, gioBatDau, gioKetThuc, ghiChu) 

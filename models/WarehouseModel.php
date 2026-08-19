@@ -1,22 +1,25 @@
 <?php
 require_once 'core/Model.php';
 
-class WarehouseModel extends Model {
+class WarehouseModel extends Model
+{
     protected $table = 'phieunhapkho';
     protected $primaryKey = 'maPhieuNK';
 
-    public function createImport($importData, $items) {
+    public function createImport($importData, $items)
+    {
         $this->db->begin_transaction();
-        
+
         try {
             // Tạo mã phiếu nhập
             $importData['maPhieu'] = generateCode('PN');
-            
+
             // Insert phiếu nhập
-            $sql = "INSERT INTO phieunhapkho (maPhieu, maNhanVien, maNhaCC, tongTien) 
-                    VALUES (?, ?, ?, ?)";
+            $sql = "INSERT INTO phieunhapkho (maPhieu, maNhanVien, maNhaCC, tongTien, trangThai) 
+        VALUES (?, ?, ?, ?, 'DaDuyet')";
             $stmt = $this->db->prepare($sql);
-            $stmt->bind_param("siid", 
+            $stmt->bind_param(
+                "siid",
                 $importData['maPhieu'],
                 $importData['maNhanVien'],
                 $importData['maNhaCC'],
@@ -24,9 +27,9 @@ class WarehouseModel extends Model {
             );
             $stmt->execute();
             $maPhieuNK = $stmt->insert_id;
-            
+
             // Insert chi tiết và cập nhật tồn kho
-            foreach($items as $item) {
+            foreach ($items as $item) {
                 $maThuoc  = (int)$item['maThuoc'];
                 $soLuong  = (int)$item['soLuong'];
                 $donGia   = (float)$item['donGia'];
@@ -44,13 +47,13 @@ class WarehouseModel extends Model {
                 $stmt = $this->db->prepare($sql);
                 $stmt->bind_param("iiids", $maPhieuNK, $maThuoc, $soLuong, $donGia, $hanSD);
                 $stmt->execute();
-                
+
                 // Cập nhật tồn kho và giá nhập
                 $sql = "UPDATE thuoc SET soLuongTon = soLuongTon + ?, giaNhap = ?, hanSuDung = ? WHERE maThuoc = ?";
                 $stmt = $this->db->prepare($sql);
                 $stmt->bind_param("idsi", $soLuong, $donGia, $hanSD, $maThuoc);
                 $stmt->execute();
-                
+
                 // Ghi lịch sử nhập
                 $maNV = (int)$importData['maNhanVien'];
                 $sql = "INSERT INTO lichsunhap_xuat (maThuoc, loaiGiaoDich, soLuong, tonKhoTruoc, tonKhoSau, maChungTu, loaiChungTu, maNhanVien) 
@@ -59,17 +62,17 @@ class WarehouseModel extends Model {
                 $stmt->bind_param("iiiiii", $maThuoc, $soLuong, $tonTruoc, $tonSau, $maPhieuNK, $maNV);
                 $stmt->execute();
             }
-            
+
             $this->db->commit();
             return true;
-            
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             $this->db->rollback();
             return false;
         }
     }
 
-    public function getHistory($fromDate = '', $toDate = '', $type = '', $search = '') {
+    public function getHistory($fromDate = '', $toDate = '', $type = '', $search = '')
+    {
         $sql = "SELECT l.*, t.tenThuoc, n.hoTen as tenNhanVien 
                 FROM lichsunhap_xuat l 
                 JOIN thuoc t ON l.maThuoc = t.maThuoc 
@@ -109,7 +112,8 @@ class WarehouseModel extends Model {
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
 
-    public function getTransactionDetail($maChungTu, $loaiChungTu) {
+    public function getTransactionDetail($maChungTu, $loaiChungTu)
+    {
         if ($loaiChungTu === 'PhieuNhap') {
             $sqlMaster = "SELECT p.maPhieu as maSo, p.tongTien, n.hoTen as tenNhanVien, nc.tenNhaCC as doiTac
                           FROM phieunhapkho p
@@ -132,7 +136,7 @@ class WarehouseModel extends Model {
                         JOIN thuoc t ON c.maThuoc = t.maThuoc
                         WHERE c.maHoaDon = ?";
         } else {
-            return null; 
+            return null;
         }
 
         try {
@@ -146,11 +150,93 @@ class WarehouseModel extends Model {
             $stmt2->execute();
             $details = $stmt2->get_result()->fetch_all(MYSQLI_ASSOC);
 
-            if($master) {
+            if ($master) {
                 $master['chi_tiet'] = $details;
                 return $master;
             }
-        } catch (Exception $e) { return null; }
+        } catch (Exception $e) {
+            return null;
+        }
         return null;
+    }
+
+    // 1. Lấy danh sách phiếu đang chờ duyệt
+    public function getPendingImports()
+    {
+        $sql = "SELECT p.*, n.hoTen as tenNhanVien, nc.tenNhaCC 
+                FROM phieunhapkho p
+                LEFT JOIN nhanvien n ON p.maNhanVien = n.maNhanVien
+                LEFT JOIN nhacungcap nc ON p.maNhaCC = nc.maNhaCC
+                WHERE p.trangThai = 'ChoDuyet'
+                ORDER BY p.ngayLap DESC";
+        return $this->db->query($sql)->fetch_all(MYSQLI_ASSOC);
+    }
+
+    // 2. Chuyển phiếu từ Chờ duyệt sang Đã duyệt (Cộng vào kho)
+    public function approveImport($maPhieuNK, $maNhanVienDuyet, $maNhaCC)
+    {
+        $this->db->begin_transaction();
+        try {
+            // 1. Cập nhật lại đúng Nhà cung cấp mà Quản lý đã chọn
+            $sqlUpdNCC = "UPDATE phieunhapkho SET maNhaCC = ? WHERE maPhieuNK = ?";
+            $stmtNCC = $this->db->prepare($sqlUpdNCC);
+            $stmtNCC->bind_param("ii", $maNhaCC, $maPhieuNK);
+            $stmtNCC->execute();
+
+            // 2. Lấy chi tiết các thuốc trong phiếu đề xuất (Giữ nguyên code cũ của bạn)
+            $sqlCT = "SELECT * FROM ct_phieunhapkho WHERE maPhieuNK = ?";
+            $stmtCT = $this->db->prepare($sqlCT);
+            $stmtCT->bind_param("i", $maPhieuNK);
+            $stmtCT->execute();
+            $items = $stmtCT->get_result()->fetch_all(MYSQLI_ASSOC);
+
+            // Chạy vòng lặp cộng tồn kho và ghi lịch sử (giống hệt cơ chế gốc của hệ thống)
+            foreach ($items as $item) {
+                $maThuoc = $item['maThuoc'];
+                $soLuong = $item['soLuong'];
+
+                // Lấy tồn trước khi nhập
+                $stmtTon = $this->db->prepare("SELECT soLuongTon FROM thuoc WHERE maThuoc=?");
+                $stmtTon->bind_param("i", $maThuoc);
+                $stmtTon->execute();
+                $tonTruoc = (int)$stmtTon->get_result()->fetch_assoc()['soLuongTon'];
+                $tonSau = $tonTruoc + $soLuong;
+
+                // Cập nhật số lượng tồn kho mới
+                $sqlUpd = "UPDATE thuoc SET soLuongTon = ? WHERE maThuoc = ?";
+                $stmtUpd = $this->db->prepare($sqlUpd);
+                $stmtUpd->bind_param("di", $tonSau, $maThuoc);
+                $stmtUpd->execute();
+
+                // Sinh ra lịch sử nhập xuất để hiện lên trang History
+                $sqlHist = "INSERT INTO lichsunhap_xuat (maThuoc, loaiGiaoDich, soLuong, tonKhoTruoc, tonKhoSau, maChungTu, loaiChungTu, maNhanVien) 
+                            VALUES (?, 'Nhap', ?, ?, ?, ?, 'PhieuNhap', ?)";
+                $stmtHist = $this->db->prepare($sqlHist);
+                $stmtHist->bind_param("iiiiii", $maThuoc, $soLuong, $tonTruoc, $tonSau, $maPhieuNK, $maNhanVienDuyet);
+                $stmtHist->execute();
+            }
+
+            // Chuyển trạng thái tờ phiếu thành Đã duyệt
+            $sqlDuyet = "UPDATE phieunhapkho SET trangThai = 'DaDuyet' WHERE maPhieuNK = ?";
+            $stmtDuyet = $this->db->prepare($sqlDuyet);
+            $stmtDuyet->bind_param("i", $maPhieuNK);
+            $stmtDuyet->execute();
+
+            $this->db->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->db->rollback();
+            return false;
+        }
+    }
+
+    // 3. Hủy phiếu nhập kho đề xuất
+    public function cancelImport($maPhieuNK)
+    {
+        // Chỉ cho phép hủy những phiếu đang ở trạng thái ChoDuyet để bảo vệ dữ liệu
+        $sql = "UPDATE phieunhapkho SET trangThai = 'DaHuy' WHERE maPhieuNK = ? AND trangThai = 'ChoDuyet'";
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("i", $maPhieuNK);
+        return $stmt->execute();
     }
 }
