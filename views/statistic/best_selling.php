@@ -48,7 +48,7 @@
 <!-- Chart -->
 <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:20px;">
   <div style="padding:14px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
-    <span style="font-size:15px;font-weight:700;color:#fff;"><i class="fas fa-chart-pie me-2"></i> Biểu Đồ Top 10 Thuốc Bán Chạy</span>
+    <span style="font-size:15px;font-weight:700;color:#fff;"><i class="fas fa-chart-pie me-2"></i> Biểu Đồ Top Thuốc Bán Chạy</span>
   </div>
   <div style="padding:20px; min-height: 300px; display:flex; align-items:center;">
     <canvas id="bestSellingChart" height="100"></canvas>
