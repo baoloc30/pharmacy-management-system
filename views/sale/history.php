@@ -55,7 +55,7 @@
     </div>
     <span style="font-size:12px;color:rgba(255,255,255,.8);"><?php echo count($invoices ?? []); ?> hóa đơn</span>
   </div>
-  <div style="overflow-x:auto;">
+  <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
     <?php if (empty($invoices)): ?>
       <div style="padding:40px;text-align:center;color:#94a3b8;">
         <i class="fas fa-receipt" style="font-size:40px;margin-bottom:12px;display:block;"></i>
@@ -63,7 +63,7 @@
       </div>
     <?php else: ?>
     <table style="width:100%;border-collapse:collapse;">
-      <thead>
+      <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
           <th style="padding:11px 16px;font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Mã HD</th>
           <th style="padding:11px 16px;font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Thời gian lập</th>
@@ -163,7 +163,7 @@ function viewDetail(id) {
         html += '</tr></thead><tbody>';
 
         data.items.forEach(function(item, i) {
-          var bg = i % 2 === 0 ? '#fff' : '#f0f7ff';
+          var bg = i % 2 === 0 ? '#fff' : '#eeecec';
           html += '<tr style="background:' + bg + ';">';
           html += '<td style="padding:9px 12px;font-weight:600;color:#1e293b;">' + (item.tenThuoc || '') + '</td>';
           html += '<td style="padding:9px 12px;color:#475569;">' + (item.donViBan || item.donViTinh || '') + '</td>';
@@ -174,10 +174,35 @@ function viewDetail(id) {
         });
 
         html += '</tbody>';
-        html += '<tfoot><tr style="background:#f0f7ff;border-top:2px solid #bfdbfe;">';
-        html += '<td colspan="4" style="padding:10px 12px;text-align:right;font-weight:700;color:#1e293b;">Tổng tiền:</td>';
-        html += '<td style="padding:10px 12px;text-align:right;font-weight:800;color:#dc2626;font-size:15px;">' + fmt(data.tongTien || 0) + '</td>';
-        html += '</tr></tfoot></table></div>';
+        html += '<tfoot>';
+        
+        var tongTienDb = data.tongTien || 0;
+        var tienGiamDb = data.tienGiam || 0;
+        
+        if (tienGiamDb > 0) {
+            var tongTienGoc = parseFloat(tongTienDb) + parseFloat(tienGiamDb);
+            html += '<tr style="background:#cfeaff; border-top:1px solid #e2e8f0;">';
+            html += '<td colspan="4" style="padding:8px 12px;text-align:right;font-weight:600;color:#334155;">Tổng tiền hàng:</td>';
+            html += '<td style="padding:8px 12px;text-align:right;font-weight:700;color:#1e293b;font-size:14px;">' + fmt(tongTienGoc) + '</td>';
+            html += '</tr>';
+            
+            html += '<tr style="background:#fef2f2; border-top:1px solid #fee2e2;">';
+            html += '<td colspan="4" style="padding:8px 12px;text-align:right;font-weight:600;color:#991b1b;">Giảm giá:</td>';
+            html += '<td style="padding:8px 12px;text-align:right;font-weight:700;color:#dc2626;font-size:14px;">-' + fmt(tienGiamDb) + '</td>';
+            html += '</tr>';
+            
+            html += '<tr style="background:#cefded; border-top:1.5px solid #bfdbfe;">';
+            html += '<td colspan="4" style="padding:10px 12px;text-align:right;font-weight:700;color:#1e40af;">Thanh toán:</td>';
+            html += '<td style="padding:10px 12px;text-align:right;font-weight:900;color:#1d4ed8;font-size:16px;">' + fmt(tongTienDb) + '</td>';
+            html += '</tr>';
+        } else {
+            html += '<tr style="background:#cefded; border-top:1.5px solid #bfdbfe;">';
+            html += '<td colspan="4" style="padding:10px 12px;text-align:right;font-weight:700;color:#1e40af;">Tổng tiền:</td>';
+            html += '<td style="padding:10px 12px;text-align:right;font-weight:900;color:#1d4ed8;font-size:16px;">' + fmt(tongTienDb) + '</td>';
+            html += '</tr>';
+        }
+        
+        html += '</tfoot></table></div>';
         
         document.getElementById('detailBody').innerHTML = html;
 

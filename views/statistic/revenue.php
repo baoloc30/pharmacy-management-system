@@ -74,20 +74,58 @@
     }
 
     $soHoaDon = count($dsHoaDon);
-    $giaTriTrungBinh = $soHoaDon > 0 ? ($summary['totalRevenue'] ?? 0 / $soHoaDon) : 0;
+    $giaTriTrungBinh = $soHoaDon > 0 ? (($summary['totalRevenue'] ?? 0) / $soHoaDon) : 0;
 
     arsort($doanhThuTheoThuoc);
     $topThuocLabels = array_slice(array_keys($doanhThuTheoThuoc), 0, 5);
     $topThuocData = array_slice(array_values($doanhThuTheoThuoc), 0, 5);
 
     arsort($doanhThuTheoNhanVien);
-    $nvLabels = array_keys($doanhThuTheoNhanVien);
-    $nvData = array_values($doanhThuTheoNhanVien);
+    
+    $top5NV = array_slice($doanhThuTheoNhanVien, 0, 5);
+    $otherNVRevenue = array_sum(array_slice($doanhThuTheoNhanVien, 5));
+    if ($otherNVRevenue > 0) {
+        $top5NV['Nhân viên khác'] = $otherNVRevenue;
+    }
+    
+    $nvLabels = array_keys($top5NV);
+    $nvData = array_values($top5NV);
+    
+    // Insight 1: Ngày đạt đỉnh doanh thu
+    $maxDay = '';
+    $maxDayRevenue = 0;
+    if (!empty($chartData)) {
+        foreach ($chartData as $d) {
+            if ($d['doanhThu'] > $maxDayRevenue) {
+                $maxDayRevenue = $d['doanhThu'];
+                $maxDay = date('d/m/Y', strtotime($d['ngay']));
+            }
+        }
+    }
+
+    // Insight 2: Sản phẩm chủ lực & Tỷ trọng
+    $bestProduct = '';
+    $bestProductRevenue = 0;
+    if (!empty($doanhThuTheoThuoc)) {
+        reset($doanhThuTheoThuoc);
+        $bestProduct = key($doanhThuTheoThuoc);
+        $bestProductRevenue = current($doanhThuTheoThuoc);
+    }
+    $bestProductPercent = ($summary['totalRevenue'] ?? 0) > 0 ? round(($bestProductRevenue / $summary['totalRevenue']) * 100, 1) : 0;
+
+    // Insight 3: Nhân viên xuất sắc & Tỷ trọng
+    $bestEmp = '';
+    $bestEmpRevenue = 0;
+    if (!empty($doanhThuTheoNhanVien)) {
+        reset($doanhThuTheoNhanVien);
+        $bestEmp = key($doanhThuTheoNhanVien);
+        $bestEmpRevenue = current($doanhThuTheoNhanVien);
+    }
+    $bestEmpPercent = ($summary['totalRevenue'] ?? 0) > 0 ? round(($bestEmpRevenue / $summary['totalRevenue']) * 100, 1) : 0;
     ?>
 
     <!-- --- KHỐI THẺ KPI CHỈ SỐ TỔNG QUAN --- -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:20px;">
-
       <!-- Thẻ 1 -->
       <div style="background:linear-gradient(135deg,#1e40af,#3b82f6); border-radius:18px; box-shadow:0 8px 24px rgba(37,99,235,.25); padding:24px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden; transition:transform 0.3s ease; cursor:pointer;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform='translateY(0)'">
         <i class="fas fa-wallet" style="font-size:90px; color:rgba(255,255,255,.08); position:absolute; right:-15px; bottom:-15px; transform:rotate(-15deg);"></i>
@@ -96,7 +134,6 @@
           <?= number_format($summary['totalRevenue'] ?? 0, 0, ',', '.') ?> <span style="font-size:16px;">đ</span>
         </div>
       </div>
-
       <!-- Thẻ 2 -->
       <div style="background:linear-gradient(135deg,#15803d,#22c55e); border-radius:18px; box-shadow:0 8px 24px rgba(21,128,61,.25); padding:24px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden; transition:transform 0.3s ease; cursor:pointer;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform='translateY(0)'">
         <i class="fas fa-box-open" style="font-size:90px; color:rgba(255,255,255,.08); position:absolute; right:-15px; bottom:-15px; transform:rotate(-15deg);"></i>
@@ -105,7 +142,6 @@
           <?= number_format($summary['totalQuantity'] ?? 0, 0, ',', '.') ?> <span style="font-size:16px;">sp</span>
         </div>
       </div>
-
       <!-- Thẻ 3 -->
       <div style="background:linear-gradient(135deg,#b45309,#f59e0b); border-radius:18px; box-shadow:0 8px 24px rgba(180,83,9,.25); padding:24px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden; transition:transform 0.3s ease; cursor:pointer;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform='translateY(0)'">
         <i class="fas fa-file-invoice-dollar" style="font-size:90px; color:rgba(255,255,255,.08); position:absolute; right:-15px; bottom:-15px; transform:rotate(-15deg);"></i>
@@ -114,7 +150,6 @@
           <?= number_format($soHoaDon, 0, ',', '.') ?> <span style="font-size:16px;">phiếu</span>
         </div>
       </div>
-
       <!-- Thẻ 4 -->
       <div style="background:linear-gradient(135deg,#6d28d9,#8b5cf6); border-radius:18px; box-shadow:0 8px 24px rgba(109,40,217,.25); padding:24px 20px; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; position:relative; overflow:hidden; transition:transform 0.3s ease; cursor:pointer;" onmouseover="this.style.transform='translateY(-6px)'" onmouseout="this.style.transform='translateY(0)'">
         <i class="fas fa-users" style="font-size:90px; color:rgba(255,255,255,.08); position:absolute; right:-15px; bottom:-15px; transform:rotate(-15deg);"></i>
@@ -124,6 +159,58 @@
         </div>
       </div>
     </div>
+
+    <!-- KHỐI SMART INSIGHTS - NHẬN XÉT THÔNG MINH TỪ HỆ THỐNG                  -->
+    <div style="background:#c1f7f9;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:20px;">
+      <div style="padding:14px 20px;background:linear-gradient(135deg,#0dba04,#06e8ef);display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-lightbulb" style="color:#fde047;font-size:15px;animation: flash 2s infinite;"></i>
+        <span style="font-size:15px;font-weight:700;color:#fff;">Phân Tích & Nhận Xét Từ Dữ Liệu</span>
+      </div>
+      <div style="padding:20px;display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:24px;">
+        
+        <!-- Insight 1 -->
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:42px;height:42px;border-radius:10px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(37,99,235,.15);">
+                <i class="fas fa-arrow-trend-up"></i>
+            </div>
+            <div>
+                <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:6px;text-transform:uppercase;">Đỉnh điểm doanh thu</div>
+                <div style="font-size:13px;color:#475569;line-height:1.6; font-weight:600;">
+                    Ghi nhận vào ngày <strong style="color:#2563eb;"><?= $maxDay ?></strong> đạt mức cao nhất <strong style="color:#15803d;"><?= number_format($maxDayRevenue, 0, ',', '.') ?>đ</strong>. Khuyến nghị chuẩn bị nhân sự và lượng hàng tồn kho tốt nhất vào các chu kỳ tương tự.
+                </div>
+            </div>
+        </div>
+
+        <!-- Insight 2 -->
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:42px;height:42px;border-radius:10px;background:#f0fdf4;color:#15803d;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(21,128,61,.15);">
+                <i class="fas fa-star"></i>
+            </div>
+            <div>
+                <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:6px;text-transform:uppercase;">Sản phẩm chủ lực</div>
+                <div style="font-size:13px;color:#475569;line-height:1.6; font-weight:600;">
+                    Thuốc <strong style="color:#2563eb;"><?= htmlspecialchars($bestProduct) ?></strong> mang lại <strong style="color:#15803d;"><?= number_format($bestProductRevenue, 0, ',', '.') ?>đ</strong>, chiếm <strong style="color:#ea580c;"><?= $bestProductPercent ?>%</strong> tổng tỷ trọng. Nên ưu tiên thiết lập AI Dự báo (ROP) cảnh báo sớm cho mặt hàng này.
+                </div>
+            </div>
+        </div>
+
+        <!-- Insight 3 -->
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:42px;height:42px;border-radius:10px;background:#fffbeb;color:#b45309;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;box-shadow:0 2px 6px rgba(180,83,9,.15);">
+                <i class="fas fa-medal"></i>
+            </div>
+            <div>
+                <div style="font-size:13px;font-weight:800;color:#1e293b;margin-bottom:6px;text-transform:uppercase;">Hiệu suất nhân viên</div>
+                <div style="font-size:13px;color:#475569;line-height:1.6; font-weight:600;">
+                    Nhân viên <strong style="color:#2563eb;"><?= htmlspecialchars($bestEmp) ?></strong> xuất sắc dẫn đầu với mức đóng góp <strong style="color:#ea580c;"><?= $bestEmpPercent ?>%</strong> doanh số. Cân nhắc khen thưởng và phân tích kỹ năng bán chéo (Cross-selling).
+                </div>
+            </div>
+        </div>
+
+      </div>
+    </div>
+    <style>@keyframes flash { 0%,100%{opacity:1;} 50%{opacity:0.4;} }</style>
+    <!-- ========================================================================= -->
 
     <!-- --- KHỐI BIỂU ĐỒ --- -->
     <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:20px;">
@@ -135,13 +222,14 @@
       </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px; margin-bottom:20px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
+      
       <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;">
         <div style="padding:14px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
           <span style="font-size:15px;font-weight:700;color:#fff;"><i class="fas fa-trophy me-2"></i> Top 5 Sản Phẩm Bán Chạy</span>
         </div>
-        <div style="padding:20px;">
-          <canvas id="topProductChart" height="120"></canvas>
+        <div style="padding:20px; min-height: 280px; display:flex; align-items:center;">
+          <canvas id="topProductChart" height="250"></canvas>
         </div>
       </div>
 
@@ -149,47 +237,50 @@
         <div style="padding:14px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
           <span style="font-size:15px;font-weight:700;color:#fff;"><i class="fas fa-id-badge me-2"></i> Tỷ Trọng Theo Nhân Viên</span>
         </div>
-        <div style="padding:20px; display:flex; justify-content:center;">
+        <div style="padding:20px; display:flex; justify-content:center; align-items:center; min-height: 280px;">
           <canvas id="employeeChart" height="250"></canvas>
         </div>
       </div>
     </div>
+    </div>
 
     <!-- --- BẢNG DỮ LIỆU CHI TIẾT --- -->
-    <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
-      <div style="padding:14px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
-        <span style="font-size:15px;font-weight:700;color:#fff;"><i class="fas fa-list me-2"></i> Bảng Chi Tiết Giao Dịch Bán Hàng</span>
-      </div>
+    <div style="padding:20px;">
+      <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
+        <div style="padding:14px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
+          <span style="font-size:15px;font-weight:700;color:#fff;"><i class="fas fa-list me-2"></i> Bảng Chi Tiết Giao Dịch Bán Hàng</span>
+        </div>
 
-      <div style="max-height:400px; overflow-y:auto; overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;">
-          <thead style="position: sticky; top: 0; z-index: 10;">
-            <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
-              <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;background:#1d4ed8;">Mã HĐ</th>
-              <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;background:#1d4ed8;">Ngày</th>
-              <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;background:#1d4ed8;">Nhân viên</th>
-              <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;background:#1d4ed8;">Tên thuốc</th>
-              <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:right;background:#1d4ed8;">Số lượng</th>
-              <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:right;background:#1d4ed8;">Doanh thu</th>
-            </tr>
-          </thead>
-          <tbody>
-            <?php foreach ($revenueDetails as $i => $r): ?>
-              <?php $rowBg = $i % 2 === 0 ? '#fff' : '#f0f7ff'; ?>
-              <tr style="background:<?php echo $rowBg; ?>; transition:background .15s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $rowBg; ?>'">
-                <td style="padding:10px 16px;font-size:13px;font-weight:700;color:#1e40af;white-space:nowrap;">#<?= htmlspecialchars($r['maHoaDon']) ?></td>
-                <td style="padding:10px 16px;font-size:13px;color:#374151;white-space:nowrap;"><?= date('d/m/Y', strtotime($r['ngayLap'])) ?></td>
-                <td style="padding:10px 16px;font-size:13px;color:#374151;white-space:nowrap;">
-                  <div style="font-weight:600;"><?= htmlspecialchars($r['tenNhanVien']) ?></div>
-                  <div style="font-size:11px;color:#6b7280;">NV: <?= htmlspecialchars($r['maNhanVien']) ?></div>
-                </td>
-                <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#1e293b;"><?= htmlspecialchars($r['tenThuoc']) ?></td>
-                <td style="padding:10px 16px;font-size:13px;color:#1e293b;text-align:right;font-weight:700;"><?= number_format($r['soLuong'], 0, ',', '.') ?></td>
-                <td style="padding:10px 16px;font-size:13px;font-weight:700;color:#15803d;text-align:right;white-space:nowrap;"><?= number_format($r['doanhThu'], 0, ',', '.') ?> đ</td>
+        <div style="max-height:400px; overflow-y:auto; overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;">
+            <thead style="position: sticky; top: 0; z-index: 10;">
+              <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
+                <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;">Mã HĐ</th>
+                <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;">Ngày</th>
+                <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;">Nhân viên</th>
+                <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;">Tên thuốc</th>
+                <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:right;">Số lượng</th>
+                <th style="padding:11px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:right;">Doanh thu</th>
               </tr>
-            <?php endforeach; ?>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              <?php foreach ($revenueDetails as $i => $r): ?>
+                <?php $rowBg = $i % 2 === 0 ? '#fff' : '#f0f7ff'; ?>
+                <tr style="background:<?php echo $rowBg; ?>; transition:background .15s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $rowBg; ?>'">
+                  <td style="padding:10px 16px;font-size:13px;font-weight:700;color:#1e40af;white-space:nowrap;">#<?= htmlspecialchars($r['maHoaDon']) ?></td>
+                  <td style="padding:10px 16px;font-size:13px;color:#374151;white-space:nowrap;"><?= date('d/m/Y', strtotime($r['ngayLap'])) ?></td>
+                  <td style="padding:10px 16px;font-size:13px;color:#374151;white-space:nowrap;">
+                    <div style="font-weight:600;"><?= htmlspecialchars($r['tenNhanVien']) ?></div>
+                    <div style="font-size:11px;color:#6b7280;">NV: <?= htmlspecialchars($r['maNhanVien']) ?></div>
+                  </td>
+                  <td style="padding:10px 16px;font-size:13px;font-weight:600;color:#1e293b;"><?= htmlspecialchars($r['tenThuoc']) ?></td>
+                  <td style="padding:10px 16px;font-size:13px;color:#1e293b;text-align:right;font-weight:700;"><?= number_format($r['soLuong'], 0, ',', '.') ?></td>
+                  <td style="padding:10px 16px;font-size:13px;font-weight:700;color:#15803d;text-align:right;white-space:nowrap;"><?= number_format($r['doanhThu'], 0, ',', '.') ?> đ</td>
+                </tr>
+              <?php endforeach; ?>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -206,7 +297,18 @@
 
       // 1. Biểu đồ đường
       <?php
-      $lineLabels = array_column($chartData ?? [], 'ngay');
+      $rawLabels = array_column($chartData ?? [], 'ngay');
+      
+      // Từ ngày và Đến ngày có nằm trong cùng 1 năm không?
+      $startYear = !empty($from_date) ? date('Y', strtotime($from_date)) : date('Y');
+      $endYear = !empty($to_date) ? date('Y', strtotime($to_date)) : date('Y');
+      $isSameYear = ($startYear === $endYear);
+      
+      // Nếu cùng năm chỉ in "Ngày/Tháng" (d/m), nếu vắt qua năm khác in đủ "Ngày/Tháng/Năm"
+      $lineLabels = array_map(function($date) use ($isSameYear) {
+          return $isSameYear ? date('d/m', strtotime($date)) : date('d/m/Y', strtotime($date)); 
+      }, $rawLabels);
+      
       $lineData = array_column($chartData ?? [], 'doanhThu');
       ?>
       new Chart(document.getElementById('revenueChart').getContext('2d'), {
@@ -216,11 +318,11 @@
           datasets: [{
             label: 'Doanh thu',
             data: <?= json_encode($lineData) ?>,
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+            borderColor: '#03db4b',
+            backgroundColor: 'rgba(46, 233, 90, 0.1)',
             borderWidth: 3,
             pointBackgroundColor: '#fff',
-            pointBorderColor: '#2563eb',
+            pointBorderColor: '#61f593',
             pointBorderWidth: 2,
             pointRadius: 5,
             fill: true,
@@ -230,21 +332,24 @@
         options: {
           responsive: true,
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display: false },
             tooltip: {
               backgroundColor: 'rgba(15, 23, 42, 0.9)',
               padding: 10,
-              callbacks: {
-                label: tooltipFormatter
-              }
+              callbacks: { label: tooltipFormatter }
             }
           },
           scales: {
             x: {
               grid: {
                 display: false
+              },
+              ticks: {
+                maxTicksLimit: 12,
+                maxRotation: 0,
+                minRotation: 0,
+                font: { size: 11 },
+                color: '#64748b'
               }
             },
             y: {
@@ -254,9 +359,7 @@
                 drawBorder: false
               },
               ticks: {
-                font: {
-                  size: 12
-                },
+                font: { size: 12 },
                 color: '#64748b',
                 callback: currencyFormatter
               }
@@ -273,12 +376,13 @@
           datasets: [{
             label: 'Doanh thu',
             data: <?= json_encode($topThuocData) ?>,
-            backgroundColor: ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'],
+            backgroundColor: ['#00c2e9', '#25d8f4', '#49e0f1', '#7ae0ef', '#b2edf4'],
             borderRadius: 6
           }]
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           indexAxis: 'y',
           plugins: {
             legend: {
@@ -288,8 +392,12 @@
               backgroundColor: 'rgba(15, 23, 42, 0.9)',
               padding: 10,
               callbacks: {
-                label: tooltipFormatter
-              }
+                title: function(context) {
+                    return context[0].label;
+                },
+                label: function(context) {
+                    return ' Doanh thu: ' + (context.raw || 0).toLocaleString('vi-VN') + ' VNĐ';
+                }
             }
           },
           scales: {
@@ -304,7 +412,11 @@
                   size: 11
                 },
                 color: '#64748b',
-                callback: currencyFormatter
+                callback: function(value) {
+                  if (value >= 1000000) return (value / 1000000).toLocaleString('vi-VN') + ' Tr';
+                  if (value >= 1000) return (value / 1000).toLocaleString('vi-VN') + ' K';
+                  return value;
+                }
               }
             },
             y: {
@@ -316,12 +428,19 @@
                   size: 12,
                   weight: '600'
                 },
-                color: '#334155'
+                color: '#334155',
+                callback: function(value) {
+                  let label = this.getLabelForValue(value) || '';
+                  if (label.length > 25) {
+                    return label.substring(0, 25) + '...';
+                  }
+                  return label;
+                }
               }
             }
           }
         }
-      });
+      }});
 
       // 3. Biểu đồ tròn
       new Chart(document.getElementById('employeeChart').getContext('2d'), {
@@ -330,7 +449,7 @@
           labels: <?= json_encode($nvLabels) ?>,
           datasets: [{
             data: <?= json_encode($nvData) ?>,
-            backgroundColor: ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#06b6d4'],
+            backgroundColor: ['#08a4f2', '#14e088', '#edb34f', '#d478f8', '#f56666', '#64eedc'],
             borderWidth: 3,
             borderColor: '#ffffff',
             hoverOffset: 8
@@ -338,15 +457,15 @@
         },
         options: {
           responsive: true,
-          cutout: '60%',
+          maintainAspectRatio: false,
+          cutout: '65%',
           plugins: {
             legend: {
-              position: 'bottom',
+              position: 'right',
               labels: {
-                boxWidth: 14,
-                font: {
-                  size: 12
-                }
+                boxWidth: 12,
+                padding: 15,
+                font: { size: 11 }
               }
             },
             tooltip: {

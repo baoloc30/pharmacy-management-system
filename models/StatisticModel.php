@@ -84,13 +84,25 @@ class StatisticModel extends Model {
         return ['sql' => $sql, 'params' => $params, 'types' => $types];
     }
 
-    public function getBestSelling($month, $year) {
-        $sql = "SELECT t.maThuoc, t.tenThuoc, t.donViTinh, SUM(c.soLuong) as soLuongBan, SUM(c.thanhTien) as doanhThu
-                FROM ct_hoadon c JOIN hoadon h ON c.maHoaDon = h.maHoaDon JOIN thuoc t ON c.maThuoc = t.maThuoc
-                WHERE MONTH(h.ngayLap) = ? AND YEAR(h.ngayLap) = ? AND h.trangThai = 'DaThanhToan'
-                GROUP BY t.maThuoc ORDER BY soLuongBan DESC LIMIT 10";
+    public function getBestSelling($fromDate, $toDate) {
+        $sql = "SELECT t.maThuoc, t.tenThuoc, t.donViTinh, 
+                       SUM(c.soLuong) as soLuongBan, 
+                       SUM(c.thanhTien) as doanhThu
+                FROM ct_hoadon c 
+                JOIN hoadon h ON c.maHoaDon = h.maHoaDon 
+                JOIN thuoc t ON c.maThuoc = t.maThuoc
+                WHERE h.trangThai = 'DaThanhToan' 
+                  AND h.ngayLap >= ? 
+                  AND h.ngayLap <= ?
+                GROUP BY t.maThuoc 
+                ORDER BY soLuongBan DESC 
+                LIMIT 10"; // Giới hạn Top 10 để vẽ biểu đồ và xếp hạng
+                
+        $toDateEnd = $toDate . ' 23:59:59';
+        $fromDateStart = $fromDate . ' 00:00:00';
+        
         $stmt = $this->db->prepare($sql);
-        $stmt->bind_param("ii", $month, $year);
+        $stmt->bind_param("ss", $fromDateStart, $toDateEnd);
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }

@@ -49,12 +49,12 @@
         <div style="padding:12px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);display:flex;align-items:center;justify-content:space-between;">
             <span style="font-size:13px;font-weight:700;color:#fff;"><?= count($pending_imports ?? []) ?> phiếu chờ duyệt</span>
         </div>
-        <div style="overflow-x:auto;">
+        <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
             <?php if (empty($pending_imports)): ?>
                 <div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;"><i class="fas fa-check-circle" style="font-size:20px;margin-bottom:10px;display:block;color:#15803d;"></i>Không có phiếu đề xuất nào cần xử lý.</div>
             <?php else: ?>
-                <table style="width:100%;border-collapse:collapse;">
-                    <thead>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
                             <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Mã Phiếu</th>
                             <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Ngày lập</th>
@@ -176,7 +176,7 @@
             }
         });
 
-        // Click ra ngoài khoảng tối để đóng Popup (Giống file stock.php)
+        // Click ra ngoài khoảng tối để đóng Popup
         document.getElementById('approveOverlay').addEventListener('click', function(e) {
             if (e.target === this) this.style.display = 'none';
         });

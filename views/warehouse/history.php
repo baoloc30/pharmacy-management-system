@@ -71,48 +71,48 @@
   <div style="padding:12px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
     <span style="font-size:13px;font-weight:700;color:#fff;"><?php echo count($history ?? []); ?> giao dịch</span>
   </div>
-  <div style="overflow-x:auto;">
+  <div style="max-height:300px; overflow-y:auto; overflow-x:auto;">
     <?php if(empty($history)): ?>
       <div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">Không có giao dịch phù hợp</div>
     <?php else: ?>
     <table style="width:100%;border-collapse:collapse;">
-      <thead>
+      <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Ngày</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Loại GD</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Tên thuốc</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Nhân viên</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">SL</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Tồn trước</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Tồn sau</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Ghi chú</th>
-          <th style="padding:10px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Chứng từ</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Ngày</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Loại GD</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Tên thuốc</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Nhân viên</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">SL</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Tồn trước</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Tồn sau</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Ghi chú</th>
+          <th style="padding:12px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Chứng từ</th>
         </tr>
       </thead>
       <tbody>
         <?php foreach($history as $i => $h): ?>
         <?php $rowBg = $i%2===0?'#fff':'#f0f7ff'; ?>
-        <tr style="background:<?php echo $rowBg; ?>;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $rowBg; ?>'">
-          <td style="padding:9px 14px;font-size:12px;color:#374151;white-space:nowrap;text-align:center;"><?php echo date('d/m/Y H:i', strtotime($h['ngayGiaoDich'])); ?></td>
-          <td style="padding:9px 14px;text-align:center;">
+        <tr style="background:<?php echo $rowBg; ?>; transition:background .15s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $rowBg; ?>'">
+          <td style="padding:10px 14px;font-size:12px;color:#374151;white-space:nowrap;text-align:center;"><?php echo date('d/m/Y H:i', strtotime($h['ngayGiaoDich'])); ?></td>
+          <td style="padding:10px 14px;text-align:center;">
             <?php if($h['loaiGiaoDich']==='Nhap'): ?>
-              <span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#f0fdf4;color:#15803d;">Nhập</span>
+              <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;">Nhập</span>
             <?php elseif($h['loaiGiaoDich']==='Xuat'): ?>
-              <span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#fef2f2;color:#dc2626;">Xuất</span>
+              <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">Xuất</span>
             <?php else: ?>
-              <span style="padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;background:#fffbeb;color:#b45309;">Điều chỉnh</span>
+              <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#fffbeb;color:#b45309;border:1px solid #fde68a;">Điều chỉnh</span>
             <?php endif; ?>
           </td>
-          <td style="padding:9px 14px;font-size:13px;color:#374151;text-align:center;"><?php echo htmlspecialchars($h['tenThuoc']); ?></td>
-          <td style="padding:9px 14px;font-size:13px;color:#374151;text-align:center;"><?php echo htmlspecialchars($h['tenNhanVien']); ?></td>
-          <td style="padding:9px 14px;font-size:13px;font-weight:700;color:#1d4ed8;text-align:center;"><?php echo $h['soLuong']; ?></td>
-          <td style="padding:9px 14px;font-size:13px;color:#374151;text-align:center;"><?php echo $h['tonKhoTruoc']; ?></td>
-          <td style="padding:9px 14px;font-size:13px;font-weight:600;color:#15803d;text-align:center;"><?php echo $h['tonKhoSau']; ?></td>
-          <td style="padding:9px 14px;font-size:12px;color:#64748b;text-align:center;"><?php echo htmlspecialchars($h['ghiChu'] ?? ''); ?></td>
-          <td style="padding:9px 14px;font-size:12px;text-align:center;">
+          <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#1e293b;text-align:center;"><?php echo htmlspecialchars($h['tenThuoc']); ?></td>
+          <td style="padding:10px 14px;font-size:13px;color:#475569;text-align:center;"><?php echo htmlspecialchars($h['tenNhanVien']); ?></td>
+          <td style="padding:10px 14px;font-size:13px;font-weight:700;color:#2563eb;text-align:center;"><?php echo $h['soLuong']; ?></td>
+          <td style="padding:10px 14px;font-size:13px;color:#64748b;text-align:center;"><?php echo $h['tonKhoTruoc']; ?></td>
+          <td style="padding:10px 14px;font-size:13px;font-weight:700;color:#15803d;text-align:center;"><?php echo $h['tonKhoSau']; ?></td>
+          <td style="padding:10px 14px;font-size:12px;color:#64748b;text-align:center;"><?php echo htmlspecialchars($h['ghiChu'] ?? ''); ?></td>
+          <td style="padding:10px 14px;font-size:12px;text-align:center;">
             <?php if(in_array($h['loaiChungTu'], ['PhieuNhap', 'HoaDon']) && !empty($h['maChungTu'])): ?>
                <button onclick="viewDetail(<?php echo $h['maChungTu']; ?>, '<?php echo $h['loaiChungTu']; ?>')" 
-                       style="padding:5px 12px; background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
+                       style="padding:6px 12px; background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer; transition:0.2s; box-shadow:0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">
                    <i class="fas fa-eye"></i> Xem phiếu
                </button>
             <?php else: ?>

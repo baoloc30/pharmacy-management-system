@@ -197,7 +197,7 @@ class EmployeeController extends Controller {
         $workShiftModel = $this->model('WorkShiftModel');
         $userModel = $this->model('UserModel');
 
-        $fromDate = $_GET['from_date'] ?? date('Y-m-d');
+        $fromDate = $_GET['from_date'] ?? date('Y-m-01');
         $toDate   = $_GET['to_date'] ?? date('Y-m-d', strtotime('+7 days'));
 
         $data['schedule']  = $workShiftModel->getSchedule($fromDate, $toDate);
@@ -261,7 +261,7 @@ class EmployeeController extends Controller {
             $_SESSION['toast_error'] = 'Không thể xóa ca làm việc.';
         }
 
-        $from = $_GET['from_date'] ?? date('Y-m-d');
+        $from = $_GET['from_date'] ?? date('Y-m-01');
         $to   = $_GET['to_date']   ?? date('Y-m-d', strtotime('+7 days'));
         redirect('employee/workshift?from_date=' . $from . '&to_date=' . $to);
         exit;

@@ -36,54 +36,56 @@
             Không tìm thấy nhà cung cấp phù hợp.
         </div>
         <?php else: ?>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead>
-                <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">Mã NCC</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">Tên nhà cung cấp</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">SĐT / Email</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">Người liên hệ</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:center;font-size:11px;">Trạng thái</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:center;font-size:11px;">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($suppliers as $i => $s): ?>
-                <tr style="background:<?php echo $i % 2 === 0 ? '#fff' : '#f0f7ff'; ?>;transition:background .15s;"
-                    onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $i % 2 === 0 ? '#fff' : '#f0f7ff'; ?>'">
-                    <td style="padding:10px 14px;color:#64748b;font-weight:600;"><?php echo $s['maNhaCC']; ?></td>
-                    <td style="padding:10px 14px;">
-                        <div style="font-weight:700;color:#1e293b;"><?php echo htmlspecialchars($s['tenNhaCC']); ?></div>
-                        <div style="font-size:11px;color:#64748b;margin-top:3px;"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($s['diaChi'] ?? '--'); ?></div>
-                    </td>
-                    <td style="padding:10px 14px;">
-                        <div style="color:#1d4ed8;font-weight:600;"><i class="fas fa-phone-alt" style="font-size:10px;margin-right:4px;"></i><?php echo htmlspecialchars($s['soDienThoai']); ?></div>
-                        <?php if(!empty($s['email'])): ?>
-                        <div style="font-size:11px;color:#475569;margin-top:3px;"><i class="fas fa-envelope" style="font-size:10px;margin-right:4px;"></i><?php echo htmlspecialchars($s['email']); ?></div>
-                        <?php endif; ?>
-                    </td>
-                    <td style="padding:10px 14px;color:#475569;font-weight:600;"><?php echo htmlspecialchars($s['nguoiLienHe'] ?? '--'); ?></td>
-                    <td style="padding:10px 14px;text-align:center;">
-                        <?php if($s['trangThai'] === 'HoatDong'): ?>
-                            <span style="padding:4px 10px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:20px;font-size:11px;font-weight:700;">Hoạt động</span>
-                        <?php else: ?>
-                            <span style="padding:4px 10px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:20px;font-size:11px;font-weight:700;">Ngừng GD</span>
-                        <?php endif; ?>
-                    </td>
-                    <td style="padding:10px 14px;text-align:center;white-space:nowrap;">
-                        <a href="<?php echo BASE_URL; ?>supplier/edit/<?php echo $s['maNhaCC']; ?>"
-                           style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#fefce8;color:#ca8a04;border:1px solid #fde68a;text-decoration:none;margin-right:5px;" title="Chỉnh sửa">
-                            <i class="fas fa-edit" style="font-size:12px;"></i>
-                        </a>
-                        <button onclick="confirmDelete(<?php echo $s['maNhaCC']; ?>, '<?php echo htmlspecialchars(addslashes($s['tenNhaCC'])); ?>')"
-                           style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;cursor:pointer;" title="Xóa">
-                            <i class="fas fa-trash" style="font-size:12px;"></i>
-                        </button>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+        <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">Mã NCC</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">Tên nhà cung cấp</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">SĐT / Email</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;">Người liên hệ</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:center;font-size:11px;">Trạng thái</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:center;font-size:11px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($suppliers as $i => $s): ?>
+                    <tr style="background:<?php echo $i % 2 === 0 ? '#fff' : '#f0f7ff'; ?>;transition:background .15s;"
+                        onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $i % 2 === 0 ? '#fff' : '#f0f7ff'; ?>'">
+                        <td style="padding:10px 14px;color:#64748b;font-weight:600;"><?php echo $s['maNhaCC']; ?></td>
+                        <td style="padding:10px 14px;">
+                            <div style="font-weight:700;color:#1e293b;"><?php echo htmlspecialchars($s['tenNhaCC']); ?></div>
+                            <div style="font-size:11px;color:#64748b;margin-top:3px;"><i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($s['diaChi'] ?? '--'); ?></div>
+                        </td>
+                        <td style="padding:10px 14px;">
+                            <div style="color:#1d4ed8;font-weight:600;"><i class="fas fa-phone-alt" style="font-size:10px;margin-right:4px;"></i><?php echo htmlspecialchars($s['soDienThoai']); ?></div>
+                            <?php if(!empty($s['email'])): ?>
+                            <div style="font-size:11px;color:#475569;margin-top:3px;"><i class="fas fa-envelope" style="font-size:10px;margin-right:4px;"></i><?php echo htmlspecialchars($s['email']); ?></div>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding:10px 14px;color:#475569;font-weight:600;"><?php echo htmlspecialchars($s['nguoiLienHe'] ?? '--'); ?></td>
+                        <td style="padding:10px 14px;text-align:center;">
+                            <?php if($s['trangThai'] === 'HoatDong'): ?>
+                                <span style="padding:4px 10px;background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0;border-radius:20px;font-size:11px;font-weight:700;">Hoạt động</span>
+                            <?php else: ?>
+                                <span style="padding:4px 10px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;border-radius:20px;font-size:11px;font-weight:700;">Ngừng GD</span>
+                            <?php endif; ?>
+                        </td>
+                        <td style="padding:10px 14px;text-align:center;white-space:nowrap;">
+                            <a href="<?php echo BASE_URL; ?>supplier/edit/<?php echo $s['maNhaCC']; ?>"
+                            style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#fefce8;color:#ca8a04;border:1px solid #fde68a;text-decoration:none;margin-right:5px;" title="Chỉnh sửa">
+                                <i class="fas fa-edit" style="font-size:12px;"></i>
+                            </a>
+                            <button onclick="confirmDelete(<?php echo $s['maNhaCC']; ?>, '<?php echo htmlspecialchars(addslashes($s['tenNhaCC'])); ?>')"
+                            style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#fef2f2;color:#dc2626;border:1px solid #fecaca;cursor:pointer;" title="Xóa">
+                                <i class="fas fa-trash" style="font-size:12px;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
         <?php endif; ?>
     </div>
 </div>

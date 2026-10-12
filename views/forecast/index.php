@@ -60,12 +60,12 @@
             <span style="font-size:13px;font-weight:700;color:#fff;">Danh sách hàng hóa cần nhập gấp</span>
             <span style="font-size:12px;color:rgba(255,255,255,.8);"><?= count($suggestions ?? []) ?> mặt hàng</span>
         </div>
-        <div style="overflow-x:auto;">
+        <div style="max-height: 500px; overflow-y: auto; overflow-x: auto;">
             <?php if (empty($suggestions)): ?>
                 <div style="padding:40px;text-align:center;color:#15803d;font-size:14px;font-weight:600;"><i class="fas fa-shield-alt" style="font-size:24px;margin-bottom:10px;display:block;"></i>Kho hàng đang ở trạng thái an toàn.</div>
             <?php else: ?>
-                <table style="width:100%;border-collapse:collapse;">
-                    <thead>
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <tr style="background:linear-gradient(135deg,#991b1b,#dc2626);">
                             <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:center;">Mã</th>
                             <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Tên thuốc</th>

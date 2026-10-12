@@ -25,9 +25,9 @@
         <?php endif; ?>
 
         <form method="POST" action="" id="priceForm">
-            <div style="overflow-x:auto;">
+            <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
                 <table style="width:100%;border-collapse:collapse;font-size:13px;">
-                    <thead>
+                    <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                         <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
                             <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Mã</th>
                             <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Tên thuốc</th>

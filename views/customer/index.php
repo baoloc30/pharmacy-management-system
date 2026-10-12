@@ -73,49 +73,51 @@
             Không tìm thấy khách hàng nào.
         </div>
         <?php else: ?>
-        <table style="width:100%;border-collapse:collapse;font-size:13px;">
-            <thead>
-                <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">STT</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Họ tên</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Số điện thoại</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Email</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Địa chỉ</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:right;font-size:11px;letter-spacing:.4px;">Tổng chi tiêu</th>
-                    <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:center;font-size:11px;letter-spacing:.4px;">Thao tác</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach($customers as $key => $customer): ?>
-                <tr style="background:<?php echo $key % 2 === 0 ? '#fff' : '#f0f7ff'; ?>;transition:background .15s;"
-                    onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $key % 2 === 0 ? '#fff' : '#f0f7ff'; ?>'">
-                    <td style="padding:10px 14px;color:#64748b;"><?php echo $key + 1; ?></td>
-                    <td style="padding:10px 14px;">
-                        <div style="display:flex;align-items:center;gap:10px;">
-                            <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">
-                                <?php echo mb_strtoupper(mb_substr($customer['hoTen'], 0, 1, 'UTF-8'), 'UTF-8'); ?>
+        <div style="max-height: 450px; overflow-y: auto; overflow-x: auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">STT</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Họ tên</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Số điện thoại</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Email</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:left;font-size:11px;letter-spacing:.4px;">Địa chỉ</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:right;font-size:11px;letter-spacing:.4px;">Tổng chi tiêu</th>
+                        <th style="padding:11px 14px;color:#fff;font-weight:700;text-transform:uppercase;white-space:nowrap;text-align:center;font-size:11px;letter-spacing:.4px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($customers as $key => $customer): ?>
+                    <tr style="background:<?php echo $key % 2 === 0 ? '#fff' : '#f0f7ff'; ?>;transition:background .15s;"
+                        onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='<?php echo $key % 2 === 0 ? '#fff' : '#f0f7ff'; ?>'">
+                        <td style="padding:10px 14px;color:#64748b;"><?php echo $key + 1; ?></td>
+                        <td style="padding:10px 14px;">
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#1e40af,#2563eb);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;">
+                                    <?php echo mb_strtoupper(mb_substr($customer['hoTen'], 0, 1, 'UTF-8'), 'UTF-8'); ?>
+                                </div>
+                                <span style="font-weight:600;color:#1e293b;"><?php echo htmlspecialchars($customer['hoTen']); ?></span>
                             </div>
-                            <span style="font-weight:600;color:#1e293b;"><?php echo htmlspecialchars($customer['hoTen']); ?></span>
-                        </div>
-                    </td>
-                    <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($customer['soDienThoai']); ?></td>
-                    <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($customer['email'] ?? ''); ?></td>
-                    <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($customer['diaChi'] ?? ''); ?></td>
-                    <td style="padding:10px 14px;text-align:right;font-weight:700;color:#1d4ed8;"><?php echo formatCurrency($customer['tongChiTieu']); ?></td>
-                    <td style="padding:10px 14px;text-align:center;white-space:nowrap;">
-                        <a href="<?php echo BASE_URL; ?>customer/history/<?php echo $customer['maKhachHang']; ?>"
-                           style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;text-decoration:none;margin-right:3px;" title="Lịch sử mua hàng">
-                            <i class="fas fa-history" style="font-size:12px;"></i>
-                        </a>
-                        <a href="<?php echo BASE_URL; ?>customer/edit/<?php echo $customer['maKhachHang']; ?>"
-                           style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#fefce8;color:#ca8a04;border:1px solid #fde68a;text-decoration:none;" title="Chỉnh sửa">
-                            <i class="fas fa-edit" style="font-size:12px;"></i>
-                        </a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                        </td>
+                        <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($customer['soDienThoai']); ?></td>
+                        <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($customer['email'] ?? ''); ?></td>
+                        <td style="padding:10px 14px;color:#475569;"><?php echo htmlspecialchars($customer['diaChi'] ?? ''); ?></td>
+                        <td style="padding:10px 14px;text-align:right;font-weight:700;color:#1d4ed8;"><?php echo formatCurrency($customer['tongChiTieu']); ?></td>
+                        <td style="padding:10px 14px;text-align:center;white-space:nowrap;">
+                            <a href="<?php echo BASE_URL; ?>customer/history/<?php echo $customer['maKhachHang']; ?>"
+                            style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;text-decoration:none;margin-right:3px;" title="Lịch sử mua hàng">
+                                <i class="fas fa-history" style="font-size:12px;"></i>
+                            </a>
+                            <a href="<?php echo BASE_URL; ?>customer/edit/<?php echo $customer['maKhachHang']; ?>"
+                            style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:7px;background:#fefce8;color:#ca8a04;border:1px solid #fde68a;text-decoration:none;" title="Chỉnh sửa">
+                                <i class="fas fa-edit" style="font-size:12px;"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
         <?php endif; ?>
     </div>
 </div>

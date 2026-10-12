@@ -188,71 +188,74 @@ $uniqueNV    = count(array_unique(array_column($schedule ?? [], 'maNhanVien')));
       <div style="font-size:12px;color:#cbd5e1;margin-top:4px;">Hãy dùng form bên trên để phân công ca mới</div>
     </div>
     <?php else: ?>
-    <table style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr style="background:linear-gradient(135deg,#1e3a8a,#1d4ed8);">
-          <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;text-align:left;">#</th>
-          <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;text-align:left;">Nhân viên</th>
-          <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;text-align:left;">Ngày làm</th>
-          <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;text-align:left;">Loại ca</th>
-          <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;text-align:left;">Giờ làm</th>
-          <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;text-align:left;">Ghi chú</th>
-          <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#93c5fd;text-transform:uppercase;text-align:center;">Thao tác</th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php
-        // Badge config — chỉ 3 ca
-        $caMap = [
-          'Sang'   => ['☀️ Ca sáng',  '#eff6ff','#1d4ed8','#bfdbfe'],
-          'Chieu'  => ['🌤️ Ca chiều', '#f0fdf4','#15803d','#bbf7d0'],
-          'TangCa' => ['🌙 Tăng ca',  '#fffbeb','#b45309','#fde68a'],
-        ];
-        $dow = ['CN','T2','T3','T4','T5','T6','T7'];
-        foreach($schedule as $i => $s):
-          $bg = $i%2===0 ? '#fff' : '#f8faff';
-          $ca = $caMap[$s['caLam']] ?? [htmlspecialchars($s['caLam']),'#f1f5f9','#64748b','#e2e8f0'];
-          $d  = strtotime($s['ngayLam']);
-        ?>
-        <tr style="background:<?php echo $bg; ?>;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='<?php echo $bg; ?>'">
-          <td style="padding:10px 14px;font-size:12px;color:#94a3b8;font-weight:600;"><?php echo $i+1; ?></td>
-          <td style="padding:10px 14px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">
-                <?php echo mb_strtoupper(mb_substr($s['hoTen'],0,1,'UTF-8'),'UTF-8'); ?>
+    
+    <div style="max-height: 400px; overflow-y: auto; overflow-x: auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
+            <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:left;">#</th>
+            <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:left;">Nhân viên</th>
+            <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:left;">Ngày làm</th>
+            <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:left;">Loại ca</th>
+            <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:left;">Giờ làm</th>
+            <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:left;">Ghi chú</th>
+            <th style="padding:11px 14px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;text-align:center;">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php
+          $caMap = [
+            'Sang'   => ['☀️ Ca sáng',  '#eff6ff','#1d4ed8','#bfdbfe'],
+            'Chieu'  => ['🌤️ Ca chiều', '#f0fdf4','#15803d','#bbf7d0'],
+            'TangCa' => ['🌙 Tăng ca',  '#fffbeb','#b45309','#fde68a'],
+          ];
+          $dow = ['CN','T2','T3','T4','T5','T6','T7'];
+          foreach($schedule as $i => $s):
+            $bg = $i%2===0 ? '#fff' : '#f8faff';
+            $ca = $caMap[$s['caLam']] ?? [htmlspecialchars($s['caLam']),'#f1f5f9','#64748b','#e2e8f0'];
+            $d  = strtotime($s['ngayLam']);
+          ?>
+          <tr style="background:<?php echo $bg; ?>;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='<?php echo $bg; ?>'">
+            <td style="padding:10px 14px;font-size:12px;color:#94a3b8;font-weight:600;"><?php echo $i+1; ?></td>
+            <td style="padding:10px 14px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#2563eb,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0;">
+                  <?php echo mb_strtoupper(mb_substr($s['hoTen'],0,1,'UTF-8'),'UTF-8'); ?>
+                </div>
+                <span style="font-size:13px;font-weight:700;color:#1e293b;"><?php echo htmlspecialchars($s['hoTen']); ?></span>
               </div>
-              <span style="font-size:13px;font-weight:700;color:#1e293b;"><?php echo htmlspecialchars($s['hoTen']); ?></span>
-            </div>
-          </td>
-          <td style="padding:10px 14px;">
-            <div style="font-size:13px;font-weight:600;color:#374151;"><?php echo date('d/m/Y',$d); ?></div>
-            <div style="font-size:11px;color:#94a3b8;"><?php echo $dow[date('w',$d)]; ?></div>
-          </td>
-          <td style="padding:10px 14px;">
-            <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:<?php echo $ca[1]; ?>;color:<?php echo $ca[2]; ?>;border:1px solid <?php echo $ca[3]; ?>;">
-              <?php echo $ca[0]; ?>
-            </span>
-          </td>
-          <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#374151;white-space:nowrap;">
-            <i class="fas fa-clock" style="color:#94a3b8;font-size:11px;margin-right:4px;"></i>
-            <?php echo substr($s['gioBatDau'],0,5); ?> – <?php echo substr($s['gioKetThuc'],0,5); ?>
-          </td>
-          <td style="padding:10px 14px;font-size:12px;color:#64748b;max-width:160px;">
-            <?php echo $s['ghiChu'] ? htmlspecialchars($s['ghiChu']) : '<span style="color:#cbd5e1;">—</span>'; ?>
-          </td>
-          <td style="padding:10px 14px;text-align:center;">
-            <a href="<?php echo BASE_URL; ?>employee/deleteshift/<?php echo $s['maLich']; ?>"
-               onclick="return confirm('Bạn có chắc muốn xóa ca làm việc này?')"
-               style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:700;text-decoration:none;border:1px solid #fecaca;"
-               onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
-              <i class="fas fa-trash-alt"></i> Xóa
-            </a>
-          </td>
-        </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-    <div style="padding:10px 16px;border-top:1px solid #f1f5f9;background:#f8faff;font-size:12px;color:#64748b;text-align:right;">
+            </td>
+            <td style="padding:10px 14px;">
+              <div style="font-size:13px;font-weight:600;color:#374151;"><?php echo date('d/m/Y',$d); ?></div>
+              <div style="font-size:11px;color:#94a3b8;"><?php echo $dow[date('w',$d)]; ?></div>
+            </td>
+            <td style="padding:10px 14px;">
+              <span style="padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:<?php echo $ca[1]; ?>;color:<?php echo $ca[2]; ?>;border:1px solid <?php echo $ca[3]; ?>;">
+                <?php echo $ca[0]; ?>
+              </span>
+            </td>
+            <td style="padding:10px 14px;font-size:13px;font-weight:600;color:#374151;white-space:nowrap;">
+              <i class="fas fa-clock" style="color:#94a3b8;font-size:11px;margin-right:4px;"></i>
+              <?php echo substr($s['gioBatDau'],0,5); ?> – <?php echo substr($s['gioKetThuc'],0,5); ?>
+            </td>
+            <td style="padding:10px 14px;font-size:12px;color:#64748b;max-width:160px;">
+              <?php echo $s['ghiChu'] ? htmlspecialchars($s['ghiChu']) : '<span style="color:#cbd5e1;">—</span>'; ?>
+            </td>
+            <td style="padding:10px 14px;text-align:center;">
+              <a href="<?php echo BASE_URL; ?>employee/deleteshift/<?php echo $s['maLich']; ?>"
+                 onclick="return confirm('Bạn có chắc muốn xóa ca làm việc này?')"
+                 style="display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:7px;background:#fef2f2;color:#dc2626;font-size:12px;font-weight:700;text-decoration:none;border:1px solid #fecaca;"
+                 onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fef2f2'">
+                <i class="fas fa-trash-alt"></i> Xóa
+              </a>
+            </td>
+          </tr>
+          <?php endforeach; ?>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="padding:12px 20px; border-top:1px solid #e2e8f0; background:#f8fafc; font-size:12px; color:#475569; text-align:right;">
       Hiển thị <strong><?php echo $totalShifts; ?></strong> ca &nbsp;|&nbsp;
       Từ <strong><?php echo date('d/m/Y',strtotime($from_date)); ?></strong>
       đến <strong><?php echo date('d/m/Y',strtotime($to_date)); ?></strong>
@@ -260,8 +263,7 @@ $uniqueNV    = count(array_unique(array_column($schedule ?? [], 'maNhanVien')));
     <?php endif; ?>
   </div>
 </div>
-
-</div><!-- end content-wrapper -->
+</div>
 
 <!-- Toast container -->
 <div id="toastContainer" style="position:fixed;top:70px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:10px;"></div>

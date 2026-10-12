@@ -34,9 +34,9 @@
     </div>
     <span style="font-size:12px;color:rgba(255,255,255,.8);"><?php echo count($employees); ?> nhân viên</span>
   </div>
-  <div style="overflow-x:auto;">
-    <table style="width:100%;border-collapse:collapse;">
-      <thead>
+  <div style="max-height: 450px; overflow-y: auto; overflow-x: auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
         <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
           <th style="padding:11px 16px;font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;">Mã NV</th>
           <th style="padding:11px 16px;font-size:12px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;text-align:left;">Họ tên</th>

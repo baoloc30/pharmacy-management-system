@@ -45,9 +45,10 @@
     <span style="font-size:13px;font-weight:700;color:#fff;">Danh sách tồn kho</span>
     <span style="font-size:12px;color:rgba(255,255,255,.8);"><?php echo count($medicines ?? []); ?> mặt hàng</span>
   </div>
-  <form method="POST" action="<?php echo BASE_URL; ?>warehouse/updateStock" id="stockForm">    <div style="overflow-x:auto;">
+  <form method="POST" action="<?php echo BASE_URL; ?>warehouse/updateStock" id="stockForm">    
+    <div style="max-height:500px; overflow-y:auto; overflow-x:auto;">
       <table style="width:100%;border-collapse:collapse;">
-        <thead>
+        <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
           <tr style="background:linear-gradient(135deg,#172554,#1d4ed8);">
             <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Mã</th>
             <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Tên thuốc</th>

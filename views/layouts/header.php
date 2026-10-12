@@ -28,6 +28,12 @@
         /* Cards */
         .card{border:none;box-shadow:0 2px 14px rgba(0,0,0,.07);border-radius:14px;margin-bottom:20px;}
         .card-header{background:#fff;border-bottom:1px solid #e2e8f0;font-weight:600;border-radius:14px 14px 0 0 !important;}
+
+        /* Tùy chỉnh thanh cuộn cho toàn bộ các thẻ có overflow */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
 <body>

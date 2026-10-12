@@ -21,20 +21,20 @@
 
 <!-- Sắp hết hàng -->
 <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
-  <div style="padding:12px 20px;background:linear-gradient(135deg,#92400e,#b45309);display:flex;align-items:center;justify-content:space-between;">
+  <div style="padding:12px 20px;background:linear-gradient(135deg,#92400e,#fa9e57);display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:8px;">
       <i class="fas fa-exclamation-triangle" style="color:#fff;font-size:13px;"></i>
       <span style="font-size:13px;font-weight:700;color:#fff;">Thuốc sắp hết hàng (tồn kho ≤ 10)</span>
     </div>
     <span style="font-size:12px;color:rgba(255,255,255,.8);"><?php echo count($low_stock ?? []); ?> mặt hàng</span>
   </div>
-  <div style="overflow-x:auto;">
+  <div style="max-height: 300px; overflow-y: auto; overflow-x: auto;">
     <?php if(empty($low_stock)): ?>
       <div style="padding:30px;text-align:center;color:#15803d;font-size:13px;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Không có thuốc nào sắp hết hàng</div>
     <?php else: ?>
     <table style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr style="background:linear-gradient(135deg,#92400e,#b45309);">
+      <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <tr style="background:linear-gradient(135deg,#92400e,#fa9e57);">
           <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Mã</th>
           <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Tên thuốc</th>
           <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Danh mục</th>
@@ -72,20 +72,20 @@
 
 <!-- Sắp hết hạn -->
 <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;">
-  <div style="padding:12px 20px;background:linear-gradient(135deg,#991b1b,#dc2626);display:flex;align-items:center;justify-content:space-between;">
+  <div style="padding:12px 20px;background:linear-gradient(135deg,#991b1b,#fa5858);display:flex;align-items:center;justify-content:space-between;">
     <div style="display:flex;align-items:center;gap:8px;">
       <i class="fas fa-clock" style="color:#fff;font-size:13px;"></i>
       <span style="font-size:13px;font-weight:700;color:#fff;">Thuốc hết hạn / sắp hết hạn</span>
     </div>
     <span style="font-size:12px;color:rgba(255,255,255,.8);"><?php echo count($expired ?? []); ?> mặt hàng</span>
   </div>
-  <div style="overflow-x:auto;">
+  <div style="max-height: 300px; overflow-y: auto; overflow-x: auto;">
     <?php if(empty($expired)): ?>
       <div style="padding:30px;text-align:center;color:#15803d;font-size:13px;"><i class="fas fa-check-circle" style="margin-right:6px;"></i>Không có sản phẩm nào hết hạn hoặc sắp hết hạn.</div>
     <?php else: ?>
     <table style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr style="background:linear-gradient(135deg,#991b1b,#dc2626);">
+      <thead style="position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        <tr style="background:linear-gradient(135deg,#991b1b,#fa5858);">
           <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Mã</th>
           <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Tên thuốc</th>
           <th style="padding:10px 16px;font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;white-space:nowrap;">Danh mục</th>

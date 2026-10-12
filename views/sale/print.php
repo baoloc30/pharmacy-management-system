@@ -22,7 +22,7 @@ body{font-family:'Inter',Arial,sans-serif;background:#f1f5f9;display:flex;flex-d
 table{width:100%;border-collapse:collapse;font-size:13px;}
 thead tr{background:linear-gradient(135deg,#172554,#1d4ed8);}
 thead th{padding:10px 12px;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;letter-spacing:.4px;white-space:nowrap;}
-tbody tr:nth-child(even){background:#f0f7ff;}
+tbody tr:nth-child(even){background:#eeecec;}
 tbody tr:nth-child(odd){background:#fff;}
 tbody td{padding:9px 12px;color:#374151;border-bottom:1px solid #e2e8f0;}
 tfoot tr{background:#f0f7ff;}
@@ -40,6 +40,10 @@ tfoot td{padding:10px 12px;font-weight:700;border-top:2px solid #bfdbfe;}
   .actions{display:none;}
   .inv-header{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   thead tr{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }
 </style>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -121,19 +125,24 @@ tfoot td{padding:10px 12px;font-weight:700;border-top:2px solid #bfdbfe;}
         <?php endforeach; ?>
       </tbody>
       <tfoot>
-        <tr>
-          <td colspan="5" class="text-right" style="color:#1e293b;">Tổng tiền:</td>
-          <td class="text-right" style="color:#15803d;font-size:15px;"><?php echo number_format($invoice['tongTien'],0,',','.'); ?>đ</td>
-        </tr>
         <?php if(!empty($invoice['tienGiam']) && $invoice['tienGiam'] > 0): ?>
-        <tr>
-          <td colspan="5" class="text-right" style="color:#1e293b;">Giảm giá:</td>
-          <td class="text-right" style="color:#dc2626;">-<?php echo number_format($invoice['tienGiam'],0,',','.'); ?>đ</td>
-        </tr>
-        <tr style="background:#eff6ff;">
-          <td colspan="5" class="text-right" style="color:#1e293b;font-size:14px;">Thanh toán:</td>
-          <td class="text-right" style="color:#1d4ed8;font-size:16px;font-weight:800;"><?php echo number_format($invoice['tongTien']-$invoice['tienGiam'],0,',','.'); ?>đ</td>
-        </tr>
+            <tr style="background:#cfeaff;">
+              <td colspan="5" class="text-right" style="color:#334155; font-weight:600;">Tổng tiền hàng:</td>
+              <td class="text-right" style="color:#1e293b; font-weight:700; font-size:14px;"><?php echo number_format($invoice['tongTien'] + $invoice['tienGiam'],0,',','.'); ?>đ</td>
+            </tr>
+            <tr style="background:#fef2f2; border-top:1px solid #fee2e2;">
+              <td colspan="5" class="text-right" style="color:#991b1b; font-weight:600;">Giảm giá:</td>
+              <td class="text-right" style="color:#dc2626; font-weight:700; font-size:14px;">-<?php echo number_format($invoice['tienGiam'],0,',','.'); ?>đ</td>
+            </tr>
+            <tr style="background:#cefded; border-top: 1.5px solid #bfdbfe;">
+              <td colspan="5" class="text-right" style="color:#1e40af; font-size:14px; font-weight:700;">Thanh toán:</td>
+              <td class="text-right" style="color:#1d4ed8; font-size:17px; font-weight:900;"><?php echo number_format($invoice['tongTien'],0,',','.'); ?>đ</td>
+            </tr>
+        <?php else: ?>
+            <tr style="background:#cefded; border-top: 1.5px solid #bfdbfe;">
+              <td colspan="5" class="text-right" style="color:#1e40af; font-size:14px; font-weight:700;">Tổng tiền:</td>
+              <td class="text-right" style="color:#1d4ed8; font-size:17px; font-weight:900;"><?php echo number_format($invoice['tongTien'],0,',','.'); ?>đ</td>
+            </tr>
         <?php endif; ?>
       </tfoot>
     </table>

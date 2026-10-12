@@ -17,7 +17,7 @@ class StatisticController extends Controller {
         ];
         $data['filters'] = $filters;
 
-        $fromDate = $_GET['from_date'] ?? date('Y-m-01');
+        $fromDate = $_GET['from_date'] ?? date('Y-01-01');
         $toDate = $_GET['to_date'] ?? date('Y-m-d');
         
         $data['from_date'] = $fromDate;
@@ -47,24 +47,18 @@ class StatisticController extends Controller {
         $this->checkLogin();
         $this->checkRole('QuanLy');
         
-        $month = $_GET['month'] ?? date('m');
-        $year = $_GET['year'] ?? date('Y');
+        $fromDate = $_GET['from_date'] ?? date('Y-m-01');
+        $toDate   = $_GET['to_date'] ?? date('Y-m-d');
         
-        $data['month'] = $month;
-        $data['year'] = $year;
+        $data['from_date'] = $fromDate;
+        $data['to_date']   = $toDate;
         
-        $currentYear = (int)date('Y');
-        $currentMonth = (int)date('m');
-        
-        if (!is_numeric($month) || !is_numeric($year) || $month < 1 || $month > 12 || 
-            $year > $currentYear || ($year == $currentYear && $month > $currentMonth)) {
-            
-            $data['error'] = 'Khoảng thời gian không hợp lệ.';
+        if (strtotime($fromDate) > strtotime($toDate)) {
+            $data['error'] = 'Khoảng thời gian không hợp lệ. Ngày bắt đầu phải trước ngày kết thúc.';
             $data['medicines'] = [];
-            
         } else {
             $statisticModel = $this->model('StatisticModel');
-            $data['medicines'] = $statisticModel->getBestSelling($month, $year);
+            $data['medicines'] = $statisticModel->getBestSelling($fromDate, $toDate);
             
             if (empty($data['medicines'])) {
                 $data['empty_message'] = 'Không có thuốc bán chạy trong khoảng thời gian đã chọn.';
