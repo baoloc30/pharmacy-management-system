@@ -9,37 +9,49 @@ class AuthController extends Controller {
     }
 
     public function login() {
+        Session::init();
+
+        if (Session::get('logged_in')) {
+            $target = Session::get('role') === 'QuanLy' ? 'home/admin' : 'home/employee';
+            redirect($target);
+        }
+
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = $_POST['username'] ?? '';
-            $password = $_POST['password'] ?? '';
+            $username = trim($_POST['username'] ?? '');
+            $password = trim($_POST['password'] ?? '');
             
-            // Validate empty fields
             if(empty($username)) {
-                $data['error'] = 'Vui lòng không để trống tên đăng nhập';
-            } elseif(empty($password)) {
-                $data['error'] = 'Vui lòng không để trống mật khẩu';
-            } else {
-                $userModel = $this->model('UserModel');
-                $user = $userModel->login($username, $password);
-                
-                if($user) {
-                    // Check account status
-                    if($user['trangThai'] !== 'HoatDong') {
-                        $data['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản lý';
+                $data['username_error'] = 'Vui lòng không bỏ trống thông tin này';
+            }
+            if(empty($password)) {
+                $data['password_error'] = 'Vui lòng không bỏ trống thông tin này';
+            }
+
+            if (empty($data['username_error']) && empty($data['password_error'])) {
+                try {
+                    $userModel = $this->model('UserModel');
+                    $user = $userModel->login($username, $password);
+
+                    if($user) {
+                        if($user['trangThai'] !== 'HoatDong') {
+                            $data['error'] = 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Quản lý';
+                        } else {
+                            Session::set('logged_in', true);
+                            Session::set('user_id', $user['idTaiKhoan']);
+                            Session::set('username', $user['tenDangNhap']);
+                            Session::set('role', $user['vaiTro']);
+                            Session::set('nhan_vien_id', $user['maNhanVien']);
+                            Session::set('nhan_vien_name', $user['hoTen']);
+                            Session::set('login_success', 'Đăng nhập thành công');
+
+                            $target = $user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee';
+                            redirect($target);
+                        }
                     } else {
-                        Session::set('logged_in', true);
-                        Session::set('user_id', $user['idTaiKhoan']);
-                        Session::set('username', $user['tenDangNhap']);
-                        Session::set('role', $user['vaiTro']);
-                        Session::set('nhan_vien_id', $user['maNhanVien']);
-                        Session::set('nhan_vien_name', $user['hoTen']);
-                        
-                        $target = $user['vaiTro'] == 'QuanLy' ? 'home/admin' : 'home/employee';
-                        header('Location: ' . BASE_URL . $target);
-                        exit();
+                        $data['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
                     }
-                } else {
-                    $data['error'] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
         }
@@ -55,20 +67,24 @@ class AuthController extends Controller {
         $this->checkLogin();
         
         if($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $oldPass = $_POST['old_password'];
-            $newPass = $_POST['new_password'];
-            $confirmPass = $_POST['confirm_password'];
+            $oldPass = $_POST['old_password'] ?? '';
+            $newPass = $_POST['new_password'] ?? '';
+            $confirmPass = $_POST['confirm_password'] ?? '';
             
             if($newPass != $confirmPass) {
                 $data['error'] = 'Mật khẩu mới không khớp';
             } else {
-                $userModel = $this->model('UserModel');
-                if($userModel->changePassword(Session::get('user_id'), $oldPass, $newPass)) {
-                    // Đăng xuất và yêu cầu đăng nhập lại
-                    Session::destroy();
-                    redirect('auth/login');
-                } else {
-                    $data['error'] = 'Mật khẩu hiện tại không chính xác';
+                try {
+                    $userModel = $this->model('UserModel');
+                    if($userModel->changePassword(Session::get('user_id'), $oldPass, $newPass)) {
+                        Session::destroy();
+                        Session::set('success', 'Đổi mật khẩu thành công. Vui lòng đăng nhập lại bằng mật khẩu mới.');
+                        redirect('auth/login');
+                    } else {
+                        $data['error'] = 'Mật khẩu hiện tại không chính xác';
+                    }
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
                 }
             }
         }
@@ -113,12 +129,30 @@ class AuthController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $username    = trim($_POST['username'] ?? '');
             $soDienThoai = trim($_POST['soDienThoai'] ?? '');
+            $newPassword = trim($_POST['new_password'] ?? '');
+            $confirmPassword = trim($_POST['confirm_password'] ?? '');
 
-            $userModel = $this->model('UserModel');
-            if ($userModel->resetPassword($username, $soDienThoai)) {
-                $data['success'] = 'Đặt lại mật khẩu thành công. Mật khẩu mới của bạn là: <b>123456</b>';
+            if (empty($username)) {
+                $data['error'] = 'Vui lòng nhập tên đăng nhập';
+            } elseif (empty($soDienThoai)) {
+                $data['error'] = 'Vui lòng nhập số điện thoại';
+            } elseif (empty($newPassword)) {
+                $data['error'] = 'Vui lòng nhập mật khẩu mới';
+            } elseif (strlen($newPassword) < 6) {
+                $data['error'] = 'Mật khẩu mới phải có ít nhất 6 ký tự';
+            } elseif ($newPassword !== $confirmPassword) {
+                $data['error'] = 'Mật khẩu xác nhận không trùng khớp';
             } else {
-                $data['error'] = 'Tên đăng nhập hoặc số điện thoại không đúng';
+                try {
+                    $userModel = $this->model('UserModel');
+                    if ($userModel->resetPassword($username, $soDienThoai, $newPassword)) {
+                        $data['success'] = 'Đặt lại mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.';
+                    } else {
+                        $data['error'] = 'Tên đăng nhập hoặc số điện thoại không đúng';
+                    }
+                } catch (Exception $e) {
+                    $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+                }
             }
         }
         $this->viewLogin('auth/forgot_password', $data ?? []);

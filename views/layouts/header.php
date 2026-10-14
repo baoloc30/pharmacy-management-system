@@ -9,10 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         *{box-sizing:border-box;}
-        body{display:flex;flex-direction:column;min-height:100vh;background:linear-gradient(135deg,#0f4c75 0%,#1565c0 50%,#0ea5e9 100%);font-family:'Inter',sans-serif;margin:0;padding:0;}
-        body.bg-loaded{background-image:url('<?php echo BASE_URL; ?>assets/images/bg_main.jpg');background-size:cover;background-position:center;background-attachment:fixed;}
-        body::before{content:'';position:fixed;inset:0;background:rgba(15,40,80,.55);z-index:0;pointer-events:none;}
-        body.bg-loaded::before{background:rgba(220,232,255,.6);}
+        body{display:flex;flex-direction:column;min-height:100vh;background:#f3f6fb url('<?php echo BASE_URL; ?>assets/images/bg_main.jpg') center center / cover fixed no-repeat;font-family:'Inter',sans-serif;margin:0;padding:0;}
+        body::before{content:'';position:fixed;inset:0;background:linear-gradient(135deg,rgba(239,246,255,.68),rgba(248,250,252,.72));z-index:0;pointer-events:none;}
         .top-navbar,.page-body{position:relative;z-index:1;}
 
         /* sidebar styles are in sidebar.php */
@@ -29,6 +27,7 @@
         .card{border:none;box-shadow:0 2px 14px rgba(0,0,0,.07);border-radius:14px;margin-bottom:20px;}
         .card-header{background:#fff;border-bottom:1px solid #e2e8f0;font-weight:600;border-radius:14px 14px 0 0 !important;}
     </style>
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/app.css?v=4">
 </head>
 <body>
 <?php if(Session::get('logged_in')): ?>

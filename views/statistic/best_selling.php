@@ -8,7 +8,7 @@
     </div>
     <div>
       <div style="font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.6px;">Thuốc Bán Chạy</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;">Thống kê theo tháng</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px;">Phân tích sản phẩm bán chạy theo khoảng thời gian</div>
     </div>
   </div>
 </div>
@@ -17,25 +17,19 @@
 <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;margin-bottom:16px;">
   <div style="padding:12px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);display:flex;align-items:center;gap:8px;">
     <i class="fas fa-filter" style="color:#fff;font-size:13px;"></i>
-    <span style="font-size:13px;font-weight:700;color:#fff;">Chọn tháng / năm</span>
+    <span style="font-size:13px;font-weight:700;color:#fff;">Chọn khoảng thời gian</span>
   </div>
   <div style="padding:16px 20px;">
     <form method="GET" action="" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
-      <div style="min-width:160px;">
-        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Tháng</label>
-        <select name="month" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
-          <?php for($i=1;$i<=12;$i++): ?>
-          <option value="<?php echo $i; ?>" <?php echo $month==$i?'selected':''; ?>>Tháng <?php echo $i; ?></option>
-          <?php endfor; ?>
-        </select>
+      <div style="flex:0 0 160px;">
+        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Từ ngày</label>
+        <input type="date" name="from_date" value="<?php echo htmlspecialchars($from_date ?? ''); ?>" required
+          style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
       </div>
-      <div style="min-width:120px;">
-        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Năm</label>
-        <select name="year" style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
-          <?php for($y=date('Y');$y>=date('Y')-3;$y--): ?>
-          <option value="<?php echo $y; ?>" <?php echo $year==$y?'selected':''; ?>><?php echo $y; ?></option>
-          <?php endfor; ?>
-        </select>
+      <div style="flex:0 0 160px;">
+        <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:5px;">Đến ngày</label>
+        <input type="date" name="to_date" value="<?php echo htmlspecialchars($to_date ?? ''); ?>" required
+          style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;outline:none;">
       </div>
       <button type="submit" style="padding:8px 20px;background:linear-gradient(135deg,#1e40af,#2563eb);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
         <i class="fas fa-chart-bar"></i> Xem thống kê
@@ -47,13 +41,13 @@
 <!-- Table -->
 <div style="background:#fff;border-radius:14px;box-shadow:0 2px 14px rgba(0,0,0,.07);overflow:hidden;">
   <div style="padding:12px 20px;background:linear-gradient(135deg,#172554,#1d4ed8);">
-    <span style="font-size:13px;font-weight:700;color:#fff;">Top thuốc bán chạy — Tháng <?php echo $month; ?>/<?php echo $year; ?></span>
+    <span style="font-size:13px;font-weight:700;color:#fff;">Top thuốc bán chạy — <?php echo date('d/m/Y', strtotime($from_date)); ?> đến <?php echo date('d/m/Y', strtotime($to_date)); ?></span>
   </div>
   <div style="overflow-x:auto;">
     <?php if(empty($medicines)): ?>
       <div style="padding:40px;text-align:center;color:#94a3b8;font-size:13px;">
         <i class="fas fa-fire" style="font-size:40px;margin-bottom:12px;display:block;"></i>
-        Không có dữ liệu thống kê cho tháng này.
+        <?php echo htmlspecialchars($empty_message ?? 'Không có dữ liệu thống kê trong khoảng thời gian đã chọn.'); ?>
       </div>
     <?php else: ?>
     <table style="width:100%;border-collapse:collapse;">

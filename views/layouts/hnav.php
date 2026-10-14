@@ -14,11 +14,11 @@ else                                                                        $act
 
 // Màu cho từng tab theo thứ tự xuất hiện trong mỗi nhóm
 $colors = [
-    ['bg'=>'#15803d','hover'=>'#166534'],  // xanh lá
-    ['bg'=>'#b45309','hover'=>'#92400e'],  // cam
-    ['bg'=>'#7c3aed','hover'=>'#6d28d9'],  // tím
-    ['bg'=>'#0e7490','hover'=>'#155e75'],  // xanh dương
-    ['bg'=>'#be185d','hover'=>'#9d174d'],  // hồng
+    ['bg' => '#2563eb', 'hover' => '#1d4ed8'],
+    ['bg' => '#4f46e5', 'hover' => '#4338ca'],
+    ['bg' => '#0f766e', 'hover' => '#115e59'],
+    ['bg' => '#475569', 'hover' => '#334155'],
+    ['bg' => '#0891b2', 'hover' => '#0e7490'],
 ];
 ?>
 <style>

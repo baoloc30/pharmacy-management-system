@@ -7,13 +7,25 @@ class StatisticController extends Controller {
         $this->checkLogin();
         $this->checkRole('QuanLy');
         
-        $fromDate = $_GET['from_date'] ?? date('Y-m-01');
+        $defaultFromDate = (new DateTimeImmutable('today'))->modify('-10 months')->format('Y-m-d');
+        $fromDate = $_GET['from_date'] ?? $defaultFromDate;
         $toDate = $_GET['to_date'] ?? date('Y-m-d');
         
         $statisticModel = $this->model('StatisticModel');
-        $data['revenue'] = $statisticModel->getRevenue($fromDate, $toDate);
         $data['from_date'] = $fromDate;
         $data['to_date'] = $toDate;
+
+        if ($fromDate > $toDate) {
+            $data['error'] = 'Khoảng thời gian không hợp lệ. Ngày bắt đầu phải trước ngày kết thúc.';
+            $data['revenue'] = [];
+        } else {
+            try {
+                $data['revenue'] = $statisticModel->getRevenue($fromDate, $toDate);
+            } catch (Exception $e) {
+                $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+                $data['revenue'] = [];
+            }
+        }
         
         $this->view('statistic/revenue', $data);
     }
@@ -22,13 +34,28 @@ class StatisticController extends Controller {
         $this->checkLogin();
         $this->checkRole('QuanLy');
         
-        $month = $_GET['month'] ?? date('m');
-        $year = $_GET['year'] ?? date('Y');
+        $defaultFromDate = (new DateTimeImmutable('today'))->modify('-10 months')->format('Y-m-d');
+        $fromDate = $_GET['from_date'] ?? $defaultFromDate;
+        $toDate   = $_GET['to_date'] ?? date('Y-m-d');
         
         $statisticModel = $this->model('StatisticModel');
-        $data['medicines'] = $statisticModel->getBestSelling($month, $year);
-        $data['month'] = $month;
-        $data['year'] = $year;
+        $data['from_date'] = $fromDate;
+        $data['to_date'] = $toDate;
+
+        if ($fromDate > $toDate) {
+            $data['error'] = 'Khoảng thời gian không hợp lệ. Ngày bắt đầu phải trước ngày kết thúc.';
+            $data['medicines'] = [];
+        } else {
+            try {
+                $data['medicines'] = $statisticModel->getBestSelling($fromDate, $toDate);
+                if (empty($data['medicines'])) {
+                    $data['empty_message'] = 'Không có thuốc bán chạy trong khoảng thời gian đã chọn.';
+                }
+            } catch (Exception $e) {
+                $data['error'] = 'Không thể kết nối cơ sở dữ liệu, vui lòng thử lại sau';
+                $data['medicines'] = [];
+            }
+        }
         
         $this->view('statistic/best_selling', $data);
     }

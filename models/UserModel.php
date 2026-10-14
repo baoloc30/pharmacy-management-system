@@ -77,7 +77,7 @@ class UserModel extends Model {
         return false;
     }
 
-    public function resetPassword($username, $soDienThoai) {
+    public function resetPassword($username, $soDienThoai, $newPassword) {
         $sql = "SELECT t.idTaiKhoan FROM taikhoan t
                 JOIN nhanvien n ON t.maNhanVien = n.maNhanVien
                 WHERE t.tenDangNhap = ? AND n.soDienThoai = ?";
@@ -89,7 +89,7 @@ class UserModel extends Model {
         if ($result->num_rows === 0) return false;
 
         $row     = $result->fetch_assoc();
-        $newHash = password_hash('123456', PASSWORD_DEFAULT);
+        $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
         $upd     = $this->db->prepare("UPDATE taikhoan SET matKhau = ? WHERE idTaiKhoan = ?");
         $upd->bind_param("si", $newHash, $row['idTaiKhoan']);
         return $upd->execute();
