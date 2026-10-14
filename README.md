@@ -51,6 +51,8 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 - **Tạo phiếu đề xuất tự động** với trạng thái "Chờ duyệt"
 - Quản lý có thể duyệt/hủy phiếu trước khi nhập kho thực tế
 
+> 📄 Xem chi tiết thuật toán tại [FORECAST_ANALYSIS.md](FORECAST_ANALYSIS.md)
+
 ### 🛒 Bán hàng
 - Tạo hóa đơn nhanh chóng
 - Tìm kiếm thuốc theo mã, tên, danh mục
@@ -90,14 +92,15 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 - **Chart.js** - Biểu đồ thống kê
 
 ### Server
-- **XAMPP - Môi trường phát triển
+- **XAMPP** - Môi trường phát triển (Windows)
 - **Apache 2.4+** - Web server
-- **MySQLi** - Database connection
+- **PDO/MySQLi** - Database connection
 
 ## 💻 Yêu cầu hệ thống
 
+- **XAMPP 7.4+** (Windows)
 - PHP >= 7.4
-- MySQL >= 5.7 hoặc MariaDB >= 10.2
+- MySQL >= 5.7
 - Apache với mod_rewrite enabled
 - Extension PHP:
   - `mysqli`
@@ -111,17 +114,17 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/baoloc30/pharmacy-management-system.git
+git clone https://github.com/yourusername/pharmacy-management-system.git
 cd pharmacy-management-system
 ```
 
-### 2. Di chuyển vào thư mục web server
+### 2. Di chuyển vào thư mục XAMPP
 
-#### XAMPP (Windows)
 ```bash
-# Copy project vào
+# Copy project vào thư mục htdocs của XAMPP
 C:\xampp\htdocs\pharmacy-management-system
 ```
+
 ### 3. Tạo cơ sở dữ liệu
 
 1. Mở **phpMyAdmin**: `http://localhost/phpmyadmin`
@@ -157,8 +160,8 @@ RewriteRule ^(.*)$ index.php [QSA,L]
 
 ### 6. Khởi động server
 
-#### XAMPP
-- Khởi động **Apache** và **MySQL** trong XAMPP Control Panel
+- Mở **XAMPP Control Panel**
+- Khởi động **Apache** và **MySQL**
 
 ### 7. Truy cập hệ thống
 
@@ -235,42 +238,51 @@ pharmacy-management-system/
 │
 ├── .htaccess                 # Apache rewrite rules
 ├── index.php                 # Entry point
-
+├── README.md                 # File này
+└── FORECAST_ANALYSIS.md      # Tài liệu chi tiết thuật toán AI
+```
 
 ## 👤 Tài khoản mặc định
 
 Sau khi cài đặt, đăng nhập với tài khoản mặc định:
 
-### Quản lý
-```
-Username: ngochanh1405
+| Vai trò | Username | Password |
+|---------|----------|----------|
+| **Quản lý** | `admin` | `admin123` |
+| **Nhân viên** | `nhanvien` | `nv123456` |
 
-Password: 123456
-```
-
-### Nhân viên
-```
-Username: baoloc3012
-
-Password: 123456
-```
+> ⚠️ **Lưu ý bảo mật:** Thay đổi mật khẩu ngay sau lần đăng nhập đầu tiên!
 
 ## 📸 Screenshots
 
-### Dashboard
-![Dashboard](screenshots/dashboard.png)
-
-### Quản lý thuốc
-![Medicine Management](screenshots/medicine.png)
-
-### Dự báo nhập kho (AI)
-![AI Forecast](screenshots/forecast.png)
-
-### Bán hàng
-![Sales](screenshots/sales.png)
-
-### Thống kê doanh thu
-![Statistics](screenshots/statistics.png)
+<table>
+  <tr>
+    <td width="50%">
+      <h3>Dashboard</h3>
+      <img src="screenshots/dashboard.png" alt="Dashboard" />
+    </td>
+    <td width="50%">
+      <h3>Quản lý thuốc</h3>
+      <img src="screenshots/medicine.png" alt="Medicine Management" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3>Dự báo nhập kho (AI)</h3>
+      <img src="screenshots/forecast.png" alt="AI Forecast" />
+    </td>
+    <td width="50%">
+      <h3>Bán hàng</h3>
+      <img src="screenshots/sales.png" alt="Sales" />
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <h3>Thống kê doanh thu</h3>
+      <img src="screenshots/statistics.png" alt="Statistics" />
+    </td>
+  </tr>
+</table>
 
 > 💡 *Thêm screenshots thực tế vào thư mục `screenshots/` để minh họa*
 
@@ -278,7 +290,7 @@ Password: 123456
 
 ### Thay đổi tham số dự báo AI
 
-Mở `controllers/ForecastController.php`:
+Mở file `controllers/ForecastController.php` và điều chỉnh các tham số:
 
 ```php
 private function calculateSuggestions($model) {
@@ -286,7 +298,7 @@ private function calculateSuggestions($model) {
     $SAFETY_STOCK = 20;       // Tồn kho an toàn (đơn vị)
     $DAYS_TO_ANALYZE = 30;    // Số ngày phân tích
     
-    // ...
+    // Tính toán logic...
 }
 ```
 
@@ -316,4 +328,5 @@ Truy cập:
 ```
 http://localhost/pharmacy-management-system/test_db.php
 ```
+
 
