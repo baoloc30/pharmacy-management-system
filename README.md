@@ -250,39 +250,6 @@ Sau khi cài đặt, đăng nhập với tài khoản mặc định:
 | **Nhân viên** | `baoloc3012` | `123456` |
 
 
-## 📸 Screenshots
-
-<table>
-  <tr>
-    <td width="50%">
-      <h3>Dashboard</h3>
-      <img src="screenshots/dashboard.png" alt="Dashboard" />
-    </td>
-    <td width="50%">
-      <h3>Quản lý thuốc</h3>
-      <img src="screenshots/medicine.png" alt="Medicine Management" />
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>Dự báo nhập kho (AI)</h3>
-      <img src="screenshots/forecast.png" alt="AI Forecast" />
-    </td>
-    <td width="50%">
-      <h3>Bán hàng</h3>
-      <img src="screenshots/sales.png" alt="Sales" />
-    </td>
-  </tr>
-  <tr>
-    <td colspan="2">
-      <h3>Thống kê doanh thu</h3>
-      <img src="screenshots/statistics.png" alt="Statistics" />
-    </td>
-  </tr>
-</table>
-
-> 💡 *Thêm screenshots thực tế vào thư mục `screenshots/` để minh họa*
-
 ## 🔧 Tùy chỉnh
 
 ### Thay đổi tham số dự báo AI
