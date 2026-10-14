@@ -14,9 +14,6 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 - [Cài đặt](#-cài-đặt)
 - [Cấu trúc thư mục](#-cấu-trúc-thư-mục)
 - [Tài khoản mặc định](#-tài-khoản-mặc-định)
-- [Screenshots](#-screenshots)
-- [Đóng góp](#-đóng-góp)
-- [License](#-license)
 
 ## ✨ Tính năng
 
