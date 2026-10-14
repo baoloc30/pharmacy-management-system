@@ -112,7 +112,7 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/yourusername/pharmacy-management-system.git
+git clone https://github.com/baoloc30/pharmacy-management-system.git
 cd pharmacy-management-system
 ```
 
