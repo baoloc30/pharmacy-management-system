@@ -51,8 +51,6 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 - **Tạo phiếu đề xuất tự động** với trạng thái "Chờ duyệt"
 - Quản lý có thể duyệt/hủy phiếu trước khi nhập kho thực tế
 
-> 📄 Xem chi tiết thuật toán tại [FORECAST_ANALYSIS.md](FORECAST_ANALYSIS.md)
-
 ### 🛒 Bán hàng
 - Tạo hóa đơn nhanh chóng
 - Tìm kiếm thuốc theo mã, tên, danh mục
@@ -92,9 +90,9 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 - **Chart.js** - Biểu đồ thống kê
 
 ### Server
-- **XAMPP/WAMP/LAMP** - Môi trường phát triển
+- **XAMPP - Môi trường phát triển
 - **Apache 2.4+** - Web server
-- **PDO/MySQLi** - Database connection
+- **MySQLi** - Database connection
 
 ## 💻 Yêu cầu hệ thống
 
@@ -113,7 +111,7 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/yourusername/pharmacy-management-system.git
+git clone https://github.com/baoloc30/pharmacy-management-system.git
 cd pharmacy-management-system
 ```
 
@@ -124,18 +122,6 @@ cd pharmacy-management-system
 # Copy project vào
 C:\xampp\htdocs\pharmacy-management-system
 ```
-
-#### LAMP (Linux)
-```bash
-sudo mv pharmacy-management-system /var/www/html/
-sudo chmod -R 755 /var/www/html/pharmacy-management-system
-```
-
-#### MAMP (macOS)
-```bash
-mv pharmacy-management-system /Applications/MAMP/htdocs/
-```
-
 ### 3. Tạo cơ sở dữ liệu
 
 1. Mở **phpMyAdmin**: `http://localhost/phpmyadmin`
@@ -173,12 +159,6 @@ RewriteRule ^(.*)$ index.php [QSA,L]
 
 #### XAMPP
 - Khởi động **Apache** và **MySQL** trong XAMPP Control Panel
-
-#### LAMP/MAMP
-```bash
-sudo service apache2 start
-sudo service mysql start
-```
 
 ### 7. Truy cập hệ thống
 
@@ -272,8 +252,6 @@ Password: 123456
 Username: baoloc3012
 Password: 123456
 ```
-
-> ⚠️ **Lưu ý bảo mật:** Thay đổi mật khẩu ngay sau lần đăng nhập đầu tiên!
 
 ## 📸 Screenshots
 
