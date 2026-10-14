@@ -255,9 +255,7 @@ pharmacy-management-system/
 │
 ├── .htaccess                 # Apache rewrite rules
 ├── index.php                 # Entry point
-├── README.md                 # File này
-└── FORECAST_ANALYSIS.md      # Tài liệu chi tiết thuật toán AI
-```
+
 
 ## 👤 Tài khoản mặc định
 
@@ -265,14 +263,14 @@ Sau khi cài đặt, đăng nhập với tài khoản mặc định:
 
 ### Quản lý
 ```
-Username: admin
-Password: admin123
+Username: ngochanh1405
+Password: 123456
 ```
 
 ### Nhân viên
 ```
-Username: nhanvien
-Password: nv123456
+Username: baoloc3012
+Password: 123456
 ```
 
 > ⚠️ **Lưu ý bảo mật:** Thay đổi mật khẩu ngay sau lần đăng nhập đầu tiên!
@@ -339,67 +337,6 @@ Truy cập:
 http://localhost/pharmacy-management-system/test_db.php
 ```
 
-### Test upload file
-
-Thử upload ảnh thuốc trong module **Quản lý thuốc**.
-
-## 🤝 Đóng góp
-
-Mọi đóng góp đều được chào đón! Vui lòng:
-
-1. **Fork** repository này
-2. Tạo **branch** mới (`git checkout -b feature/TinhNangMoi`)
-3. **Commit** thay đổi (`git commit -m 'Thêm tính năng XYZ'`)
-4. **Push** lên branch (`git push origin feature/TinhNangMoi`)
-5. Tạo **Pull Request**
-
-### Hướng dẫn đóng góp
-
-- Tuân thủ coding style hiện tại
-- Viết comment rõ ràng bằng tiếng Việt
-- Test kỹ trước khi commit
-- Cập nhật tài liệu nếu cần
-
-## 🐛 Báo lỗi
-
-Nếu bạn phát hiện lỗi, vui lòng:
-
-1. Mở **Issue** mới trên GitHub
-2. Mô tả chi tiết lỗi và cách tái hiện
-3. Đính kèm screenshot nếu có
-4. Ghi rõ môi trường (PHP version, OS...)
-
-## 📝 Changelog
-
-### Version 1.0.0 (2024)
-- ✅ Quản lý thuốc, danh mục, kho
-- ✅ Bán hàng và hóa đơn
-- ✅ Quản lý khách hàng, nhà cung cấp
-- ✅ Quản lý nhân viên và phân quyền
-- ✅ **Dự báo nhập kho tự động (AI/ROP)**
-- ✅ Báo cáo thống kê với biểu đồ
-- ✅ Lịch sử nhập xuất chi tiết
-
-## 📚 Tài liệu tham khảo
-
-- [Thuật toán ROP (Reorder Point)](https://en.wikipedia.org/wiki/Reorder_point)
-- [MVC Pattern in PHP](https://www.php.net/)
-- [Chart.js Documentation](https://www.chartjs.org/docs/)
-- [Font Awesome Icons](https://fontawesome.com/)
-
-## 📧 Liên hệ
-
-- **Email**: your.email@example.com
-- **Facebook**: [Your FB Page](https://facebook.com/yourpage)
-- **GitHub**: [@yourusername](https://github.com/yourusername)
-
-## 📄 License
-
-Dự án này được phân phối dưới giấy phép **MIT License**. Xem file [LICENSE](LICENSE) để biết thêm chi tiết.
-
----
-
-<div align="center">
 
 **⭐ Nếu thấy project hữu ích, hãy cho 1 star nhé! ⭐**
 
