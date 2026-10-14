@@ -51,8 +51,6 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 - **Tạo phiếu đề xuất tự động** với trạng thái "Chờ duyệt"
 - Quản lý có thể duyệt/hủy phiếu trước khi nhập kho thực tế
 
-> 📄 Xem chi tiết thuật toán tại [FORECAST_ANALYSIS.md](FORECAST_ANALYSIS.md)
-
 ### 🛒 Bán hàng
 - Tạo hóa đơn nhanh chóng
 - Tìm kiếm thuốc theo mã, tên, danh mục
@@ -94,7 +92,7 @@ Hệ thống quản lý nhà thuốc toàn diện với tính năng dự báo nh
 ### Server
 - **XAMPP** - Môi trường phát triển (Windows)
 - **Apache 2.4+** - Web server
-- **PDO/MySQLi** - Database connection
+- **MySQLi** - Database connection
 
 ## 💻 Yêu cầu hệ thống
 
@@ -248,10 +246,9 @@ Sau khi cài đặt, đăng nhập với tài khoản mặc định:
 
 | Vai trò | Username | Password |
 |---------|----------|----------|
-| **Quản lý** | `admin` | `admin123` |
-| **Nhân viên** | `nhanvien` | `nv123456` |
+| **Quản lý** | `ngochanh1405` | `123456` |
+| **Nhân viên** | `baoloc3012` | `123456` |
 
-> ⚠️ **Lưu ý bảo mật:** Thay đổi mật khẩu ngay sau lần đăng nhập đầu tiên!
 
 ## 📸 Screenshots
 
