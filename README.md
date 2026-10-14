@@ -244,12 +244,14 @@ Sau khi cài đặt, đăng nhập với tài khoản mặc định:
 ### Quản lý
 ```
 Username: ngochanh1405
+
 Password: 123456
 ```
 
 ### Nhân viên
 ```
 Username: baoloc3012
+
 Password: 123456
 ```
 
@@ -315,9 +317,3 @@ Truy cập:
 http://localhost/pharmacy-management-system/test_db.php
 ```
 
-
-**⭐ Nếu thấy project hữu ích, hãy cho 1 star nhé! ⭐**
-
-Made with ❤️ by [Your Name]
-
-</div>
